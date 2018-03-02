@@ -1,0 +1,11 @@
+*****Untested Instructions*****
+Steps for adding a new Converter:
+    1) Implement an iParameter set for the conversion
+    2) Modify ParamList.java(method: createNewParamSet(File file)) to handle the new Parameter set
+    3) Implement a an iConversion interface for the file conversion
+    4) Modify Type Matcher to handle the new iConversion object
+        a)Modify String[]'s to handle the new file types
+        b)Modify getToByFrom(String from) to return the correct to String[] for the given file type
+            -If no new file types are added and part a was done correctly, this should be done already
+        c)Modify getWorkerByToAndFrom(String from, String to, iGUI gui) to return your new conversion object
+          when the correct to, from strings are passed in
