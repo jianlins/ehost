@@ -5,9 +5,12 @@
 
 package navigatorContainer;
 
+import org.apache.commons.io.comparator.NameFileComparator;
+
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.io.File;
+import java.util.Arrays;
 import java.util.Vector;
 import java.util.logging.Level;
 import javax.imageio.ImageIO;
@@ -76,6 +79,7 @@ public class ListProjects {
         Image image=null;
         if((subfiles!=null)&&(subfiles.length>=0))
         {
+            Arrays.sort(subfiles, NameFileComparator.NAME_COMPARATOR);
             for(File subfile:subfiles)
             {
                 if (subfile==null)
