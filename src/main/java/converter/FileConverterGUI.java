@@ -54,7 +54,7 @@ public class FileConverterGUI extends javax.swing.JPanel implements iGUI
         initComponents();
 
         //Clear out all temp files
-        String separator = env.Parameters.isUnixOS ? "/" : "\\";
+        String separator = File.separator;
         File oldStuff = new File("temp" + separator + "currentConversion");
         deleteAll(oldStuff);
 

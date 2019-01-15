@@ -110,7 +110,7 @@
             <Component class="javax.swing.JLabel" name="jLabel1">
               <Properties>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/res/3.png"/>
+                  <Image iconType="3" name="res/3.png"/>
                 </Property>
               </Properties>
               <Constraints>
@@ -258,7 +258,7 @@
             <Component class="javax.swing.JButton" name="jButton1">
               <Properties>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/res/change24.png"/>
+                  <Image iconType="3" name="res/change24.png"/>
                 </Property>
               </Properties>
               <Events>
@@ -382,7 +382,7 @@
             <Component class="javax.swing.JLabel" name="jLabel12">
               <Properties>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/res/mark1.png"/>
+                  <Image iconType="3" name="res/mark1.png"/>
                 </Property>
               </Properties>
               <Constraints>
@@ -394,7 +394,7 @@
             <Component class="javax.swing.JLabel" name="jLabel13">
               <Properties>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/res/BackUp.png"/>
+                  <Image iconType="3" name="res/BackUp.png"/>
                 </Property>
               </Properties>
               <Constraints>
@@ -422,7 +422,7 @@
                   <Font name="Segoe UI" size="12" style="1"/>
                 </Property>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/res/markerror.png"/>
+                  <Image iconType="3" name="res/markerror.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="jLabel16"/>
               </Properties>

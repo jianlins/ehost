@@ -105,10 +105,10 @@ public class TabPanel extends JPanel{
     private void loadIcons(){
         try{
             icon_projects = new javax.swing.ImageIcon(
-                getClass().getResource("/navigatorContainer/workspace1.png")).getImage();
+                getClass().getClassLoader().getResource("res/navigatorContainer/workspace1.png")).getImage();
 
             icon_projects_unselected = new javax.swing.ImageIcon(
-                getClass().getResource("/navigatorContainer/workspace2.png")).getImage();
+                getClass().getClassLoader().getResource("res/navigatorContainer/workspace2.png")).getImage();
         }catch(Exception ex){
 
         }

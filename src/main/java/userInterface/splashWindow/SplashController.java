@@ -25,8 +25,8 @@ public class SplashController {
 
     /*public static void initSplash() {
         try {
-            //url_of_bgimg = new URL("/UserInterface/splashWindow/splash.png");
-            //getClass().getResource("/UserInterface/splashWindow/splash.png").toURI().toURL();
+            //url_of_bgimg = new URL("res/splash.png");
+            //getClass().getClassLoader().getResource("res/splash.png").toURI().toURL();
             //m_splash.setImageURL(url_of_bgimg);
             m_splash = SplashScreen.getSplashScreen();
 

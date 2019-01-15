@@ -39,6 +39,11 @@
             <version>4.4.9</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-model</artifactId>
+            <version>3.3.9</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
             <version>4.5.5</version>
@@ -63,35 +68,40 @@
             <artifactId>commons-io</artifactId>
             <version>2.6</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>3.17</version>
+        </dependency>
         <!--local jar libraries-->
         <dependency>
             <groupId>gov.va.vinci</groupId>
             <artifactId>annotation-admin</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/annotationadmin-integration-1.0.13.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.jdesktop.swingx</groupId>
             <artifactId>multi-split</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/MultiSplit.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>gov.nih.nlm.uts</groupId>
             <artifactId>uts</artifactId>
             <version>2.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/utsapi2_0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.netbeans.lib</groupId>
             <artifactId>awtextra</artifactId>
             <version>2.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/AbsoluteLayout.jar</systemPath>
         </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.va.nlp</groupId>-->
+            <!--<artifactId>ehost</artifactId>-->
+            <!--<version>5.1</version>-->
+            <!--<scope>system</scope>-->
+            <!--<systemPath>${project.basedir}/lib/eHOST-mk5.1.jar</systemPath>-->
+        <!--</dependency>-->
 
     </dependencies>
     <build>
@@ -120,29 +130,32 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
-            <!--<plugin>-->
-                <!--<artifactId>maven-assembly-plugin</artifactId>-->
-                <!--<version>3.0.0</version>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<phase>package</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>single</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-                <!--<configuration>-->
-                    <!--<descriptorRefs>-->
-                        <!--<descriptorRef>jar-with-dependencies</descriptorRef>-->
-                    <!--</descriptorRefs>-->
-                    <!--<archive>-->
-                        <!--<manifest>-->
-                            <!--<mainClass>eHOST</mainClass>-->
-                        <!--</manifest>-->
-                    <!--</archive>-->
-                    <!--<outputDirectory>${project.build.directory}/deploy/lib</outputDirectory>-->
-                <!--</configuration>-->
-            <!--</plugin>-->
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>eHOST</mainClass>
+                        </manifest>
+                    </archive>
+                    <!--<descriptors>-->
+                        <!--<descriptor>assembly/eHOSTAssembly.xml</descriptor>-->
+                    <!--</descriptors>-->
+                    <outputDirectory>${project.build.directory}/deploy/lib</outputDirectory>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <profiles>

@@ -108,7 +108,7 @@ public class Comparator extends javax.swing.JPanel {
     /**load resources from files, such as pictures, icons, etc.*/
     private void loadRes(){
         try{
-            icon_span = new javax.swing.ImageIcon(getClass().getResource("/res/span.jpeg"));
+            icon_span = new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/span.jpeg"));
         }catch(Exception ex){
         }
     }
@@ -330,7 +330,7 @@ public class Comparator extends javax.swing.JPanel {
         jToolBar4.setVerifyInputWhenFocusTarget(false);
         jToolBar4.add(jSeparator2);
 
-        jButton_spaneditor_lefttToLeft.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/span_ll.png"))); // NOI18N
+        jButton_spaneditor_lefttToLeft.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/span_ll.png"))); // NOI18N
         jButton_spaneditor_lefttToLeft.setToolTipText("<html>Move the start of the annotation<br>One character to the left.<br>Hotkey(Ctrl + Left Arrow)</html>");
         jButton_spaneditor_lefttToLeft.setBorderPainted(false);
         jButton_spaneditor_lefttToLeft.setContentAreaFilled(false);
@@ -344,7 +344,7 @@ public class Comparator extends javax.swing.JPanel {
         });
         jToolBar4.add(jButton_spaneditor_lefttToLeft);
 
-        jButton_spaneditor_leftToRight.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/span_lr.png"))); // NOI18N
+        jButton_spaneditor_leftToRight.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/span_lr.png"))); // NOI18N
         jButton_spaneditor_leftToRight.setToolTipText("<html>Move the start of the annotation<br>One character to the right.<br>Hotkey(Ctrl + Right Arrow)</html>");
         jButton_spaneditor_leftToRight.setBorderPainted(false);
         jButton_spaneditor_leftToRight.setContentAreaFilled(false);
@@ -358,7 +358,7 @@ public class Comparator extends javax.swing.JPanel {
         });
         jToolBar4.add(jButton_spaneditor_leftToRight);
 
-        jButton_span_rightToLeft.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/span_rl.png"))); // NOI18N
+        jButton_span_rightToLeft.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/span_rl.png"))); // NOI18N
         jButton_span_rightToLeft.setToolTipText("<html>Move the end of the annotation<br>One character to the left.</html>");
         jButton_span_rightToLeft.setBorderPainted(false);
         jButton_span_rightToLeft.setContentAreaFilled(false);
@@ -375,7 +375,7 @@ public class Comparator extends javax.swing.JPanel {
         });
         jToolBar4.add(jButton_span_rightToLeft);
 
-        jButton4_spanEditor_rightToRight.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/span_rr.png"))); // NOI18N
+        jButton4_spanEditor_rightToRight.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/span_rr.png"))); // NOI18N
         jButton4_spanEditor_rightToRight.setToolTipText("<html>Move the end of the annotation<br>One character to the right.<br>Hotkey(Alt + Right Arrow)</html>");
         jButton4_spanEditor_rightToRight.setBorderPainted(false);
         jButton4_spanEditor_rightToRight.setContentAreaFilled(false);
@@ -574,7 +574,7 @@ public class Comparator extends javax.swing.JPanel {
         jTextField_annotationClassnames.setEnabled(false);
         jPanel53.add(jTextField_annotationClassnames, java.awt.BorderLayout.CENTER);
 
-        jButton_SelectClass.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/instancewatch.png"))); // NOI18N
+        jButton_SelectClass.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/instancewatch.png"))); // NOI18N
         jButton_SelectClass.setToolTipText("Change category of current annotation.");
         jButton_SelectClass.setEnabled(false);
         jButton_SelectClass.setFocusable(false);
@@ -657,10 +657,10 @@ public class Comparator extends javax.swing.JPanel {
         jPanel22.setLayout(new java.awt.GridLayout(1, 2, 1, 0));
 
         jButton_cr.setFont(new java.awt.Font("Calibri", 0, 11)); // NOI18N
-        jButton_cr.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/addtab.png"))); // NOI18N
+        jButton_cr.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/addtab.png"))); // NOI18N
         jButton_cr.setToolTipText("Enable relationship building");
         jButton_cr.setPreferredSize(new java.awt.Dimension(21, 21));
-        jButton_cr.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/res/note.jpeg"))); // NOI18N
+        jButton_cr.setSelectedIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/note.jpeg"))); // NOI18N
         jButton_cr.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton_crActionPerformed(evt);
@@ -668,7 +668,7 @@ public class Comparator extends javax.swing.JPanel {
         });
         jPanel22.add(jButton_cr);
 
-        delete_Relationships.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/closetab.png"))); // NOI18N
+        delete_Relationships.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/closetab.png"))); // NOI18N
         delete_Relationships.setToolTipText("Delete selected relationship");
         delete_Relationships.setMargin(null);
         delete_Relationships.setMaximumSize(new java.awt.Dimension(23, 23));
@@ -717,7 +717,7 @@ public class Comparator extends javax.swing.JPanel {
         jPanel63.setBackground(new Color(237, 237, 237));
         jPanel63.setLayout(new java.awt.BorderLayout());
 
-        jButton_relationships1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/instancewatch.png"))); // NOI18N
+        jButton_relationships1.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/instancewatch.png"))); // NOI18N
         jButton_relationships1.setFocusable(false);
         jButton_relationships1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         jButton_relationships1.setMargin(new java.awt.Insets(2, 2, 2, 2));

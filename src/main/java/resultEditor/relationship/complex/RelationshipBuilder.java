@@ -79,9 +79,9 @@ public class RelationshipBuilder extends javax.swing.JFrame {
     
     private void  loadRes(){
         try{
-            this.ICON_SOURCE_ANNOTATION = new javax.swing.ImageIcon( RelationshipBuilder.class.getResource("/res/annotation1.jpeg") );
-            this.ICON_OBJECT_ANNOTATION = new javax.swing.ImageIcon( RelationshipBuilder.class.getResource("/res/annotation2.jpeg") );
-            this.ICON_RELATIONSHIP = new javax.swing.ImageIcon( RelationshipBuilder.class.getResource("/res/links.jpeg") );
+            this.ICON_SOURCE_ANNOTATION = new javax.swing.ImageIcon( RelationshipBuilder.class.getResource("res/annotation1.jpeg") );
+            this.ICON_OBJECT_ANNOTATION = new javax.swing.ImageIcon( RelationshipBuilder.class.getResource("res/annotation2.jpeg") );
+            this.ICON_RELATIONSHIP = new javax.swing.ImageIcon( RelationshipBuilder.class.getResource("res/links.jpeg") );
         }catch(Exception ex){
             ex.printStackTrace();
         }

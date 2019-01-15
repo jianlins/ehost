@@ -203,7 +203,7 @@ public class Editor extends javax.swing.JFrame {
 
         jPanel2.setBackground(new java.awt.Color(230, 230, 230));
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/links.jpeg"))); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/links.jpeg"))); // NOI18N
         jLabel1.setText("Modify attributes on the relationship for current annotation:");
 
         org.jdesktop.layout.GroupLayout jPanel2Layout = new org.jdesktop.layout.GroupLayout(jPanel2);

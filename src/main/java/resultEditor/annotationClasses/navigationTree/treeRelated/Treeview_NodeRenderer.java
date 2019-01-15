@@ -23,7 +23,7 @@ public class Treeview_NodeRenderer extends DefaultTreeCellRenderer {
     
     //public static Icon icon_attribute = null;  
     
-    public Icon icon_relationship = new ImageIcon( getClass().getResource("/res/classRelDef.gif"));;
+    public Icon icon_relationship = new ImageIcon( getClass().getClassLoader().getResource("res/classRelDef.gif"));;
 
     private JClassCheckBox component_of_class = new JClassCheckBox();
     private JAnnotationCheckBox component_of_annotation = new JAnnotationCheckBox();
@@ -45,19 +45,19 @@ public class Treeview_NodeRenderer extends DefaultTreeCellRenderer {
 
         /*
          * super.setClosedIcon( new
-         * javax.swing.ImageIcon(getClass().getResource("/res/arrow_right.gif"))
+         * javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/arrow_right.gif"))
          * ); super.setOpenIcon( new
-         * javax.swing.ImageIcon(getClass().getResource("/res/arrow_down.gif")));
+         * javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/arrow_down.gif")));
          * super.setLeafIcon( new
-         * javax.swing.ImageIcon(getClass().getResource("/res/annotation1.jpeg")));
+         * javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/annotation1.jpeg")));
          *
          * Icon closedicon = new
-         * javax.swing.ImageIcon(getClass().getResource("/res/arrow_right.gif"));
+         * javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/arrow_right.gif"));
          * this.setClosedIcon( closedicon ); Icon openedicon = new
-         * javax.swing.ImageIcon(getClass().getResource("/res/arrow_down.gif"));
+         * javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/arrow_down.gif"));
          *
          * this.setOpenIcon( openedicon ); this.setLeafIcon( new
-         * javax.swing.ImageIcon(getClass().getResource("/res/arrow_down.gif")));
+         * javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/arrow_down.gif")));
          */
 
         Font fontValue;
@@ -194,7 +194,7 @@ public class Treeview_NodeRenderer extends DefaultTreeCellRenderer {
 
 
             //if( this.icon_attribute == null )
-            // this.icon_attribute = new javax.swing.ImageIcon( getClass().getResource("/res/attributeDef.gif"));
+            // this.icon_attribute = new javax.swing.ImageIcon( getClass().getClassLoader().getResource("res/attributeDef.gif"));
             
             JAttRootCheckBox component_of_attributeroot = new JAttRootCheckBox( );
             component_of_attributeroot.setFont(new Font("Arial Unicode MS", Font.PLAIN, 12));

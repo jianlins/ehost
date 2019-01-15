@@ -383,7 +383,7 @@ public class Setting extends JFrame implements PropertyChangeListener
         jPanel_topbar.setLayout(new java.awt.BorderLayout());
 
         jLabel_background_pic3.setBackground(new java.awt.Color(226, 226, 226));
-        jLabel_background_pic3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/bar.png"))); // NOI18N
+        jLabel_background_pic3.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/bar.png"))); // NOI18N
         jPanel_topbar.add(jLabel_background_pic3, java.awt.BorderLayout.CENTER);
 
         getContentPane().add(jPanel_topbar, java.awt.BorderLayout.NORTH);
@@ -402,7 +402,7 @@ public class Setting extends JFrame implements PropertyChangeListener
         jToggleButton5.setBackground(new java.awt.Color(200, 200, 200));
         buttonGroup1.add(jToggleButton5);
         jToggleButton5.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
-        jToggleButton5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/annotator.png"))); // NOI18N
+        jToggleButton5.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/annotator.png"))); // NOI18N
         jToggleButton5.setSelected(true);
         jToggleButton5.setText("<html>Others</html>");
         jToggleButton5.setFocusable(false);
@@ -418,7 +418,7 @@ public class Setting extends JFrame implements PropertyChangeListener
         jToggleButton3.setBackground(new java.awt.Color(200, 200, 200));
         buttonGroup1.add(jToggleButton3);
         jToggleButton3.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
-        jToggleButton3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/annotator.png"))); // NOI18N
+        jToggleButton3.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/annotator.png"))); // NOI18N
         jToggleButton3.setFocusable(false);
         jToggleButton3.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         jToggleButton3.setLabel("<html>Concept<br>Dictionaries</html>");
@@ -433,7 +433,7 @@ public class Setting extends JFrame implements PropertyChangeListener
         jToggleButton2.setBackground(new java.awt.Color(200, 200, 200));
         buttonGroup1.add(jToggleButton2);
         jToggleButton2.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
-        jToggleButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/annotator.png"))); // NOI18N
+        jToggleButton2.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/annotator.png"))); // NOI18N
         jToggleButton2.setFocusable(false);
         jToggleButton2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         jToggleButton2.setLabel("<html>Custom<br> Regular<br>Expressions</html>");
@@ -448,7 +448,7 @@ public class Setting extends JFrame implements PropertyChangeListener
         jToggleButton4.setBackground(new java.awt.Color(200, 200, 200));
         buttonGroup1.add(jToggleButton4);
         jToggleButton4.setFont(new java.awt.Font("Arial", 1, 11)); // NOI18N
-        jToggleButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/annotator.png"))); // NOI18N
+        jToggleButton4.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/annotator.png"))); // NOI18N
         jToggleButton4.setText("<html>Verifier<br> Dictionaries</html>");
         jToggleButton4.setFocusable(false);
         jToggleButton4.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);

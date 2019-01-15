@@ -232,10 +232,10 @@ public class RelationshipSchemaEditor extends javax.swing.JFrame
         jPanel6 = new javax.swing.JPanel();
         exit = new javax.swing.JButton();
 
-        icon_1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/relationship/complex/creation/attribute.png"))); // NOI18N
+        icon_1.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/creation/attribute.png"))); // NOI18N
         icon_1.setText("jLabel4");
 
-        icon_2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/relationship/complex/creation/attributevalue.png"))); // NOI18N
+        icon_2.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/creation/attributevalue.png"))); // NOI18N
         icon_2.setText("jLabel4");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);

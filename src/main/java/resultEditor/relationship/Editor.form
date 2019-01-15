@@ -5,7 +5,7 @@
     <Component class="javax.swing.JLabel" name="jLabel_notdone">
       <Properties>
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-          <Image iconType="3" name="/res/radiobutton_unchecked_pressed.png"/>
+          <Image iconType="3" name="res/radiobutton_unchecked_pressed.png"/>
         </Property>
         <Property name="text" type="java.lang.String" value="&lt;html&gt;jLabel3------&lt;br&gt;dsd&lt;br&gt;dsdf&lt;/html&gt;"/>
         <Property name="verticalTextPosition" type="int" value="1"/>

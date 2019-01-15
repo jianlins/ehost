@@ -435,7 +435,7 @@ public class OracleFunction extends javax.swing.JFrame {
 
         jPanel_top_right.setBackground(new Color(254, 255, 255));
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/metacontact_online.png"))); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/metacontact_online.png"))); // NOI18N
 
         javax.swing.GroupLayout jPanel_top_rightLayout = new javax.swing.GroupLayout(jPanel_top_right);
         jPanel_top_right.setLayout(jPanel_top_rightLayout);

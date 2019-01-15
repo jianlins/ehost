@@ -89,7 +89,7 @@ public class DictManager extends javax.swing.JFrame {
         jPanel1.setLayout(new java.awt.BorderLayout());
 
         jLabel1.setFont(new java.awt.Font("Trebuchet MS", 1, 12)); // NOI18N
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/setting_big.jpeg"))); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/setting_big.jpeg"))); // NOI18N
         jLabel1.setText("eHOST-BoB Dictionary Manager");
         jPanel1.add(jLabel1, java.awt.BorderLayout.NORTH);
 

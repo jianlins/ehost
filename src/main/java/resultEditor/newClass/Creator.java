@@ -69,7 +69,7 @@ public class Creator extends javax.swing.JFrame {
         jButton_apply = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
 
-        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/markerror.png"))); // NOI18N
+        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/markerror.png"))); // NOI18N
         jLabel3.setText("jLabel3");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);

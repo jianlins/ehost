@@ -122,7 +122,7 @@ public class OutputToXML {
     public boolean write(){
        latestUsedMentionID = getLatestUsedMentionID();
        checkOutputFolder( path );
-       String sepatator = ( env.Parameters.isUnixOS? "/":"\\" );
+       String sepatator = File.separator;
        String outputxmlfilename = path + sepatator + textsourcefilename + ".knowtator.xml";
        log.LoggingToFile.log(Level.INFO, " + now we are try to build xml: ["+ outputxmlfilename + "]");
 
@@ -159,8 +159,8 @@ public class OutputToXML {
             XML.close();
 
             // Screen Log
-            log.LoggingToFile.log(Level.INFO,"Successfully genereted XML to - " + outputAbsoulateFilename );
-            logs.ShowLogs.printImportantInfoLog("Successfully genereted XML to - " + outputAbsoulateFilename );
+            log.LoggingToFile.log(Level.INFO,"Successfully genereted XML to - " + new File(outputAbsoulateFilename).getAbsolutePath() );
+            logs.ShowLogs.printImportantInfoLog("Successfully genereted XML to - " + new File(outputAbsoulateFilename).getAbsolutePath() );
             return true;
          }
         catch(Exception exc){

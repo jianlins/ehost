@@ -38,7 +38,7 @@ public class NagivationMenuItem extends JPanel{
         super();
 
         this.Title = title;
-        img = Toolkit.getDefaultToolkit().getImage( getClass().getResource("/ResultEditor/CustomComponents/files2.png") );
+        img = Toolkit.getDefaultToolkit().getImage( getClass().getClassLoader().getResource("res/CustomComponents/files2.png") );
     
 
         this.setfixedSize();

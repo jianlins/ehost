@@ -72,7 +72,7 @@ public class PinsToI2B2Converter implements iConversion
     public void convert(String output)
     {
         //Get separator
-        String separator = env.Parameters.isUnixOS ? "/" : "\\";
+        String separator = File.separator;
 
         //Make a temporary file to write in between files(knowtator xml)
         File toWrite = new File("temp" + separator + "currentConversion" + separator + getDateTime());

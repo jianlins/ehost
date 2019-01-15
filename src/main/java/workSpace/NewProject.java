@@ -85,7 +85,7 @@ public class NewProject extends javax.swing.JFrame {
         jLabel_projectname.setText("New Project Name:");
 
         jLabel_info.setFont(new java.awt.Font("Calibri", 0, 12)); // NOI18N
-        jLabel_info.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/markerror.png"))); // NOI18N
+        jLabel_info.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/markerror.png"))); // NOI18N
         jLabel_info.setText("New Project Name:");
 
         jButton_ok.setFont(new java.awt.Font("Calibri", 0, 13)); // NOI18N

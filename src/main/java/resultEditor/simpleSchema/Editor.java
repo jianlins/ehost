@@ -191,16 +191,16 @@ public class Editor extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        icon_1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resultEditor/simpleSchema/public.png"))); // NOI18N
+        icon_1.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/simpleSchema/public.png"))); // NOI18N
         icon_1.setText("jLabel5");
 
-        icon_2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resultEditor/simpleSchema/class.png"))); // NOI18N
+        icon_2.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/simpleSchema/class.png"))); // NOI18N
         icon_2.setText("jLabel5");
 
-        icon_3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resultEditor/simpleSchema/attribute.png"))); // NOI18N
+        icon_3.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/simpleSchema/attribute.png"))); // NOI18N
         icon_3.setText("jLabel5");
 
-        icon_4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resultEditor/simpleSchema/attributevalue.png"))); // NOI18N
+        icon_4.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/simpleSchema/attributevalue.png"))); // NOI18N
         icon_4.setText("jLabel5");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -258,7 +258,7 @@ public class Editor extends javax.swing.JFrame {
         });
         jPanel22.add(jCheckBox1, java.awt.BorderLayout.CENTER);
 
-        jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resultEditor/simpleSchema/clip.jpeg"))); // NOI18N
+        jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/simpleSchema/clip.jpeg"))); // NOI18N
         jPanel22.add(jLabel5, java.awt.BorderLayout.EAST);
 
         jPanel16.add(jPanel22, java.awt.BorderLayout.SOUTH);

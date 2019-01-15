@@ -357,7 +357,7 @@ public class Editor extends javax.swing.JFrame
         jButton1 = new javax.swing.JButton();
         jPanel13 = new javax.swing.JPanel();
 
-        jLabel_notdone.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/radiobutton_unchecked_pressed.png"))); // NOI18N
+        jLabel_notdone.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/radiobutton_unchecked_pressed.png"))); // NOI18N
         jLabel_notdone.setText("<html>jLabel3------<br>dsd<br>dsdf</html>");
         jLabel_notdone.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
 

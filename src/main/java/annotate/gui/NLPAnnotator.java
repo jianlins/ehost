@@ -68,9 +68,9 @@ public class NLPAnnotator extends javax.swing.JPanel {
 
     private void loadingRes(){
         //follows three icons are used to indicates the status of running button
-        disabled = new javax.swing.ImageIcon(getClass().getResource("/annotate/gui/starts_disabled.jpg"));
-        enabled = new javax.swing.ImageIcon(getClass().getResource("/annotate/gui/starts.jpg"));
-        mouseon = new javax.swing.ImageIcon(getClass().getResource("/annotate/gui/starts_mouseon.jpg"));
+        disabled = new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/gui/starts_disabled.jpg"));
+        enabled = new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/gui/starts.jpg"));
+        mouseon = new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/gui/starts_mouseon.jpg"));
     }
 
     private void ComponentSetting(){
@@ -137,7 +137,7 @@ public class NLPAnnotator extends javax.swing.JPanel {
         jLabel1.setBackground(new Color(255, 254, 255));
         jLabel1.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/annotate/gui/startpoint.jpg"))); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/gui/startpoint.jpg"))); // NOI18N
         jLabel1.setText("Welcome");
         jLabel1.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
         jLabel1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -183,7 +183,7 @@ public class NLPAnnotator extends javax.swing.JPanel {
         });
 
         jLabel2.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
-        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/annotate/gui/oracle1.jpg"))); // NOI18N
+        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/gui/oracle1.jpg"))); // NOI18N
         jLabel2.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
         jLabel2.setBorder(javax.swing.BorderFactory.createLineBorder(new Color(153, 153, 153)));
         jLabel2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
@@ -240,7 +240,7 @@ public class NLPAnnotator extends javax.swing.JPanel {
         });
 
         jLabel3.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
-        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/annotate/gui/search.png"))); // NOI18N
+        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/gui/search.png"))); // NOI18N
         jLabel3.setVerticalAlignment(javax.swing.SwingConstants.BOTTOM);
         jLabel3.setBorder(javax.swing.BorderFactory.createLineBorder(new Color(153, 153, 153)));
         jLabel3.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);

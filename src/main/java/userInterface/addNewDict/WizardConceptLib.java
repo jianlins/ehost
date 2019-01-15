@@ -201,7 +201,7 @@ public class WizardConceptLib extends javax.swing.JFrame {
         jPanel_Introduction.setRequestFocusEnabled(false);
         jPanel_Introduction.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/userInterface/addNewDict/gears.jpg"))); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/addNewDict/gears.jpg"))); // NOI18N
         jPanel_Introduction.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 10, -1, -1));
 
         jLabel2.setFont(new java.awt.Font("Calibri", 0, 14)); // NOI18N
@@ -250,7 +250,7 @@ public class WizardConceptLib extends javax.swing.JFrame {
 
         jLabel21.setFont(new java.awt.Font("Calibri", 0, 14)); // NOI18N
         jLabel21.setForeground(new java.awt.Color(204, 0, 0));
-        jLabel21.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/markerror.png"))); // NOI18N
+        jLabel21.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/markerror.png"))); // NOI18N
         jLabel21.setText("jLabel21");
         jPanel_choosefile.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 260, 290, 50));
 
@@ -262,7 +262,7 @@ public class WizardConceptLib extends javax.swing.JFrame {
         });
         jPanel_choosefile.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(290, 140, 80, -1));
 
-        jLabel23.setIcon(new javax.swing.ImageIcon(getClass().getResource("/userInterface/addNewDict/dropfile.png"))); // NOI18N
+        jLabel23.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/dropfile.png"))); // NOI18N
         jPanel_choosefile.add(jLabel23, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 80, -1, -1));
 
         jLabel25.setFont(new java.awt.Font("Calibri", 0, 14)); // NOI18N
@@ -282,7 +282,7 @@ public class WizardConceptLib extends javax.swing.JFrame {
         jPanel_verifyer.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(34, 134, -1, -1));
         jPanel_verifyer.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(34, 157, -1, -1));
 
-        jLabel_right_icon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/mark1.png"))); // NOI18N
+        jLabel_right_icon.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/mark1.png"))); // NOI18N
         jPanel_verifyer.add(jLabel_right_icon, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, -1, -1));
 
         jLabel_step3_title.setFont(new java.awt.Font("Calibri", 1, 18)); // NOI18N
@@ -290,7 +290,7 @@ public class WizardConceptLib extends javax.swing.JFrame {
         jPanel_verifyer.add(jLabel_step3_title, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 20, -1, -1));
 
         jLabel_error_msg.setFont(new java.awt.Font("Calibri", 1, 14)); // NOI18N
-        jLabel_error_msg.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/markerror.png"))); // NOI18N
+        jLabel_error_msg.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/markerror.png"))); // NOI18N
         jLabel_error_msg.setText("jLabel16");
         jPanel_verifyer.add(jLabel_error_msg, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 310, -1, -1));
 
@@ -314,7 +314,7 @@ public class WizardConceptLib extends javax.swing.JFrame {
 
         jPanel_verifyer.add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 210, 570, 60));
 
-        jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/userInterface/addNewDict/verify_dict.png"))); // NOI18N
+        jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/verify_dict.png"))); // NOI18N
         jPanel_verifyer.add(jLabel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 10, -1, -1));
 
         jPanel_CardLayout.add(jPanel_verifyer, "card4");
@@ -322,7 +322,7 @@ public class WizardConceptLib extends javax.swing.JFrame {
         jPanel_saved.setBackground(new java.awt.Color(254, 254, 254));
         jPanel_saved.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel13.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/BackUp.png"))); // NOI18N
+        jLabel13.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/BackUp.png"))); // NOI18N
         jPanel_saved.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 100, -1, -1));
 
         jLabel_step4_title.setFont(new java.awt.Font("Calibri", 1, 18)); // NOI18N
@@ -617,7 +617,7 @@ public class WizardConceptLib extends javax.swing.JFrame {
      * We need to save changes of adding new pre-annotated concept dictionary
      * after user clicked button after step 3
      *
-     * @param   lines
+     * @param   amount_of_enties
      *          Amount of entries in the pre-annotated concept dictionary you
      *          just designated.
      */

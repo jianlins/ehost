@@ -202,7 +202,7 @@ public class WizardVerifierLib extends javax.swing.JFrame
         jPanel_Introduction.setRequestFocusEnabled(false);
         jPanel_Introduction.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/3.png"))); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/3.png"))); // NOI18N
         jPanel_Introduction.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(24, 46, -1, -1));
 
         jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 14));
@@ -248,7 +248,7 @@ public class WizardVerifierLib extends javax.swing.JFrame
         jLabel21.setText("jLabel21");
         jPanel_choosefile.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(24, 264, -1, -1));
 
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/change24.png"))); // NOI18N
+        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/change24.png"))); // NOI18N
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -287,10 +287,10 @@ public class WizardVerifierLib extends javax.swing.JFrame
         jPanel_Done.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(34, 134, -1, -1));
         jPanel_Done.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(34, 157, -1, -1));
 
-        jLabel12.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/mark1.png"))); // NOI18N
+        jLabel12.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/mark1.png"))); // NOI18N
         jPanel_Done.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(23, 180, -1, -1));
 
-        jLabel13.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/BackUp.png"))); // NOI18N
+        jLabel13.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/BackUp.png"))); // NOI18N
         jPanel_Done.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(420, 101, -1, -1));
 
         jLabel14.setFont(new java.awt.Font("Segoe UI", 1, 14));
@@ -298,7 +298,7 @@ public class WizardVerifierLib extends javax.swing.JFrame
         jPanel_Done.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(36, 20, -1, -1));
 
         jLabel16.setFont(new java.awt.Font("Segoe UI", 1, 12));
-        jLabel16.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/markerror.png"))); // NOI18N
+        jLabel16.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/markerror.png"))); // NOI18N
         jLabel16.setText("jLabel16");
         jPanel_Done.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(23, 268, -1, -1));
 

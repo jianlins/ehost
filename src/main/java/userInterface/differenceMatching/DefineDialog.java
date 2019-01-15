@@ -162,7 +162,7 @@ public class DefineDialog extends JFrame {
         jPanel4.setMinimumSize(new Dimension(20, 20));
         jPanel4.setLayout(new java.awt.GridLayout(1, 2, 4, 0));
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/UserInterface/DifferenceMatching/overlapping.png"))); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/overlapping.png"))); // NOI18N
         jPanel4.add(jLabel1);
 
         jPanel5.setBackground(new java.awt.Color(255, 255, 255));

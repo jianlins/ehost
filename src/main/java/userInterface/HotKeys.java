@@ -77,7 +77,7 @@ public class HotKeys extends javax.swing.JFrame {
 
         jPanel1.setLayout(new java.awt.BorderLayout());
 
-        jLabel9.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/documents_48.png"))); // NOI18N
+        jLabel9.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/documents_48.png"))); // NOI18N
         jPanel1.add(jLabel9, java.awt.BorderLayout.LINE_START);
 
         jLabel10.setFont(new java.awt.Font("Calibri", 1, 18));
@@ -99,7 +99,7 @@ public class HotKeys extends javax.swing.JFrame {
         jPanel4.setLayout(new java.awt.BorderLayout());
 
         jLabel2.setFont(new java.awt.Font("Calibri", 0, 12));
-        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/delete.png"))); // NOI18N
+        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/delete.png"))); // NOI18N
         jLabel2.setText("<html><b>Ctrl+D</b> - Delete annotation</html>");
         jPanel4.add(jLabel2, java.awt.BorderLayout.CENTER);
 
@@ -109,7 +109,7 @@ public class HotKeys extends javax.swing.JFrame {
         jPanel5.setLayout(new java.awt.BorderLayout());
 
         jLabel6.setFont(new java.awt.Font("Calibri", 0, 12));
-        jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/span_rl.png"))); // NOI18N
+        jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/span_rl.png"))); // NOI18N
         jLabel6.setText("<html><b>Alt+Left Arrow</b> - Move end of span to the left</html>");
         jPanel5.add(jLabel6, java.awt.BorderLayout.CENTER);
 
@@ -118,7 +118,7 @@ public class HotKeys extends javax.swing.JFrame {
         jPanel8.setLayout(new java.awt.BorderLayout());
 
         jLabel5.setFont(new java.awt.Font("Calibri", 0, 12));
-        jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/span_rr.png"))); // NOI18N
+        jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/span_rr.png"))); // NOI18N
         jLabel5.setText("<html><b>Alt+Right Arrow</b> - Move end of span to the right</html>");
         jPanel8.add(jLabel5, java.awt.BorderLayout.CENTER);
 
@@ -127,7 +127,7 @@ public class HotKeys extends javax.swing.JFrame {
         jPanel6.setLayout(new java.awt.BorderLayout());
 
         jLabel4.setFont(new java.awt.Font("Calibri", 0, 12));
-        jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/span_ll.png"))); // NOI18N
+        jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/span_ll.png"))); // NOI18N
         jLabel4.setText("<html><b>Ctrl+Left Arrow</b> - Move start of span to the left</html>");
         jPanel6.add(jLabel4, java.awt.BorderLayout.CENTER);
 
@@ -136,7 +136,7 @@ public class HotKeys extends javax.swing.JFrame {
         jPanel7.setLayout(new java.awt.BorderLayout());
 
         jLabel3.setFont(new java.awt.Font("Calibri", 0, 12));
-        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/span_lr.png"))); // NOI18N
+        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/span_lr.png"))); // NOI18N
         jLabel3.setText("<html><b>Ctrl+Right Arrow</b> - Move start of span to the right</html>");
         jPanel7.add(jLabel3, java.awt.BorderLayout.CENTER);
 
@@ -145,7 +145,7 @@ public class HotKeys extends javax.swing.JFrame {
         jPanel11.setLayout(new java.awt.BorderLayout());
 
         jLabel12.setFont(new java.awt.Font("Calibri", 0, 12));
-        jLabel12.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/nextb.png"))); // NOI18N
+        jLabel12.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/nextb.png"))); // NOI18N
         jLabel12.setText("<html><b>Left Arrow/Up Arrow</b> - Move to previous annotation</html>");
         jPanel11.add(jLabel12, java.awt.BorderLayout.CENTER);
 
@@ -154,7 +154,7 @@ public class HotKeys extends javax.swing.JFrame {
         jPanel13.setLayout(new java.awt.BorderLayout());
 
         jLabel11.setFont(new java.awt.Font("Calibri", 0, 12));
-        jLabel11.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/back.png"))); // NOI18N
+        jLabel11.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/back.png"))); // NOI18N
         jLabel11.setText("<html><b>Right Arrow/Down Arrow</b> - Move to next annotation</html>");
         jPanel13.add(jLabel11, java.awt.BorderLayout.CENTER);
 
@@ -171,7 +171,7 @@ public class HotKeys extends javax.swing.JFrame {
         jPanel10.setLayout(new java.awt.BorderLayout());
 
         jLabel8.setFont(new java.awt.Font("Calibri", 0, 12));
-        jLabel8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/media-seek-backward-16.png"))); // NOI18N
+        jLabel8.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/media-seek-backward-16.png"))); // NOI18N
         jLabel8.setText("<html><b>Ctrl+Z</b> - Undo previous annotation deletion</html>");
         jPanel10.add(jLabel8, java.awt.BorderLayout.CENTER);
 

@@ -2,7 +2,6 @@ package algorithmNegex;
 
 /**
  * @(#)XMLMaker.java Collect and assemble data to XML format
- *
  * @author Jianwei Leng ( Chris ) @location: Williams Building, Level 1,
  * Epidemiology Department @history: Monday 10-20-2009 10:32 pm MST,
  * First_Created_Time @history: Thursday 11-05-2009 03:32 pm MST, Add function
@@ -11,17 +10,19 @@ package algorithmNegex;
  * 14:06 pm MST, Modify for data/time words
  */
 /*
- * --------------------------------------------- 
+ * ---------------------------------------------
  * jdom.jar should be set in your
  * classpath If not, please download the source codes and complie to get a
- * compatible one          
+ * compatible one
  * ---------------------------------------------
  */
+
 import java.io.*;
 import java.util.*;
 import java.util.Calendar;
 import java.util.Random;
 import java.util.logging.Level;
+
 import org.jdom.*;
 import org.jdom.output.*;
 import resultEditor.annotations.AnnotationAttributeDef;
@@ -50,9 +51,9 @@ class Annotations {
 
     // the return number is current offset for ID number increased
     int dataCollector(String _definedMentionClassText, int _currentMentionClassIdNumber, // parameters in this line are used to generate the IDs
-            String annotatorId, String annotator,
-            String spanStart, String spanEnd, String spanText, String creationDate,
-            String stringSlotMentionValue, int _groupindex, int type, String _comment) {
+                      String annotatorId, String annotator,
+                      String spanStart, String spanEnd, String spanText, String creationDate,
+                      String stringSlotMentionValue, int _groupindex, int type, String _comment) {
         //currentMentionID = DefinedMentionClassText + (int)(count_of_annotations + mentionIRN);
         // STEP -=[1]=-
         // for variety of concepts:
@@ -246,7 +247,7 @@ class ClassMention {
         SSMArrayList.add(SSM);
     }
 
-    void addComplexSlotMention(String _hasClassMention_id, int _groupindex){ //, ArrayList<AnnotationAttributeDef> attributes) {
+    void addComplexSlotMention(String _hasClassMention_id, int _groupindex) { //, ArrayList<AnnotationAttributeDef> attributes) {
         //System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@"+_groupindex);
         ComplexSlotMention CSM = new ComplexSlotMention();
         //CSM.complexSlotMentionid = _complexSlotMentionid;
@@ -405,7 +406,7 @@ public class XMLMaker {
         } else {
             appended = records.dataCollector(originalMentionID, count_of_annotations + mentionIRN,
                     currentAnnotatorID, _annotator,
-                    _spanStart, _spanEnd, _spanText, getCurrentDate(), _stringSlotMentionValue, _memory_groupIndex, 1, _comment);	// 1:normal term(span) information
+                    _spanStart, _spanEnd, _spanText, getCurrentDate(), _stringSlotMentionValue, _memory_groupIndex, 1, _comment);    // 1:normal term(span) information
             if (appended > 0) {
                 count_of_annotations = count_of_annotations + appended;
             }
@@ -513,8 +514,7 @@ public class XMLMaker {
     // set out put xml file name
     public void setOutputFileName(String _FileName) {
         // set the path by system
-        setPath_By_OSType();
-
+        path = "." + File.separator + "xmloutput/";
         if (_FileName == null) {
             OutputXMLFileName = path + "NoName" + fileExtendedAttributesName;
         } else {
@@ -525,7 +525,6 @@ public class XMLMaker {
 
     // assume the XML file and output
     public void outputXML() {
-
 
 
         mentionIRN = mentionIRN + count_of_annotations;
@@ -672,16 +671,15 @@ public class XMLMaker {
                                 complexSlotMention.setAttribute("id", CSMA.complexSlotMentionid);
                                 //complexSlotMention.setAttribute("id", CSMA.parentsMentionID );
 
-                                
+
                                 String csmv = getComplexSlotMentionValue(CSMA.groupIndex);
-                                if(( csmv == null )||(csmv.trim().length()<1))
+                                if ((csmv == null) || (csmv.trim().length() < 1))
                                     continue;
-                                
+
                                 ///System.out.println( "---------------------" + CSMA.groupIndex);
                                 Element mentionSlotId = new Element("mentionSlot");
                                 mentionSlotId.setAttribute("id", CSMA.mentionSlot);
                                 complexSlotMention.addContent(mentionSlotId);
-                                
 
 
                                 Element complexSlotMentionValue = new Element("complexSlotMentionValue");
@@ -749,7 +747,6 @@ public class XMLMaker {
             }
 
 
-
         }
 
         // if above program can not find matched classmention id of the negative word
@@ -757,11 +754,4 @@ public class XMLMaker {
     }
 
     // mac and windows operation system uses different path separator
-    private void setPath_By_OSType() {
-        if (env.Parameters.isUnixOS) {
-            path = "./xmloutput/";      // for mac os system
-        } else {
-            path = ".\\xmloutput\\";
-        }   // for windows system
-    }
 }

@@ -394,7 +394,7 @@ public class UMLSBrowser extends javax.swing.JFrame {
         jButton2 = new javax.swing.JButton();
         jLabel_errmsg = new javax.swing.JLabel();
 
-        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/umls/busy1.gif"))); // NOI18N
+        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/busy1.gif"))); // NOI18N
         jLabel3.setText("jLabel3");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -711,7 +711,7 @@ public class UMLSBrowser extends javax.swing.JFrame {
         jPanel4.setPreferredSize(new Dimension(560, 55));
         jPanel4.setLayout(new java.awt.BorderLayout());
 
-        jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/umls1.gif"))); // NOI18N
+        jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/umls1.gif"))); // NOI18N
         jLabel4.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 1, 1, 3, new java.awt.Color(250, 250, 250)));
         jPanel4.add(jLabel4, java.awt.BorderLayout.EAST);
 

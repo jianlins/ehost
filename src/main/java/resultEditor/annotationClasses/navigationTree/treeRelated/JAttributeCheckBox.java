@@ -50,7 +50,7 @@ public class JAttributeCheckBox extends JCheckBox {
         super();
         this.att = att;
         this.setIconTextGap(24);  
-        //this.setIcon( new javax.swing.ImageIcon(getClass().getResource("/res/attributeDef.gif")) );
+        //this.setIcon( new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/attributeDef.gif")) );
         
         
             
@@ -87,7 +87,7 @@ public class JAttributeCheckBox extends JCheckBox {
      public void paint(Graphics g){
          super.paint(g);
          if( image == null ){
-             image =  new javax.swing.ImageIcon(getClass().getResource("/res/attributeDef.gif")).getImage();
+             image =  new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/attributeDef.gif")).getImage();
          }
          g.drawImage(  image, 26, 2, this);
          

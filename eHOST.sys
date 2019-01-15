@@ -11,7 +11,7 @@
 
 
 [ANNOTATOR]
-
+sjl
 
 [ENABLE_DIFF_BUTTON]
 false
@@ -32,6 +32,7 @@ false
 NOPASSWORD
 
 [WORKSPACE_PATH]
+/home/brokenjade/Documents/IdeaProjects/EasyCIE_GUI/data/output
 
 [OracleFunction]
 true

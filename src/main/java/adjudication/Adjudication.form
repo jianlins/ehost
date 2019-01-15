@@ -449,7 +449,7 @@
             <Component class="javax.swing.JLabel" name="jLabel_busySignal1">
               <Properties>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/adjudication/busy1.gif"/>
+                  <Image iconType="3" name="res/busy1.gif"/>
                 </Property>
               </Properties>
             </Component>
@@ -564,7 +564,7 @@
             <Component class="javax.swing.JLabel" name="jLabel2">
               <Properties>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/adjudication/gavel.png"/>
+                  <Image iconType="3" name="res/gavel.png"/>
                 </Property>
               </Properties>
             </Component>

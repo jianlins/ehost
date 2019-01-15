@@ -57,7 +57,7 @@ public class JAttRootCheckBox extends JCheckBox {
         super.setBackground(Color.white);
         super.setIconTextGap(24);
         //this.set
-        //this.setIcon( new javax.swing.ImageIcon(getClass().getResource("/res/attributeDef.gif")) );
+        //this.setIcon( new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/attributeDef.gif")) );
         //this.setSelectedIcon(icon_attribute);
         
         
@@ -103,7 +103,7 @@ public class JAttRootCheckBox extends JCheckBox {
      public void paint(Graphics g){
          super.paint(g);
          if( image == null ){
-             image =  new javax.swing.ImageIcon(getClass().getResource("/res/attributeDef.gif")).getImage();
+             image =  new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/attributeDef.gif")).getImage();
          }
          g.drawImage(  image, 26, 2, this);
          

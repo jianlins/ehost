@@ -335,7 +335,7 @@ public class RegexEditor extends javax.swing.JFrame
         jPanel_holder_description.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 0, 5, 0, new Color(255, 255, 253)));
         jPanel_holder_description.setLayout(new java.awt.BorderLayout());
 
-        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/relationship/complex/creation/Relationship_cursor.png"))); // NOI18N
+        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/creation/Relationship_cursor.png"))); // NOI18N
         jPanel_holder_description.add(jLabel2, java.awt.BorderLayout.LINE_START);
 
         jLabel6.setFont(new java.awt.Font("Calibri", 0, 13)); // NOI18N

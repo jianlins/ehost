@@ -8,17 +8,21 @@ import imports.importedXML.eAnnotationNode;
 import imports.importedXML.eStringSlotMention;
 import imports.importedXML.eComplexSlotMention;
 import imports.importedXML.eClassMention;
+
+import java.io.File;
 import java.util.Vector;
 
 /**
  * @author Jianwei Leng  2010-05-16, Sun
  */
-public class eXMLFile
-{
+public class eXMLFile {
 
-    /**the file name, in format ###.###, not absolutely filename*/
+    /**
+     * the file name, in format ###.###, not absolutely filename
+     */
     public String filename;
-    /**the absolute filename of this imported xml file,
+    /**
+     * the absolute filename of this imported xml file,
      * use to write back information
      */
     public String absoluteFilename;
@@ -30,17 +34,17 @@ public class eXMLFile
     public Vector<eClassMention> classMentions = new Vector<eClassMention>();
     // stringslotmention
     public Vector<eStringSlotMention> stringSlotMentions = new Vector<eStringSlotMention>();
-    /**sub branch of complex slot mention to a XML annotation file. */
-    public Vector<eComplexSlotMention> complexSlotMentions = new Vector<eComplexSlotMention> ();
+    /**
+     * sub branch of complex slot mention to a XML annotation file.
+     */
+    public Vector<eComplexSlotMention> complexSlotMentions = new Vector<eComplexSlotMention>();
 
-    public eXMLFile(){};
+    public eXMLFile() {
+    }
+
 
     public eXMLFile(String path, String fileName) {
-        String separator = "";
-        if (env.Parameters.isUnixOS)        
-            separator = "/";        
-        else        
-            separator = "\\";        
+        String separator = File.separator;
         this.filename = fileName;
         this.absoluteFilename = path + separator + fileName;
     }

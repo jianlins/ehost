@@ -422,7 +422,7 @@ public class Adjudication extends javax.swing.JFrame {
 
         card4.setBackground(new java.awt.Color(255, 255, 254));
 
-        jLabel_busySignal1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/adjudication/busy1.gif"))); // NOI18N
+        jLabel_busySignal1.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/busy1.gif"))); // NOI18N
 
         jLabel17.setFont(new java.awt.Font("Gill Sans MT", 0, 13)); // NOI18N
         jLabel17.setText("eHOST is searching for matches and nonmatches ... ... ");
@@ -494,7 +494,7 @@ public class Adjudication extends javax.swing.JFrame {
 
         card5.setBackground(new java.awt.Color(255, 255, 254));
 
-        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/adjudication/gavel.png"))); // NOI18N
+        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/gavel.png"))); // NOI18N
 
         jLabel24.setFont(new java.awt.Font("Gill Sans MT", 1, 16)); // NOI18N
         jLabel24.setText("After This Wizard... ... ");

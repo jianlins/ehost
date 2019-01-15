@@ -50,7 +50,7 @@
               <Font name="Trebuchet MS" size="12" style="1"/>
             </Property>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/res/setting_big.jpeg"/>
+              <Image iconType="3" name="res/setting_big.jpeg"/>
             </Property>
             <Property name="text" type="java.lang.String" value="eHOST-BoB Dictionary Manager"/>
           </Properties>

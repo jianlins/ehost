@@ -66,7 +66,7 @@ public class DeleteConfirm extends javax.swing.JFrame {
         jLabel1.setFont(new java.awt.Font("Calibri", 0, 14)); // NOI18N
         jLabel1.setText("<html>While you try to delete annotations, do you want to only delete annotations in<br>\ncurrent document? Or in all document?</html>");
 
-        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/editcut.png"))); // NOI18N
+        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/editcut.png"))); // NOI18N
 
         buttonGroup1.add(jRadioButton1);
         jRadioButton1.setFont(new java.awt.Font("Calibri", 0, 14)); // NOI18N

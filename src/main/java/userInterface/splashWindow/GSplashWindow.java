@@ -37,7 +37,7 @@ public class GSplashWindow extends JWindow {
     public GSplashWindow() {
         
         try{
-            this.bgImage = new ImageIcon( getClass().getResource("/UserInterface/splashWindow/splash.png") ).getImage();
+            this.bgImage = new ImageIcon( getClass().getClassLoader().getResource("res/splash.png") ).getImage();
         }catch(Exception ex){
             // Ignore errors here
         }

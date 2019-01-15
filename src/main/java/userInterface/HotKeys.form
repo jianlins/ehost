@@ -40,7 +40,7 @@
         <Component class="javax.swing.JLabel" name="jLabel9">
           <Properties>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/res/documents_48.png"/>
+              <Image iconType="3" name="res/documents_48.png"/>
             </Property>
           </Properties>
           <Constraints>
@@ -107,7 +107,7 @@
                   <Font name="Calibri" size="12" style="0"/>
                 </Property>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/res/delete.png"/>
+                  <Image iconType="3" name="res/delete.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;b&gt;Ctrl+D&lt;/b&gt; - Delete annotation&lt;/html&gt;"/>
               </Properties>
@@ -134,7 +134,7 @@
                   <Font name="Calibri" size="12" style="0"/>
                 </Property>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/res/span_rl.png"/>
+                  <Image iconType="3" name="res/span_rl.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;b&gt;Alt+Left Arrow&lt;/b&gt; - Move end of span to the left&lt;/html&gt;"/>
               </Properties>
@@ -156,7 +156,7 @@
                   <Font name="Calibri" size="12" style="0"/>
                 </Property>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/res/span_rr.png"/>
+                  <Image iconType="3" name="res/span_rr.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;b&gt;Alt+Right Arrow&lt;/b&gt; - Move end of span to the right&lt;/html&gt;"/>
               </Properties>
@@ -178,7 +178,7 @@
                   <Font name="Calibri" size="12" style="0"/>
                 </Property>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/res/span_ll.png"/>
+                  <Image iconType="3" name="res/span_ll.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;b&gt;Ctrl+Left Arrow&lt;/b&gt; - Move start of span to the left&lt;/html&gt;"/>
               </Properties>
@@ -200,7 +200,7 @@
                   <Font name="Calibri" size="12" style="0"/>
                 </Property>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/res/span_lr.png"/>
+                  <Image iconType="3" name="res/span_lr.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;b&gt;Ctrl+Right Arrow&lt;/b&gt; - Move start of span to the right&lt;/html&gt;"/>
               </Properties>
@@ -222,7 +222,7 @@
                   <Font name="Calibri" size="12" style="0"/>
                 </Property>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/res/nextb.png"/>
+                  <Image iconType="3" name="res/nextb.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;b&gt;Left Arrow/Up Arrow&lt;/b&gt; - Move to previous annotation&lt;/html&gt;"/>
               </Properties>
@@ -244,7 +244,7 @@
                   <Font name="Calibri" size="12" style="0"/>
                 </Property>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/res/back.png"/>
+                  <Image iconType="3" name="res/back.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;b&gt;Right Arrow/Down Arrow&lt;/b&gt; - Move to next annotation&lt;/html&gt;"/>
               </Properties>
@@ -285,7 +285,7 @@
                   <Font name="Calibri" size="12" style="0"/>
                 </Property>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/res/media-seek-backward-16.png"/>
+                  <Image iconType="3" name="res/media-seek-backward-16.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="&lt;html&gt;&lt;b&gt;Ctrl+Z&lt;/b&gt; - Undo previous annotation deletion&lt;/html&gt;"/>
               </Properties>

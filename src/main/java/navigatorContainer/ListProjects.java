@@ -33,17 +33,17 @@ public class ListProjects {
         this.path = _path;
 
         try{
-            //image = new javax.swing.ImageIcon(getClass().getResource("projects.jpg")).getImage();
+            //image = new javax.swing.ImageIcon(getClass().getClassLoader().getResource("projects.jpg")).getImage();
             if(image_good==null)
-                //image_good = Toolkit.getDefaultToolkit().getImage( getClass().getResource("/NavigatorContainer/projects_box.png") );
+                //image_good = Toolkit.getDefaultToolkit().getImage( getClass().getClassLoader().getResource("/NavigatorContainer/projects_box.png") );
                  
-                image_good = ImageIO.read(getClass().getResource("/navigatorContainer/archive.png").toURI().toURL());
-                image_error = ImageIO.read(getClass().getResource("/navigatorContainer/error.png").toURI().toURL());
+                image_good = ImageIO.read(getClass().getClassLoader().getResource("res/navigatorContainer/archive.png").toURI().toURL());
+                image_error = ImageIO.read(getClass().getClassLoader().getResource("res/navigatorContainer/error.png").toURI().toURL());
                 
-            //image_warning = Toolkit.getDefaultToolkit().getImage( getClass().getResource("/NavigatorContainer/projects-warning.png") );
-            //image_wrong = Toolkit.getDefaultToolkit().getImage( getClass().getResource("/NavigatorContainer/projects-wrong.png") );
+            //image_warning = Toolkit.getDefaultToolkit().getImage( getClass().getClassLoader().getResource("/NavigatorContainer/projects-warning.png") );
+            //image_wrong = Toolkit.getDefaultToolkit().getImage( getClass().getClassLoader().getResource("/NavigatorContainer/projects-wrong.png") );
         }catch(Exception ex){
-            log.LoggingToFile.log(Level.SEVERE, "error 1102021334:: fail to load resourece:: image file /navigatorContainer/projects_box.png");
+            log.LoggingToFile.log(Level.SEVERE, "error 1102021334:: fail to load resourece:: image file res/navigatorContainer/projects_box.png");
         }
     }
 

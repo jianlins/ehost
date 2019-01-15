@@ -12,6 +12,7 @@
 package resultEditor.annotationClasses;
 
 import java.awt.Color;
+import java.net.URL;
 import java.util.Vector;
 import java.util.logging.Level;
 
@@ -270,8 +271,7 @@ public class Manager extends javax.swing.JFrame {
         jPanel3 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
         jPanel13 = new javax.swing.JPanel();
-
-        jLabel_notdone.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resultEditor/annotationClasses/classDef.gif"))); // NOI18N
+        jLabel_notdone.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/classDef.gif"))); // NOI18N
         jLabel_notdone.setText("<html>jLabel3------<br>dsd<br>dsdf</html>");
         jLabel_notdone.setVerticalTextPosition(javax.swing.SwingConstants.TOP);
 
@@ -483,7 +483,7 @@ public class Manager extends javax.swing.JFrame {
         jPanel12.setLayout(new java.awt.BorderLayout());
 
         jLabel_warning.setFont(new java.awt.Font("Verdana", 0, 12)); // NOI18N
-        jLabel_warning.setIcon(new javax.swing.ImageIcon(getClass().getResource("/res/markerror.png"))); // NOI18N
+        jLabel_warning.setIcon(new javax.swing.ImageIcon(getClass().getClassLoader().getResource("res/markerror.png"))); // NOI18N
         jLabel_warning.setText("jLabel2");
         jPanel12.add(jLabel_warning, java.awt.BorderLayout.CENTER);
 

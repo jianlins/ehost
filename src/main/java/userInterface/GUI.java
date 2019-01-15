@@ -24,6 +24,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 
 import org.apache.commons.io.comparator.NameFileComparator;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 import relationship.complex.creation.RelationshipSchemaEditor;
 import relationship.complex.dataTypes.ComplexRelImportReturn;
 import relationship.simple.dataTypes.AttributeSchemaDef;
@@ -554,7 +557,7 @@ public class GUI extends JFrame {
 
         jPanel14.setLayout(new BorderLayout());
 
-        jLabel5.setIcon(new ImageIcon(getClass().getResource("/res/imac_01.png"))); // NOI18N
+        jLabel5.setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/imac_01.png"))); // NOI18N
         jPanel14.add(jLabel5, BorderLayout.CENTER);
 
         jPanel13.add(jPanel14, BorderLayout.WEST);
@@ -616,14 +619,14 @@ public class GUI extends JFrame {
 
         confirmExit.getContentPane().add(jPanel16, BorderLayout.CENTER);
 
-        res_conflictIcon.setIcon(new ImageIcon(getClass().getResource(
-                "/res/conflictHuman.png"))); // NOI18N
+        res_conflictIcon.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/conflictHuman.png"))); // NOI18N
         res_conflictIcon.setText("jLabel38");
 
         jTextField_sample.setText("jTextField1");
 
-        jLabel_icon_annotationlist.setIcon(new ImageIcon(getClass().getResource(
-                "/res/userInputIcon.png"))); // NOI18N
+        jLabel_icon_annotationlist.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/userInputIcon.png"))); // NOI18N
         jLabel_icon_annotationlist.setText("jLabel9");
 
         jDialog_Confirm_before_Removing_Annotations
@@ -633,7 +636,7 @@ public class GUI extends JFrame {
 
         jPanel10.setBackground(new Color(255, 255, 254));
 
-        jLabel10.setIcon(new ImageIcon(getClass().getResource("/res/warning_1.png"))); // NOI18N
+        jLabel10.setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/warning_1.png"))); // NOI18N
         jLabel10.setLabelFor(refresh);
 
         jLabel7.setFont(new Font("Georgia", 0, 12)); // NOI18N
@@ -713,7 +716,17 @@ public class GUI extends JFrame {
         jSplitPane_Annotations_Comparator.setVerifyInputWhenFocusTarget(false);
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setTitle("eHOST V1.186@2013.05.08");
+        String title = "eHOST V1.20@2018.04";
+//        MavenXpp3Reader reader = new MavenXpp3Reader();
+//        try {
+//            Model model = reader.read(new FileReader("pom.xml"));
+//            title = "eHOST " + model.getVersion() + "@2018";
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } catch (XmlPullParserException e) {
+//            e.printStackTrace();
+//        }
+        setTitle(title);
         setBackground(new Color(132, 122, 122));
         addWindowFocusListener(new WindowFocusListener() {
             public void windowGainedFocus(WindowEvent evt) {
@@ -750,8 +763,8 @@ public class GUI extends JFrame {
         buttonGroup_Tabs.add(jToggleButton_ResultEditor);
         jToggleButton_ResultEditor.setFont(new Font("Segoe UI", 1, 12)); // NOI18N
         jToggleButton_ResultEditor.setForeground(new Color(41, 41, 41));
-        jToggleButton_ResultEditor.setIcon(new ImageIcon(getClass().getResource(
-                "/res/annotator.png"))); // NOI18N
+        jToggleButton_ResultEditor.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/annotator.png"))); // NOI18N
         jToggleButton_ResultEditor.setSelected(true);
         jToggleButton_ResultEditor.setFocusable(false);
         jToggleButton_ResultEditor.setHorizontalTextPosition(SwingConstants.RIGHT);
@@ -769,8 +782,8 @@ public class GUI extends JFrame {
         buttonGroup_Tabs.add(jToggleButton_CreateAnnotaion);
         jToggleButton_CreateAnnotaion.setFont(new Font("Segoe UI", 1, 12)); // NOI18N
         jToggleButton_CreateAnnotaion.setForeground(new Color(0, 102, 102));
-        jToggleButton_CreateAnnotaion.setIcon(new ImageIcon(getClass().getResource(
-                "/res/annotator.png"))); // NOI18N
+        jToggleButton_CreateAnnotaion.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/annotator.png"))); // NOI18N
         jToggleButton_CreateAnnotaion.setText("<html>NLP<br>Assisted<html> ");
         jToggleButton_CreateAnnotaion.setFocusable(false);
         jToggleButton_CreateAnnotaion.setHorizontalTextPosition(SwingConstants.RIGHT);
@@ -788,8 +801,8 @@ public class GUI extends JFrame {
         buttonGroup_Tabs.add(jToggleButton_PinExtractor);
         jToggleButton_PinExtractor.setFont(new Font("Segoe UI", 1, 12)); // NOI18N
         jToggleButton_PinExtractor.setForeground(new Color(41, 41, 41));
-        jToggleButton_PinExtractor.setIcon(new ImageIcon(getClass().getResource(
-                "/res/run.png"))); // NOI18N
+        jToggleButton_PinExtractor.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/run.png"))); // NOI18N
         jToggleButton_PinExtractor.setText("<html>Pin<br>Extractor<html> ");
         jToggleButton_PinExtractor.setFocusable(false);
         jToggleButton_PinExtractor.setHorizontalTextPosition(SwingConstants.RIGHT);
@@ -806,8 +819,8 @@ public class GUI extends JFrame {
         buttonGroup_Tabs.add(jToggleButton_DictionaryManager);
         jToggleButton_DictionaryManager.setFont(new Font("Segoe UI", 1, 12)); // NOI18N
         jToggleButton_DictionaryManager.setForeground(new Color(41, 41, 41));
-        jToggleButton_DictionaryManager.setIcon(new ImageIcon(getClass().getResource(
-                "/res/run.png"))); // NOI18N
+        jToggleButton_DictionaryManager.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/run.png"))); // NOI18N
         jToggleButton_DictionaryManager.setText("<html>Dictionary<br>Manager<html> ");
         jToggleButton_DictionaryManager.setFocusable(false);
         jToggleButton_DictionaryManager.setHorizontalTextPosition(SwingConstants.RIGHT);
@@ -824,8 +837,8 @@ public class GUI extends JFrame {
         buttonGroup_Tabs.add(jToggleButton_Converter);
         jToggleButton_Converter.setFont(new Font("Segoe UI", 1, 12)); // NOI18N
         jToggleButton_Converter.setForeground(new Color(41, 41, 41));
-        jToggleButton_Converter.setIcon(new ImageIcon(getClass().getResource(
-                "/res/configure.png"))); // NOI18N
+        jToggleButton_Converter.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/configure.png"))); // NOI18N
         jToggleButton_Converter.setText("<html>Converter</html> ");
         jToggleButton_Converter.setFocusable(false);
         jToggleButton_Converter.setHorizontalTextPosition(SwingConstants.RIGHT);
@@ -841,8 +854,8 @@ public class GUI extends JFrame {
         buttonGroup_Tabs.add(jToggleButton_DictionarySetting);
         jToggleButton_DictionarySetting.setFont(new Font("Segoe UI", 1, 12)); // NOI18N
         jToggleButton_DictionarySetting.setForeground(new Color(41, 41, 41));
-        jToggleButton_DictionarySetting.setIcon(new ImageIcon(getClass().getResource(
-                "/res/configure.png"))); // NOI18N
+        jToggleButton_DictionarySetting.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/configure.png"))); // NOI18N
         jToggleButton_DictionarySetting.setText("<html>SYSTEM<br>Setting<html> ");
         jToggleButton_DictionarySetting.setFocusable(false);
         jToggleButton_DictionarySetting.setHorizontalTextPosition(SwingConstants.RIGHT);
@@ -858,8 +871,8 @@ public class GUI extends JFrame {
 
         buttonGroup_Tabs.add(jToggle_AssignmentsScreen);
         jToggle_AssignmentsScreen.setFont(new Font("SansSerif", 1, 12)); // NOI18N
-        jToggle_AssignmentsScreen.setIcon(new ImageIcon(getClass().getResource(
-                "/res/sync.png"))); // NOI18N
+        jToggle_AssignmentsScreen.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/sync.png"))); // NOI18N
         jToggle_AssignmentsScreen.setText("<html>Sync<p>Assignments<html>");
         jToggle_AssignmentsScreen.setFocusable(false);
         jToggle_AssignmentsScreen.setHorizontalTextPosition(SwingConstants.RIGHT);
@@ -875,8 +888,7 @@ public class GUI extends JFrame {
         buttonGroup_Tabs.add(jToggleButton_exit);
         jToggleButton_exit.setFont(new Font("Segoe UI", 1, 12)); // NOI18N
         jToggleButton_exit.setForeground(new Color(102, 0, 51));
-        jToggleButton_exit.setIcon(new ImageIcon(getClass()
-                .getResource("/res/exit.png"))); // NOI18N
+        jToggleButton_exit.setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/exit.png"))); // NOI18N
         jToggleButton_exit.setFocusable(false);
         jToggleButton_exit.setHorizontalTextPosition(SwingConstants.RIGHT);
         jToggleButton_exit.setLabel("EXIT ");
@@ -934,8 +946,8 @@ public class GUI extends JFrame {
 
         jLabel_info_annotatorlabel.setFont(new Font("Courier New", 1, 12)); // NOI18N
         jLabel_info_annotatorlabel.setForeground(new Color(0, 102, 102));
-        jLabel_info_annotatorlabel.setIcon(new ImageIcon(getClass().getResource(
-                "/res/User-2-icon.png"))); // NOI18N
+        jLabel_info_annotatorlabel.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/User-2-icon.png"))); // NOI18N
         jLabel_info_annotatorlabel.setText(" ");
         jLabel_info_annotatorlabel.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
@@ -974,7 +986,7 @@ public class GUI extends JFrame {
         jPanel1.setBackground(new Color(183, 183, 183));
         jPanel1.setLayout(new GridLayout(1, 0, 4, 0));
 
-        jLabel22.setIcon(new ImageIcon(getClass().getResource("/res/fire.png"))); // NOI18N
+        jLabel22.setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/fire.png"))); // NOI18N
         jLabel22.setToolTipText("Hot keys");
         jLabel22.addMouseListener(new MouseAdapter() {
             public void mouseReleased(MouseEvent evt) {
@@ -988,8 +1000,8 @@ public class GUI extends JFrame {
 
         jLabel_infobar_FlagOfOracle.setFont(new Font("Courier New", 1, 12)); // NOI18N
         jLabel_infobar_FlagOfOracle.setForeground(new Color(0, 102, 102));
-        jLabel_infobar_FlagOfOracle.setIcon(new ImageIcon(getClass().getResource(
-                "/res/oracle_icon_s_disabled.png"))); // NOI18N
+        jLabel_infobar_FlagOfOracle.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/oracle_icon_s_disabled.png"))); // NOI18N
         jLabel_infobar_FlagOfOracle.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
                 jLabel_infobar_FlagOfOraclejLabel_info_annotatorMouseClicked(evt);
@@ -999,8 +1011,8 @@ public class GUI extends JFrame {
 
         jLabel_infobar_FlagOfDiff.setFont(new Font("Courier New", 1, 12)); // NOI18N
         jLabel_infobar_FlagOfDiff.setForeground(new Color(0, 102, 102));
-        jLabel_infobar_FlagOfDiff.setIcon(new ImageIcon(getClass().getResource(
-                "/res/path-difference.png"))); // NOI18N
+        jLabel_infobar_FlagOfDiff.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/path-difference.png"))); // NOI18N
         jLabel_infobar_FlagOfDiff.setToolTipText(" Difference Matching");
         jLabel_infobar_FlagOfDiff.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
@@ -1011,8 +1023,8 @@ public class GUI extends JFrame {
 
         jLabel_infobar_attributeEditor.setFont(new Font("Courier New", 1, 12)); // NOI18N
         jLabel_infobar_attributeEditor.setForeground(new Color(0, 102, 102));
-        jLabel_infobar_attributeEditor.setIcon(new ImageIcon(getClass().getResource(
-                "/res/attribute_disabled.png"))); // NOI18N
+        jLabel_infobar_attributeEditor.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/attribute_disabled.png"))); // NOI18N
         jLabel_infobar_attributeEditor.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
                 jLabel_infobar_attributeEditorMouseClicked(evt);
@@ -1098,8 +1110,8 @@ public class GUI extends JFrame {
         jPanel8_bottomBar.setLayout(new GridLayout(1, 2, 2, 0));
 
         jButton_AddClinicalTexts1.setFont(new Font("Calibri", 0, 13)); // NOI18N
-        jButton_AddClinicalTexts1.setIcon(new ImageIcon(getClass().getResource(
-                "/res/add.png"))); // NOI18N
+        jButton_AddClinicalTexts1.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/add.png"))); // NOI18N
         jButton_AddClinicalTexts1.setText("New");
         jButton_AddClinicalTexts1.setDefaultCapable(false);
         jButton_AddClinicalTexts1.setFocusable(false);
@@ -1116,7 +1128,7 @@ public class GUI extends JFrame {
         jPanel8_bottomBar.add(jButton_AddClinicalTexts1);
 
         jButton26.setFont(new Font("Calibri", 0, 13)); // NOI18N
-        jButton26.setIcon(new ImageIcon(getClass().getResource("/res/delete.png"))); // NOI18N
+        jButton26.setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/delete.png"))); // NOI18N
         jButton26.setFocusable(false);
         jButton26.setHorizontalTextPosition(SwingConstants.RIGHT);
         jButton26.setMinimumSize(new Dimension(90, 27));
@@ -1138,7 +1150,7 @@ public class GUI extends JFrame {
         jPanel8_currentWorkSpace.setPreferredSize(new Dimension(197, 87));
         jPanel8_currentWorkSpace.setLayout(new BorderLayout());
 
-        jLabel18.setIcon(new ImageIcon(getClass().getResource("/res/workspace2.png"))); // NOI18N
+        jLabel18.setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/workspace2.png"))); // NOI18N
         jPanel8_currentWorkSpace.add(jLabel18, BorderLayout.WEST);
 
         jPanel95.setBackground(new Color(237, 237, 237));
@@ -1161,7 +1173,7 @@ public class GUI extends JFrame {
 
         jPanel17.setBackground(new Color(238, 238, 239));
 
-        jButton5.setIcon(new ImageIcon(getClass().getResource("/res/back.png"))); // NOI18N
+        jButton5.setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/back.png"))); // NOI18N
         jButton5.setText("Change");
         jButton5.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
@@ -1263,8 +1275,8 @@ public class GUI extends JFrame {
         jPanel8_bottomBar1.setLayout(new GridLayout(1, 0));
 
         jButton_AddClinicalTexts.setFont(new Font("Calibri", 0, 13)); // NOI18N
-        jButton_AddClinicalTexts.setIcon(new ImageIcon(getClass().getResource(
-                "/res/add.png"))); // NOI18N
+        jButton_AddClinicalTexts.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/add.png"))); // NOI18N
         jButton_AddClinicalTexts.setText("Add files");
         jButton_AddClinicalTexts.setDefaultCapable(false);
         jButton_AddClinicalTexts.setFocusable(false);
@@ -1281,7 +1293,7 @@ public class GUI extends JFrame {
         jPanel8_bottomBar1.add(jButton_AddClinicalTexts);
 
         jButton2.setFont(new Font("Calibri", 0, 13)); // NOI18N
-        jButton2.setIcon(new ImageIcon(getClass().getResource("/res/delete.png"))); // NOI18N
+        jButton2.setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/delete.png"))); // NOI18N
         jButton2.setText("Remove");
         jButton2.setFocusable(false);
         jButton2.setHorizontalTextPosition(SwingConstants.RIGHT);
@@ -1315,7 +1327,7 @@ public class GUI extends JFrame {
 
         jLabel21.setFont(new Font("Arial", 1, 13)); // NOI18N
         jLabel21.setForeground(new Color(0, 102, 102));
-        jLabel21.setIcon(new ImageIcon(getClass().getResource("/res/return.jpg"))); // NOI18N
+        jLabel21.setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/return.jpg"))); // NOI18N
         jLabel21.setText("Go back to project list ...");
         jLabel21.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
@@ -1389,7 +1401,7 @@ public class GUI extends JFrame {
         jToolBar5.setVerifyInputWhenFocusTarget(false);
         jToolBar5.add(jSeparator7);
 
-        jButton23.setIcon(new ImageIcon(getClass().getResource("/res/classDef.gif"))); // NOI18N
+        jButton23.setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/classDef.gif"))); // NOI18N
         jButton23.setToolTipText("Annotation Schema Editor");
         jButton23.setBorderPainted(false);
         jButton23.setFocusable(false);
@@ -1404,7 +1416,7 @@ public class GUI extends JFrame {
         jToolBar5.add(jButton23);
 
         jButton16
-                .setIcon(new ImageIcon(getClass().getResource("/res/attributeDef.gif"))); // NOI18N
+                .setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/attributeDef.gif"))); // NOI18N
         jButton16.setToolTipText("Attribute Schema Editor");
         jButton16.setBorderPainted(false);
         jButton16.setFocusable(false);
@@ -1418,7 +1430,7 @@ public class GUI extends JFrame {
         jToolBar5.add(jButton16);
 
         jButton15
-                .setIcon(new ImageIcon(getClass().getResource("/res/classRelDef.gif"))); // NOI18N
+                .setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/classRelDef.gif"))); // NOI18N
         jButton15.setToolTipText("Relationship Schema Editor");
         jButton15.setBorderPainted(false);
         jButton15.setContentAreaFilled(false);
@@ -1434,8 +1446,8 @@ public class GUI extends JFrame {
         jToolBar5.add(jSeparator5);
 
         buttonGroup_listAnnotationsInSequences.add(jToggleButton_sequence_inLocation);
-        jToggleButton_sequence_inLocation.setIcon(new ImageIcon(getClass().getResource(
-                "/res/list_sequence.png"))); // NOI18N
+        jToggleButton_sequence_inLocation.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/list_sequence.png"))); // NOI18N
         jToggleButton_sequence_inLocation.setToolTipText("Sort list by order of appearance");
         jToggleButton_sequence_inLocation.setFocusable(false);
         jToggleButton_sequence_inLocation
@@ -1450,8 +1462,7 @@ public class GUI extends JFrame {
         jToolBar5.add(jToggleButton_sequence_inLocation);
 
         buttonGroup_listAnnotationsInSequences.add(jToggleButton_sequence_inCharacters);
-        jToggleButton_sequence_inCharacters.setIcon(new ImageIcon(getClass()
-                .getResource("/res/list_chars.png"))); // NOI18N
+        jToggleButton_sequence_inCharacters.setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/list_chars.png"))); // NOI18N
         jToggleButton_sequence_inCharacters.setToolTipText("Sort list alphabetically");
         jToggleButton_sequence_inCharacters.setFocusable(false);
         jToggleButton_sequence_inCharacters
@@ -1629,7 +1640,7 @@ public class GUI extends JFrame {
         jLabel3.setOpaque(true);
         jToolBar3.add(jLabel3);
 
-        jButton13.setIcon(new ImageIcon(getClass().getResource("/res/nextb.png"))); // NOI18N
+        jButton13.setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/nextb.png"))); // NOI18N
         jButton13.setToolTipText("Previous note");
         jButton13.setBorderPainted(false);
         jButton13.setMaximumSize(new Dimension(23, 23));
@@ -1642,7 +1653,7 @@ public class GUI extends JFrame {
         });
         jToolBar3.add(jButton13);
 
-        jButton14.setIcon(new ImageIcon(getClass().getResource("/res/back.png"))); // NOI18N
+        jButton14.setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/back.png"))); // NOI18N
         jButton14.setToolTipText("Next note");
         jButton14.setBorderPainted(false);
         jButton14.setFocusable(false);
@@ -1658,8 +1669,8 @@ public class GUI extends JFrame {
         jToolBar3.add(jButton14);
         jToolBar3.add(jSeparator4);
 
-        jButton_importAnnotations.setIcon(new ImageIcon(getClass().getResource(
-                "/res/addtab.png"))); // NOI18N
+        jButton_importAnnotations.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/addtab.png"))); // NOI18N
         jButton_importAnnotations
                 .setToolTipText("<html>Import Annotations from knowtator<br> XML files or PINS files.<html>");
         jButton_importAnnotations.setBorderPainted(false);
@@ -1675,8 +1686,8 @@ public class GUI extends JFrame {
         });
         jToolBar3.add(jButton_importAnnotations);
 
-        jButton_removeduplicates.setIcon(new ImageIcon(getClass().getResource(
-                "/res/removeduplicates.png"))); // NOI18N
+        jButton_removeduplicates.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/removeduplicates.png"))); // NOI18N
         jButton_removeduplicates.setToolTipText("Error Checker");
         jButton_removeduplicates.setBorderPainted(false);
         jButton_removeduplicates.setFocusable(false);
@@ -1692,7 +1703,7 @@ public class GUI extends JFrame {
         });
         jToolBar3.add(jButton_removeduplicates);
 
-        jButton_save.setIcon(new ImageIcon(getClass().getResource("/res/save.png"))); // NOI18N
+        jButton_save.setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/save.png"))); // NOI18N
         jButton_save.setToolTipText("<html>Quick Save</html>");
         jButton_save.setBorderPainted(false);
         jButton_save.setFocusable(false);
@@ -1706,7 +1717,7 @@ public class GUI extends JFrame {
         });
         jToolBar3.add(jButton_save);
 
-        jButton20.setIcon(new ImageIcon(getClass().getResource("/res/saveas.png"))); // NOI18N
+        jButton20.setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/saveas.png"))); // NOI18N
         jButton20.setToolTipText("Save As");
         jButton20.setBorderPainted(false);
         jButton20.setFocusable(false);
@@ -1722,7 +1733,7 @@ public class GUI extends JFrame {
         });
         jToolBar3.add(jButton20);
 
-        jButton21.setIcon(new ImageIcon(getClass().getResource("/res/font2.png"))); // NOI18N
+        jButton21.setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/font2.png"))); // NOI18N
         jButton21.setToolTipText("Decrease font");
         jButton21.setBorderPainted(false);
         jButton21.setFocusable(false);
@@ -1738,7 +1749,7 @@ public class GUI extends JFrame {
         });
         jToolBar3.add(jButton21);
 
-        jButton22.setIcon(new ImageIcon(getClass().getResource("/res/font1.png"))); // NOI18N
+        jButton22.setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/font1.png"))); // NOI18N
         jButton22.setToolTipText("Increase font");
         jButton22.setBorderPainted(false);
         jButton22.setFocusable(false);
@@ -1754,8 +1765,8 @@ public class GUI extends JFrame {
         });
         jToolBar3.add(jButton22);
 
-        jButton_removeAllAnnotations.setIcon(new ImageIcon(getClass().getResource(
-                "/res/clearConsoleButtonGlyph.png"))); // NOI18N
+        jButton_removeAllAnnotations.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/clearConsoleButtonGlyph.png"))); // NOI18N
         jButton_removeAllAnnotations.setToolTipText("Delete all annotations.");
         jButton_removeAllAnnotations.setBorderPainted(false);
         jButton_removeAllAnnotations.setFocusable(false);
@@ -1771,8 +1782,8 @@ public class GUI extends JFrame {
         });
         jToolBar3.add(jButton_removeAllAnnotations);
 
-        jButton_save1.setIcon(new ImageIcon(getClass().getResource(
-                "/res/images-preannotated.jpg"))); // NOI18N
+        jButton_save1.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/images-preannotated.jpg"))); // NOI18N
         jButton_save1.setToolTipText("<html>Pre-Annotated for Pairs</html>");
         jButton_save1.setBorderPainted(false);
         jButton_save1.setFocusable(false);
@@ -1788,8 +1799,8 @@ public class GUI extends JFrame {
         });
         jToolBar3.add(jButton_save1);
 
-        jButton_importAnnotations1.setIcon(new ImageIcon(getClass().getResource(
-                "/res/images-preannotated.jpg"))); // NOI18N
+        jButton_importAnnotations1.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/images-preannotated.jpg"))); // NOI18N
         jButton_importAnnotations1
                 .setToolTipText("<html>Import Annotations from knowtator<br> XML files or PINS files.<html>");
         jButton_importAnnotations1.setBorderPainted(false);
@@ -1829,7 +1840,7 @@ public class GUI extends JFrame {
         jLabel4.setOpaque(true);
         jToolBar6.add(jLabel4);
 
-        jButton18.setIcon(new ImageIcon(getClass().getResource("/res/nextb.png"))); // NOI18N
+        jButton18.setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/nextb.png"))); // NOI18N
         jButton18.setText("Previous");
         jButton18.setToolTipText("Previous note");
         jButton18.setBorder(BorderFactory
@@ -1856,7 +1867,7 @@ public class GUI extends JFrame {
         jToolBar6.add(jLabel30);
 
         jButton19.setBackground(new Color(204, 204, 255));
-        jButton19.setIcon(new ImageIcon(getClass().getResource("/res/back.png"))); // NOI18N
+        jButton19.setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/back.png"))); // NOI18N
         jButton19.setText("Next");
         jButton19.setToolTipText("Next note");
         jButton19.setBorder(BorderFactory.createLineBorder(new Color(102, 102,
@@ -2268,8 +2279,8 @@ public class GUI extends JFrame {
         jToolBar4.setVerifyInputWhenFocusTarget(false);
         jToolBar4.add(jSeparator8);
 
-        jButton_spaneditor_delete.setIcon(new ImageIcon(getClass().getResource(
-                "/res/closetab.png"))); // NOI18N
+        jButton_spaneditor_delete.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/closetab.png"))); // NOI18N
         jButton_spaneditor_delete.setToolTipText("Delete selected annotation");
         jButton_spaneditor_delete.setBorderPainted(false);
         jButton_spaneditor_delete.setContentAreaFilled(false);
@@ -2284,8 +2295,8 @@ public class GUI extends JFrame {
         jToolBar4.add(jButton_spaneditor_delete);
         jToolBar4.add(jSeparator2);
 
-        jButton_spaneditor_lefttToLeft.setIcon(new ImageIcon(getClass().getResource(
-                "/res/span_ll.png"))); // NOI18N
+        jButton_spaneditor_lefttToLeft.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/span_ll.png"))); // NOI18N
         jButton_spaneditor_lefttToLeft
                 .setToolTipText("<html>Move the start of the annotation<br>One character to the left.<br>Hotkey(Ctrl + Left Arrow)</html>");
         jButton_spaneditor_lefttToLeft.setBorderPainted(false);
@@ -2300,8 +2311,8 @@ public class GUI extends JFrame {
         });
         jToolBar4.add(jButton_spaneditor_lefttToLeft);
 
-        jButton_spaneditor_leftToRight.setIcon(new ImageIcon(getClass().getResource(
-                "/res/span_lr.png"))); // NOI18N
+        jButton_spaneditor_leftToRight.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/span_lr.png"))); // NOI18N
         jButton_spaneditor_leftToRight
                 .setToolTipText("<html>Move the start of the annotation<br>One character to the right.<br>Hotkey(Ctrl + Right Arrow)</html>");
         jButton_spaneditor_leftToRight.setBorderPainted(false);
@@ -2316,8 +2327,8 @@ public class GUI extends JFrame {
         });
         jToolBar4.add(jButton_spaneditor_leftToRight);
 
-        jButton_span_rightToLeft.setIcon(new ImageIcon(getClass().getResource(
-                "/res/span_rl.png"))); // NOI18N
+        jButton_span_rightToLeft.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/span_rl.png"))); // NOI18N
         jButton_span_rightToLeft
                 .setToolTipText("<html>Move the end of the annotation<br>One character to the left.</html>");
         jButton_span_rightToLeft.setBorderPainted(false);
@@ -2335,8 +2346,8 @@ public class GUI extends JFrame {
         });
         jToolBar4.add(jButton_span_rightToLeft);
 
-        jButton4_spanEditor_rightToRight.setIcon(new ImageIcon(getClass().getResource(
-                "/res/span_rr.png"))); // NOI18N
+        jButton4_spanEditor_rightToRight.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/span_rr.png"))); // NOI18N
         jButton4_spanEditor_rightToRight
                 .setToolTipText("<html>Move the end of the annotation<br>One character to the right.<br>Hotkey(Alt + Right Arrow)</html>");
         jButton4_spanEditor_rightToRight.setBorderPainted(false);
@@ -2483,8 +2494,8 @@ public class GUI extends JFrame {
         jPanel23.setBackground(new Color(238, 238, 240));
         jPanel23.setLayout(new GridLayout(2, 1, 0, 2));
 
-        jButton_SpanAdd.setIcon(new ImageIcon(getClass().getResource(
-                "/res/span-add.png"))); // NOI18N
+        jButton_SpanAdd.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/span-add.png"))); // NOI18N
         jButton_SpanAdd.setToolTipText("Add a span to this annotation");
         jButton_SpanAdd.setBorderPainted(false);
         jButton_SpanAdd.setContentAreaFilled(false);
@@ -2498,8 +2509,8 @@ public class GUI extends JFrame {
         });
         jPanel23.add(jButton_SpanAdd);
 
-        jButton_SpanRemove.setIcon(new ImageIcon(getClass().getResource(
-                "/res/span-remove.png"))); // NOI18N
+        jButton_SpanRemove.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/span-remove.png"))); // NOI18N
         jButton_SpanRemove.setToolTipText("<html>Delete this span.</html>");
         jButton_SpanRemove.setBorderPainted(false);
         jButton_SpanRemove.setContentAreaFilled(false);
@@ -2583,8 +2594,8 @@ public class GUI extends JFrame {
         jTextField_annotationClassnames.setEnabled(false);
         jPanel44.add(jTextField_annotationClassnames, BorderLayout.CENTER);
 
-        jButton_SelectClass.setIcon(new ImageIcon(getClass().getResource(
-                "/res/instancewatch.png"))); // NOI18N
+        jButton_SelectClass.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/instancewatch.png"))); // NOI18N
         jButton_SelectClass.setToolTipText("Change category of current annotation.");
         jButton_SelectClass.setFocusable(false);
         jButton_SelectClass.setHorizontalTextPosition(SwingConstants.CENTER);
@@ -2685,11 +2696,11 @@ public class GUI extends JFrame {
         jPanel18.setLayout(new GridLayout(1, 2, 1, 0));
 
         jButton_cr.setFont(new Font("Calibri", 0, 11)); // NOI18N
-        jButton_cr.setIcon(new ImageIcon(getClass().getResource("/res/addtab.png"))); // NOI18N
+        jButton_cr.setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/addtab.png"))); // NOI18N
         jButton_cr.setToolTipText("Enable relationship building");
         jButton_cr.setPreferredSize(new Dimension(21, 21));
-        jButton_cr.setSelectedIcon(new ImageIcon(getClass().getResource(
-                "/res/note.jpeg"))); // NOI18N
+        jButton_cr.setSelectedIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/note.jpeg"))); // NOI18N
         jButton_cr.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 jButton_crActionPerformed(evt);
@@ -2697,8 +2708,8 @@ public class GUI extends JFrame {
         });
         jPanel18.add(jButton_cr);
 
-        delete_Relationships.setIcon(new ImageIcon(getClass().getResource(
-                "/res/closetab.png"))); // NOI18N
+        delete_Relationships.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/closetab.png"))); // NOI18N
         delete_Relationships.setToolTipText("Delete selected relationship");
         delete_Relationships.setMargin(null);
         delete_Relationships.setMaximumSize(new Dimension(23, 23));
@@ -2711,8 +2722,8 @@ public class GUI extends JFrame {
         });
         jPanel18.add(delete_Relationships);
 
-        jButton_relationships.setIcon(new ImageIcon(getClass().getResource(
-                "/res/instancewatch.png"))); // NOI18N
+        jButton_relationships.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/instancewatch.png"))); // NOI18N
         jButton_relationships.setFocusable(false);
         jButton_relationships.setHorizontalTextPosition(SwingConstants.CENTER);
         jButton_relationships.setMargin(new Insets(2, 2, 2, 2));
@@ -2755,8 +2766,8 @@ public class GUI extends JFrame {
         jPanel63.setBackground(new Color(237, 237, 237));
         jPanel63.setLayout(new BorderLayout());
 
-        jButton_attribute.setIcon(new ImageIcon(getClass().getResource(
-                "/res/instancewatch.png"))); // NOI18N
+        jButton_attribute.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/instancewatch.png"))); // NOI18N
         jButton_attribute.setFocusable(false);
         jButton_attribute.setHorizontalTextPosition(SwingConstants.CENTER);
         jButton_attribute.setMargin(new Insets(2, 2, 2, 2));
@@ -7661,29 +7672,29 @@ public class GUI extends JFrame {
      */
     private void loadRes() {
         try {
-            icon_oracle_disabled = new ImageIcon(getClass().getResource(
-                    "/res/oracle_icon_s_disabled.png"));
-            icon_oracle_enabled = new ImageIcon(getClass().getResource(
-                    "/res/oracle_icon_s_enabled.png"));
-            icon_graphicpath_enabled = new ImageIcon(getClass().getResource(
-                    "/res/object-to-path_enabled.png"));
-            icon_graphicpath_disabled = new ImageIcon(getClass().getResource(
-                    "/res/object-to-path_disabled.png"));
-            icon_difference_enabled = new ImageIcon(getClass().getResource(
-                    "/res/path-difference.png"));
-            icon_difference_disabled = new ImageIcon(getClass().getResource(
-                    "/res/path-difference_disabled.png"));
-            icon_attribute_disabled = new ImageIcon(getClass().getResource(
-                    "/res/attribute_disabled.png"));
-            icon_attribute_enabled = new ImageIcon(getClass().getResource(
-                    "/res/attribute_enabled.png"));
-            icon_note = new ImageIcon(getClass().getResource("/res/note.jpeg"));
-            icon_note2 = new ImageIcon(getClass().getResource("/res/note2.jpeg"));
-            icon_span = new ImageIcon(getClass().getResource("/res/span.jpeg"));
-            icon_spanaddingOn = new ImageIcon(getClass().getResource(
-                    "/res/span-add-working.png"));
-            icon_spanaddingOff = new ImageIcon(getClass().getResource(
-                    "/res/span-add.png"));
+            icon_oracle_disabled = new ImageIcon(getClass().getClassLoader().getResource(
+                    "res/oracle_icon_s_disabled.png"));
+            icon_oracle_enabled = new ImageIcon(getClass().getClassLoader().getResource(
+                    "res/oracle_icon_s_enabled.png"));
+            icon_graphicpath_enabled = new ImageIcon(getClass().getClassLoader().getResource(
+                    "res/object-to-path_enabled.png"));
+            icon_graphicpath_disabled = new ImageIcon(getClass().getClassLoader().getResource(
+                    "res/object-to-path_disabled.png"));
+            icon_difference_enabled = new ImageIcon(getClass().getClassLoader().getResource(
+                    "res/path-difference.png"));
+            icon_difference_disabled = new ImageIcon(getClass().getClassLoader().getResource(
+                    "res/path-difference_disabled.png"));
+            icon_attribute_disabled = new ImageIcon(getClass().getClassLoader().getResource(
+                    "res/attribute_disabled.png"));
+            icon_attribute_enabled = new ImageIcon(getClass().getClassLoader().getResource(
+                    "res/attribute_enabled.png"));
+            icon_note = new ImageIcon(getClass().getClassLoader().getResource("res/note.jpeg"));
+            icon_note2 = new ImageIcon(getClass().getClassLoader().getResource("res/note2.jpeg"));
+            icon_span = new ImageIcon(getClass().getClassLoader().getResource("res/span.jpeg"));
+            icon_spanaddingOn = new ImageIcon(getClass().getClassLoader().getResource(
+                    "res/span-add-working.png"));
+            icon_spanaddingOff = new ImageIcon(getClass().getClassLoader().getResource(
+                    "res/span-add.png"));
 
         } catch (Exception ex) {
         }
