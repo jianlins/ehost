@@ -4626,8 +4626,12 @@ public class GUI extends JFrame {
 
     public void selectProject(String projectName) {
         if (projectIdMap.containsKey(projectName)) {
-            selectProject(projectIdMap.get(projectName));
+            if (Parameters.previousProjectPath==null || !Parameters.previousProjectPath.endsWith(projectName))
+                selectProject(projectIdMap.get(projectName));
+            else
+                ready=true;
         } else
+            ready=true;
             return;
     }
 
