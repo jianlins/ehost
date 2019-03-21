@@ -117,7 +117,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <fork>true</fork>
-                    <mainClass>main.eHOST</mainClass>
+                    <mainClass>eHOST</mainClass>
                     <outputDirectory>
                         target/deploy
                     </outputDirectory>

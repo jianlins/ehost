@@ -4624,15 +4624,19 @@ public class GUI extends JFrame {
 
     }// GEN-LAST:event_jList_NAV_projectsMouseClicked
 
-    public void selectProject(String projectName) {
+    public String selectProject(String projectName) {
+        String response = "Project: " + projectName + " not found";
         if (projectIdMap.containsKey(projectName)) {
-            if (Parameters.previousProjectPath==null || !Parameters.previousProjectPath.endsWith(projectName))
+            if (Parameters.previousProjectPath == null || !Parameters.previousProjectPath.endsWith(projectName)) {
                 selectProject(projectIdMap.get(projectName));
-            else
-                ready=true;
+                response = "success";
+            } else {
+                response = "Project: " + projectName + " has already loaded";
+                ready = true;
+            }
         } else
-            ready=true;
-            return;
+            ready = true;
+        return response;
     }
 
     public void selectProject(int projectId) {
@@ -8596,19 +8600,22 @@ public class GUI extends JFrame {
     }
 
 
-    public void showFileContextInTextPane(String fileName) {
-        if (fileIdMap.containsKey(fileName))
+    public String showFileContextInTextPane(String fileName) {
+        String response = "File: '" + fileName + "' not found in project: " + Parameters.previousProjectPath;
+        if (fileIdMap.containsKey(fileName)) {
             showFileContextInTextPane(fileIdMap.get(fileName));
-        else {
+            response = "success";
+        } else {
             for (String loadedFileName : fileIdMap.keySet()) {
                 if (loadedFileName.contains(fileName)) {
                     showFileContextInTextPane(fileIdMap.get(loadedFileName));
+                    response = "Load file: " + loadedFileName;
                     break;
                 }
             }
         }
         ready = true;
-        return;
+        return response;
     }
 
     /**

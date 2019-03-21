@@ -26,28 +26,30 @@ public class EhostController {
     @ResponseBody
     String getDoc(@PathVariable String projectName,
                   @PathVariable String fileName) throws InterruptedException {
+        String response="";
         if (projectName != null && GUI.gui.ready) {
             GUI.gui.ready = false;
-            GUI.gui.selectProject(projectName);
+            response= GUI.gui.selectProject(projectName);
         }
 
 
         if (fileName != null && GUI.gui.ready) {
             GUI.gui.ready = false;
-            GUI.gui.showFileContextInTextPane(fileName);
+            response= GUI.gui.showFileContextInTextPane(fileName);
         }
 
 
-        return "success";
+        return response;
     }
 
     @GetMapping(value = "/ehost/{projectName}")
     @ResponseBody
     String getProject(@PathVariable String projectName) throws InterruptedException {
+        String response="";
         if (projectName != null && GUI.gui.ready) {
             GUI.gui.ready = false;
-            GUI.gui.selectProject(projectName);
-            return "success";
+            response= GUI.gui.selectProject(projectName);
+            return response;
         }
         return "Ehost is busy. Try again later.";
     }
@@ -56,6 +58,7 @@ public class EhostController {
     @RequestMapping(value = "/path/", method = RequestMethod.POST)
     @ResponseBody
     public String displayFileByPath(@RequestBody PathElements pathElements) {
+        String response="";
         if (pathElements != null && pathElements.projectpath != null && GUI.gui.ready) {
             GUI.gui.ready = false;
             GUI.gui.selectProject(new File(pathElements.projectpath));
@@ -63,9 +66,9 @@ public class EhostController {
 
         if (pathElements != null && pathElements.file != null && GUI.gui.ready) {
             GUI.gui.ready = false;
-            GUI.gui.showFileContextInTextPane(pathElements.file);
+            response=GUI.gui.showFileContextInTextPane(pathElements.file);
         }
-        return "";
+        return response;
     }
 
 
