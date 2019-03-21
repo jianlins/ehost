@@ -185,7 +185,7 @@ public class VerifierDictionaryFormat
     }
 
     /**
-     * @return the fileName
+     * @return the file
      */
     public String getFileName()
     {
@@ -241,7 +241,7 @@ public class VerifierDictionaryFormat
     }
 
     /**
-     * @param fileName the fileName to set
+     * @param fileName the file to set
      */
     public void setFileName(String fileName)
     {

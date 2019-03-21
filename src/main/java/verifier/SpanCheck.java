@@ -45,7 +45,7 @@ public class SpanCheck
     }
 
     /**
-     * This method will first extract all annotations that match the inputted fileName from
+     * This method will first extract all annotations that match the inputted file from
      * the data pool of annotations.  For each of these annotations this method will attempt
      * to find matches with each dictionary, using the user settings for each of the dictionaries.
      * This method will populate all of the annotations with suggestion objects.

@@ -16,7 +16,7 @@ public class tmp_Conflicts
 {
     /**
      * Get All class conflicts between this file and the working set.  Only class conflicts
-     * which involve annotations from the given fileName will be returned.
+     * which involve annotations from the given file will be returned.
      * @param fileName - File to find class conflicts from.
      * @return - All Class conflicts involving this file.
      */
@@ -28,7 +28,7 @@ public class tmp_Conflicts
         Article source = Depot.getArticleByFilename(fileName);
         
         //Match Annotations with their fileNames(Two corresponding vectors)
-        //fileNames.get(i) contains the fileName for conflictedAnnotations.get(i)
+        //fileNames.get(i) contains the file for conflictedAnnotations.get(i)
         Vector<String> fileNames = new Vector<String>();
         Vector<Annotation> conflictedAnnotations = new Vector<Annotation>();
 
@@ -114,7 +114,7 @@ public class tmp_Conflicts
     }
     /**
      * This function will return all overlapping(non-equal) annotations that are in the file
-     * with the given fileName
+     * with the given file
      *
      * @param fileName - the file name to find span overlaps for.
      * @return - spanOverlaps objects for all annotations with overlapping spans.

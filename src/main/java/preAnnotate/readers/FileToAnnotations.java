@@ -130,7 +130,7 @@ public class FileToAnnotations
             //Get the name of this file
             String name = fileNames.get(i);
 
-            //Create a file from the fileName
+            //Create a file from the file
             File toRead = new File(name);
 
             //Set progress percentage

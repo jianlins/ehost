@@ -4,12 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.UriComponentsBuilder;
 import userInterface.GUI;
 
 import java.io.File;
@@ -19,6 +15,12 @@ import java.util.TimerTask;
 @Controller
 public class EhostController {
 
+
+    @GetMapping(value = "/status")
+    @ResponseBody
+    String getStatus() {
+        return GUI.gui.ready + "";
+    }
 
     @GetMapping(value = "/ehost/{projectName}/{fileName}")
     @ResponseBody
@@ -54,14 +56,14 @@ public class EhostController {
     @RequestMapping(value = "/path/", method = RequestMethod.POST)
     @ResponseBody
     public String displayFileByPath(@RequestBody PathElements pathElements) {
-        if (pathElements != null && pathElements.projectPath != null && GUI.gui.ready) {
+        if (pathElements != null && pathElements.projectpath != null && GUI.gui.ready) {
             GUI.gui.ready = false;
-            GUI.gui.selectProject(new File(pathElements.projectPath));
+            GUI.gui.selectProject(new File(pathElements.projectpath));
         }
 
-        if (pathElements != null && pathElements.fileName != null && GUI.gui.ready) {
+        if (pathElements != null && pathElements.file != null && GUI.gui.ready) {
             GUI.gui.ready = false;
-            GUI.gui.showFileContextInTextPane(pathElements.fileName);
+            GUI.gui.showFileContextInTextPane(pathElements.file);
         }
         return "";
     }
