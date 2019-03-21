@@ -43,7 +43,10 @@
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import env.Parameters;
 import log.LogCleaner;
+import org.springframework.boot.SpringApplication;
+import rest.server.EhostServerApp;
 
 /**
  * The entrance class to load the GUI of eHOST and display the splash dialog
@@ -130,6 +133,9 @@ public class eHOST {
 
                 }
             }.start();
+
+            if(Parameters.RESTFulServer)
+                SpringApplication.run(EhostServerApp.class, args);
 
         } catch (Exception e) {
             //e.printStackTrace();

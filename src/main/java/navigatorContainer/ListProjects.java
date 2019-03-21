@@ -11,6 +11,7 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.io.File;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Vector;
 import java.util.logging.Level;
 import javax.imageio.ImageIO;
@@ -18,7 +19,6 @@ import javax.swing.JList;
 
 
 /**
- *
  * @author leng
  */
 public class ListProjects {
@@ -26,155 +26,158 @@ public class ListProjects {
     protected userInterface.GUI gui;
     protected JList list;
     protected String path;
-    protected Image image_good=null;
-    protected Image image_error=null;
-      
-    
-    public ListProjects(userInterface.GUI _gui, JList _list, String _path){
+    protected Image image_good = null;
+    protected Image image_error = null;
+
+    protected HashMap<String, Integer> projectIds = new HashMap<>();
+
+
+    public ListProjects(userInterface.GUI _gui, JList _list, String _path) {
         this.gui = _gui;
         this.list = _list;
         this.path = _path;
 
-        try{
+        try {
             //image = new javax.swing.ImageIcon(getClass().getClassLoader().getResource("projects.jpg")).getImage();
-            if(image_good==null)
+            if (image_good == null)
                 //image_good = Toolkit.getDefaultToolkit().getImage( getClass().getClassLoader().getResource("/NavigatorContainer/projects_box.png") );
-                 
+
                 image_good = ImageIO.read(getClass().getClassLoader().getResource("res/navigatorContainer/archive.png").toURI().toURL());
-                image_error = ImageIO.read(getClass().getClassLoader().getResource("res/navigatorContainer/error.png").toURI().toURL());
-                
+            image_error = ImageIO.read(getClass().getClassLoader().getResource("res/navigatorContainer/error.png").toURI().toURL());
+
             //image_warning = Toolkit.getDefaultToolkit().getImage( getClass().getClassLoader().getResource("/NavigatorContainer/projects-warning.png") );
             //image_wrong = Toolkit.getDefaultToolkit().getImage( getClass().getClassLoader().getResource("/NavigatorContainer/projects-wrong.png") );
-        }catch(Exception ex){
+        } catch (Exception ex) {
             log.LoggingToFile.log(Level.SEVERE, "error 1102021334:: fail to load resourece:: image file res/navigatorContainer/projects_box.png");
         }
     }
 
 
-    /**This method is allowed to be called from outside, so eHOST can refresh
+    /**
+     * This method is allowed to be called from outside, so eHOST can refresh
      * the list of projects under current workspace;
      */
-    public void showProjectsInList()
-    {        
+    public void showProjectsInList() {
 
         //System.out.println("img = "+image.toString());
-        
+
         Vector nulldisplay = new Vector();
         list.setListData(nulldisplay);
 
-        if(path==null)
+        if (path == null)
             return;
-        if(path.trim().length()<1)
+        if (path.trim().length() < 1)
             return;
 
         File f = new File(path);
         if (!f.exists())
             return;
-        if(!f.isDirectory())
+        if (!f.isDirectory())
             return;
 
         File[] subfiles = f.listFiles();
         Vector<Object> listentry = new Vector<Object>();
 
-        Image image=null;
-        if((subfiles!=null)&&(subfiles.length>=0))
-        {
+        Image image = null;
+        if ((subfiles != null) && (subfiles.length >= 0)) {
+            projectIds.clear();
             Arrays.sort(subfiles, NameFileComparator.NAME_COMPARATOR);
-            for(File subfile:subfiles)
-            {
-                if (subfile==null)
+            for (File subfile : subfiles) {
+                if (subfile == null)
                     continue;
 
-                if (subfile.isDirectory())
-                {
+                if (subfile.isDirectory()) {
                     String foldername = subfile.getName();
                     nulldisplay.add(foldername);
                     // get number of txt files under this project
                     int numberOfCorpus = getNumberOfCorpus(subfile);
-                    if(numberOfCorpus<0)
+                    if (numberOfCorpus < 0)
                         continue;
                     //System.out.println("number="+numberOfCorpus);
-                    image = (numberOfCorpus>=0? image_good:image_error);
-                    ListEntry_Project entry =  new ListEntry_Project(subfile, 
+                    image = (numberOfCorpus >= 0 ? image_good : image_error);
+                    ListEntry_Project entry = new ListEntry_Project(subfile,
                             image, numberOfCorpus);
+                    projectIds.put(subfile.getName(), listentry.size());
                     listentry.add(entry);
                 }
             }
         }
-        
+
         list.setListData(listentry);
-        list.setCellRenderer( new ProjectListCellRander() );
+        list.setCellRenderer(new ProjectListCellRander());
         list.updateUI();
     }
 
-    /**Return the number of corpus to a given project folder. Count *.txt
+    /**
+     * Return the number of corpus to a given project folder. Count *.txt
      * file under the project
      * directory.
      *
-     * @return
-     *    -2          : means this vaiable didn't get initilized;
-     *    -1          : means error(s) occurred while trying to count
-     *                  the ".txt" files;
-     *    0-infinite  : means the number of corpus.
+     * @return -2          : means this vaiable didn't get initilized;
+     * -1          : means error(s) occurred while trying to count
+     * the ".txt" files;
+     * 0-infinite  : means the number of corpus.
      */
-    private int getNumberOfCorpus(File projectFolder){
-        int number=-2;
-        try{
-            if(projectFolder==null)
+    private int getNumberOfCorpus(File projectFolder) {
+        int number = -2;
+        try {
+            if (projectFolder == null)
                 return -1;
-            if(projectFolder.isFile())
+            if (projectFolder.isFile())
                 return -1;
 
             File[] folders = projectFolder.listFiles();
-            if(folders==null)
+            if (folders == null)
                 return -1;
-            for(File f : folders)
-            {
-                if(f==null)
+            for (File f : folders) {
+                if (f == null)
                     continue;
-                
+
                 // if this is the folder "saved"
-                if( (f.isDirectory())
-                && (f.getName().compareTo( env.CONSTANTS.corpus)==0) )
-                {
-                    int size=0;
-                    
+                if ((f.isDirectory())
+                        && (f.getName().compareTo(env.CONSTANTS.corpus) == 0)) {
+                    int size = 0;
+
                     // filter to only select ".txt" files                    
                     File[] txtfiles = f.listFiles();
-                    
-                    for(File corpus:txtfiles){
+
+                    for (File corpus : txtfiles) {
                         //System.out.println("Filename:[ " + corpus.getName() + " ]");
                         //System.out.println("extension name:[ " + getExtension(corpus.getName()) + " ]");
                         int i = corpus.getName().lastIndexOf('.');
-                        if(  i == -1){
+                        if (i == -1) {
                             size++;
                             continue;
                         }
-                        if(corpus.getName().toLowerCase().endsWith(".txt"))
+                        if (corpus.getName().toLowerCase().endsWith(".txt"))
                             size++;
                     }
-                    
+
                     return size;
                 }
             }
 
-        }catch(Exception ex){
+        } catch (Exception ex) {
             log.LoggingToFile.log(Level.SEVERE, "error 1101241125:: file to count txt files in "
                     + "folder of corpus\n"
                     + ex.getMessage());
         }
-        
+
         return number;
     }
-    
-    public static String getExtension(String filename) { 
-        if ((filename != null) && (filename.length() > 0)) { 
-            int i = filename.lastIndexOf('.'); 
 
-            if ((i >-1) && (i < (filename.length() - 1))) { 
-                return filename.substring(i + 1); 
-            } 
-        } 
-        return null; 
-    } 
+    public static String getExtension(String filename) {
+        if ((filename != null) && (filename.length() > 0)) {
+            int i = filename.lastIndexOf('.');
+
+            if ((i > -1) && (i < (filename.length() - 1))) {
+                return filename.substring(i + 1);
+            }
+        }
+        return null;
+    }
+
+    public HashMap<String, Integer> getProjectIds() {
+        return projectIds;
+    }
 }

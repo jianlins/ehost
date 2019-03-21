@@ -170,6 +170,13 @@ public class SaveConf {
             }
             p.println("");
 
+            p.println("[RESTFUL_SERVER]");
+            if ( env.Parameters.RESTFulServer == true )
+                p.println("true");
+            else{
+                p.println("false");
+            }
+            p.println("");
 
             
             

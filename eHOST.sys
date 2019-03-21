@@ -37,3 +37,6 @@ NOPASSWORD
 [OracleFunction]
 true
 
+[RESTFUL_SERVER]
+true
+

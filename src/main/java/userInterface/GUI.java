@@ -16,6 +16,7 @@ import gov.va.vinci.annotationAdmin.integration.AnnotationAdminComMgrEvent;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,13 +24,18 @@ import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.comparator.NameFileComparator;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
+import org.springframework.http.HttpMethod;
+import org.springframework.web.client.RestTemplate;
 import relationship.complex.creation.RelationshipSchemaEditor;
 import relationship.complex.dataTypes.ComplexRelImportReturn;
 import relationship.simple.dataTypes.AttributeSchemaDef;
+import rest.server.RESTFulConfig;
 import resultEditor.annotations.*;
 import resultEditor.conflicts.classConflict;
 import resultEditor.conflicts.spanOverlaps;
@@ -52,6 +58,9 @@ import workSpace.switcher.RecentWorkSpace;
  */
 
 public class GUI extends JFrame {
+
+    public static GUI gui;
+    public static boolean ready = false;
 
     // <editor-fold defaultstate="collapsed" desc="Member Variables">
     protected enum fileInputType {
@@ -166,10 +175,12 @@ public class GUI extends JFrame {
     public GUI() {
         init(env.Parameters.WorkSpace.WorkSpace_AbsolutelyPath);
 
+
     }
 
     public GUI(String workspacePath) {
         init(workspacePath);
+
     }
 
     public void init(String workspacePath) {
@@ -234,6 +245,7 @@ public class GUI extends JFrame {
         // necessary
         display_hideEditor();
         setWorkSpace(workspacePath);
+        gui = this;
     }
 
     // </editor-fold>
@@ -3142,11 +3154,14 @@ public class GUI extends JFrame {
         // popup a dialog to ask whether you want to save modificaiton or not
         // if there is any changed have been made on annotations.
         this.saveModification();
+        this.saveProjectCurrentViewingFileId();
 
         // save global setting for eHOST
         config.system.SysConf.saveSystemConfigure();
         // save setting for current project
         config_saveProjectSetting();
+        popupExitDialog();
+
     }// GEN-LAST:event_formWindowClosing
 
     private void jButton13ActionPerformed(ActionEvent evt) {// GEN-FIRST:event_jButton13ActionPerformed
@@ -3960,6 +3975,12 @@ public class GUI extends JFrame {
     private JList jList_Spans;
     private JList jList_complexrelationships;
     private JList jList_corpus;
+
+    //    map file name to navigation list id
+    private HashMap<String, Integer> fileIdMap = new HashMap<>();
+    //    map project name to navigation list id
+    private HashMap<String, Integer> projectIdMap = new HashMap<>();
+
     private JList jList_normalrelationship;
     private JList jList_selectedAnnotations;
     private JPanel jPanel1;
@@ -4587,14 +4608,6 @@ public class GUI extends JFrame {
             // if user double clicking on a project
             if (evt.getClickCount() == 2) {
 
-                // ##1## empty the corpus list for current project
-                env.Parameters.corpus.RemoveAll();
-                adjudication.data.AdjudicationDepot.clear();
-
-                Paras.__adjudicated = false;
-                Paras.removeAll();
-                Paras.removeParas();
-                env.Parameters.currentMarkables_to_createAnnotation_by1Click = null;
 
                 // ##2## get selected folder
                 int size = jList_NAV_projects.getModel().getSize();
@@ -4602,47 +4615,8 @@ public class GUI extends JFrame {
                 if ((selected < 0) || (selected > size - 1))
                     return;
 
-                Object o = jList_NAV_projects.getModel().getElementAt(selected);
-                if (o == null)
-                    return;
+                selectProject(selected);
 
-                navigatorContainer.ListEntry_Project entry = (navigatorContainer.ListEntry_Project) o;
-
-                if (entry == null) {
-                    log.LoggingToFile
-                            .log(Level.SEVERE,
-                                    "#### ERROR #### 1106091554::fail to get a selected item from the list of project!!!");
-                    return;
-                }
-
-                File f = entry.getFolder();
-                if (f == null) {
-                    log.LoggingToFile
-                            .log(Level.SEVERE,
-                                    "#### ERROR #### 1102110353:: current project we got from you selected item in the list of project is NULL");
-                    return;
-                }
-
-                setFlag_allowToAddSpan(false); // cancel possible operation of
-                // adding new span
-
-                // move code to a separate function
-                selectProject(f);
-
-                if ((env.Parameters.OracleStatus.visible == false)
-                        || (env.Parameters.OracleStatus.sysvisible == false)) {
-
-                    if ((env.Parameters.OracleStatus.sysvisible == false)) {
-                        env.Parameters.oracleFunctionEnabled = false;
-                    }
-
-                    jLabel_infobar_FlagOfOracle.setVisible(false);
-                } else {
-                    jLabel_infobar_FlagOfOracle.setVisible(true);
-                }
-
-                jLabel_infobar.setText("<html><b>Current Project:</b> <font color=blue>"
-                        + f.getAbsolutePath() + "</font>.</html>");
             }
         } catch (Exception ex) {
             log.LoggingToFile.log(Level.SEVERE, "error 1106091336::" + ex.getMessage());
@@ -4650,11 +4624,58 @@ public class GUI extends JFrame {
 
     }// GEN-LAST:event_jList_NAV_projectsMouseClicked
 
-    private void selectProject(File f) {
+    public void selectProject(String projectName) {
+        if (projectIdMap.containsKey(projectName)) {
+            selectProject(projectIdMap.get(projectName));
+        } else
+            return;
+    }
+
+    public void selectProject(int projectId) {
+        // ##1## empty the corpus list for current project
+        env.Parameters.corpus.RemoveAll();
+        adjudication.data.AdjudicationDepot.clear();
+
+        Paras.__adjudicated = false;
+        Paras.removeAll();
+        Paras.removeParas();
+        saveProjectCurrentViewingFileId();
+        env.Parameters.currentMarkables_to_createAnnotation_by1Click = null;
+        Object o = jList_NAV_projects.getModel().getElementAt(projectId);
+        if (o == null)
+            return;
+
+        navigatorContainer.ListEntry_Project entry = (navigatorContainer.ListEntry_Project) o;
+
+        if (entry == null) {
+            log.LoggingToFile
+                    .log(Level.SEVERE,
+                            "#### ERROR #### 1106091554::fail to get a selected item from the list of project!!!");
+            return;
+        }
+
+        File f = entry.getFolder();
+        if (f == null) {
+            log.LoggingToFile
+                    .log(Level.SEVERE,
+                            "#### ERROR #### 1102110353:: current project we got from you selected item in the list of project is NULL");
+            return;
+        }
+
+        setFlag_allowToAddSpan(false); // cancel possible operation of
+        // adding new span
+
+        // move code to a separate function
+        selectProject(f);
+    }
+
+    public void selectProject(File f) {
         try {
+            ready = false;
             this.setReviewMode(reviewmode.ANNOTATION_MODE);
             // ##3## set current project
             env.Parameters.WorkSpace.CurrentProject = f;
+            env.Parameters.previousProjectPath = f.getAbsolutePath();
 
             this.modified = false;
 
@@ -4771,6 +4792,22 @@ public class GUI extends JFrame {
             // assignmentsScreen.updateAssignments(); THIS DISPLAYS THE ASGS,
             // but then asg selects do not show correctly in the results editor
 
+            if ((env.Parameters.OracleStatus.visible == false)
+                    || (env.Parameters.OracleStatus.sysvisible == false)) {
+
+                if ((env.Parameters.OracleStatus.sysvisible == false)) {
+                    env.Parameters.oracleFunctionEnabled = false;
+                }
+
+                jLabel_infobar_FlagOfOracle.setVisible(false);
+            } else {
+                jLabel_infobar_FlagOfOracle.setVisible(true);
+            }
+
+            jLabel_infobar.setText("<html><b>Current Project:</b> <font color=blue>"
+                    + f.getAbsolutePath() + "</font>.</html>");
+            ready = true;
+
         } catch (Exception ex) {
             System.out.println("error 1204031721");
             ex.printStackTrace();
@@ -4782,6 +4819,7 @@ public class GUI extends JFrame {
      * read file list from
      */
     public void refreshFileList() {
+        ready = false;
         File[] corpus = listCorpus_inProjectFolder(env.Parameters.WorkSpace.CurrentProject);
         if (corpus != null)
             Arrays.sort(corpus, NameFileComparator.NAME_COMPARATOR);
@@ -4799,11 +4837,13 @@ public class GUI extends JFrame {
 
         showTextFiles_inComboBox();
         goUserDesignated();
+        ready = true;
     }
 
     private void listCorpus(File[] corpus) {
         // empty the list
         this.jList_corpus.setListData(new Vector());
+        fileIdMap.clear();
         if (corpus != null)
             Arrays.sort(corpus, NameFileComparator.NAME_COMPARATOR);
 
@@ -4813,6 +4853,7 @@ public class GUI extends JFrame {
             for (File file : corpus) {
                 userInterface.structure.FileObj fileobj = new userInterface.structure.FileObj(
                         file.getName(), this.icon_note2);
+                fileIdMap.put(file.getName(), entries.size());
                 entries.add(fileobj);
             }
             this.jList_corpus.setListData(entries);
@@ -6362,8 +6403,20 @@ public class GUI extends JFrame {
      * O.W, do nothing.
      */
     public void after_click_exit(boolean _userWantToQuit) {
-        if (_userWantToQuit)
-            System.exit(-99);
+        if (_userWantToQuit) {
+            if (Parameters.RESTFulServer) {
+                shutdownRESTServer();
+            } else
+                System.exit(-99);
+        }
+    }
+
+
+    private void shutdownRESTServer() {
+        final String uri = String.format("http://%s:%s/shutdown", RESTFulConfig._address, RESTFulConfig._port);
+        RestTemplate restTemplate = new RestTemplate();
+        String result = restTemplate.getForObject(uri, String.class);
+        System.out.println(result);
     }
 
     /**
@@ -7379,10 +7432,9 @@ public class GUI extends JFrame {
         // jToggleButton1.setSelected(false);
         File current_raw_document = WorkSet.getCurrentFile();
         if (current_raw_document == null)
-            showFileContextInTextPane(0, 0);
+            showFileContextInTextPane(loadProjectPreviousViewedFileId());
         else
-
-            showFileContextInTextPane(current_raw_document, 0);
+            showFileContextInTextPane(current_raw_document);
         disableAnnotationDisplay();
         // textPaneforClinicalNotes.setCaretPosition(latestCarePostion);
         showSelectedAnnotations_inList(env.Parameters.latestSelectedInListOfMultipleAnnotions);
@@ -8244,7 +8296,7 @@ public class GUI extends JFrame {
 
         // go to file viewer to view newly painted annotations
         int selected = jComboBox_InputFileList.getSelectedIndex();
-        showFileContextInTextPane(selected, 0);
+        showFileContextInTextPane(selected);
         jTabbedPane3.setSelectedIndex(0);
     }
 
@@ -8458,7 +8510,7 @@ public class GUI extends JFrame {
                     "~~~~ WARNING ~~~~:: fail to refresh the combolist for ");
         }
         jComboBox_InputFileList.updateUI();
-        showFileContextInTextPane(jComboBox_InputFileList.getSelectedIndex(), 0);
+        showFileContextInTextPane(jComboBox_InputFileList.getSelectedIndex());
 
     }
 
@@ -8470,7 +8522,7 @@ public class GUI extends JFrame {
 
         if (selected > 0) {
             jComboBox_InputFileList.setSelectedIndex(selected - 1);
-            showFileContextInTextPane(selected - 1, 0);
+            showFileContextInTextPane(selected - 1);
 
             this.showAnnotationCategoriesInTreeView_CurrentArticle();
             this.showValidPositionIndicators_setAll();
@@ -8510,7 +8562,7 @@ public class GUI extends JFrame {
 
             jComboBox_InputFileList.setSelectedIndex(selected + 1);
 
-            showFileContextInTextPane(selected + 1, 0);
+            showFileContextInTextPane(selected + 1);
             this.showAnnotationCategoriesInTreeView_CurrentArticle();
             this.showValidPositionIndicators_setAll();
             this.showValidPositionIndicators();
@@ -8539,10 +8591,26 @@ public class GUI extends JFrame {
         return commons.Filesys.ReadFileContents(_rawTextDocument);
     }
 
+
+    public void showFileContextInTextPane(String fileName) {
+        if (fileIdMap.containsKey(fileName))
+            showFileContextInTextPane(fileIdMap.get(fileName));
+        else {
+            for (String loadedFileName : fileIdMap.keySet()) {
+                if (loadedFileName.contains(fileName)) {
+                    showFileContextInTextPane(fileIdMap.get(loadedFileName));
+                    break;
+                }
+            }
+        }
+        ready = true;
+        return;
+    }
+
     /**
      * Load text content from file and show them in textpanel
      */
-    private void showFileContextInTextPane(int index, int LatestScrollBarValue) {
+    public void showFileContextInTextPane(int index) {
         // long p1=System.currentTimeMillis(), p2;
         try {
             if (index < 0)
@@ -8553,7 +8621,8 @@ public class GUI extends JFrame {
             int size = jComboBox_InputFileList.getItemCount();
             if (index > (size - 1))
                 return;
-
+            jComboBox_InputFileList.setSelectedIndex(index);
+            jList_corpus.setSelectedIndex(index);
             // ##2 get the file you want to show in text pane.
             // To this index, get matched absolute textsourceFilename
             // File currentTextSource =
@@ -8585,7 +8654,7 @@ public class GUI extends JFrame {
     /**
      * Load text content from file and show them in textpanel
      */
-    private void showFileContextInTextPane(File _current_text_file, int LatestScrollBarValue) {
+    public void showFileContextInTextPane(File _current_text_file) {
         if (_current_text_file == null) {
             log.LoggingToFile.log(Level.SEVERE, "error 1103251356:: fail to find file context");
             return;
@@ -8672,7 +8741,7 @@ public class GUI extends JFrame {
             if (selected <= (size - 1)) {
                 WorkSet.latestScrollBarValue = 0;
                 // jComboBox_InputFileList.setSelectedIndex(selected + 1);
-                showFileContextInTextPane(selected, 0);
+                showFileContextInTextPane(selected);
                 this.showAnnotationCategoriesInTreeView_CurrentArticle();
                 this.showValidPositionIndicators_setAll();
                 this.showValidPositionIndicators();
@@ -8727,7 +8796,7 @@ public class GUI extends JFrame {
             }
 
             WorkSet.latestScrollBarValue = 0;
-            showFileContextInTextPane(0, 0);
+            showFileContextInTextPane(loadProjectPreviousViewedFileId());
 
         } catch (Exception ex) {
             log.LoggingToFile.log(Level.SEVERE,
@@ -8751,6 +8820,10 @@ public class GUI extends JFrame {
         }
     }
 
+    public void navigateToNote() {
+
+    }
+
     private void goUserDesignatedTable() {
         // resetVerifier();
         ((userInterface.annotationCompare.ExpandButton) jPanel60).setStatusInvisible();
@@ -8766,13 +8839,14 @@ public class GUI extends JFrame {
         if (size != fileListSize)
             return;
 
+
         int selected = this.jList_corpus.getSelectedIndex();
 
         if (selected <= (size - 1)) {
             jComboBox_InputFileList.setSelectedIndex(selected);
             WorkSet.latestScrollBarValue = 0;
             // jComboBox_InputFileList.setSelectedIndex(selected + 1);
-            showFileContextInTextPane(selected, 0);
+            showFileContextInTextPane(selected);
             this.showAnnotationCategoriesInTreeView_CurrentArticle();
             this.showValidPositionIndicators_setAll();
             this.showValidPositionIndicators();
@@ -10158,7 +10232,7 @@ public class GUI extends JFrame {
 
         // show clinical notes in color
         int selected = jComboBox_InputFileList.getSelectedIndex();
-        showFileContextInTextPane(selected, 0);
+        showFileContextInTextPane(selected);
         // If unknown attributes or relationships were inputted then open an
         // import schema handler
         if ((env.Parameters.AnnotationImportSetting.needSchemaHandler)
@@ -10275,7 +10349,7 @@ public class GUI extends JFrame {
             depot.clear();
             int caretpostion = textPaneforClinicalNotes.getCaretPosition();
             int selected = jComboBox_InputFileList.getSelectedIndex();
-            showFileContextInTextPane(selected, 0);
+            showFileContextInTextPane(selected);
             // textPaneforClinicalNotes.setCaretPosition(caretpostion);
         } catch (Exception ex) {
             log.LoggingToFile.log(Level.SEVERE, "error 1101012338::" + ex.toString());
@@ -10391,6 +10465,33 @@ public class GUI extends JFrame {
                 this.saveto_originalxml();
             }
         }
+    }
+
+    private void saveProjectCurrentViewingFileId() {
+        if (jList_corpus.getSelectedIndex() > -1) {
+            try {
+                FileUtils.write(new File(Parameters.previousProjectPath, ".log"), "" + jList_corpus.getSelectedIndex(),
+                        StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private int loadProjectPreviousViewedFileId() {
+        File log = new File(Parameters.previousProjectPath, ".log");
+        int id = 0;
+        if (log.exists()) {
+            try {
+                String content = FileUtils.readFileToString(log, StandardCharsets.UTF_8).trim();
+                if (content != null && content.length() > 0) {
+                    id = Integer.parseInt(content);
+                }
+            } catch (Exception e) {
+
+            }
+        }
+        return id;
     }
 
     // selected button matched to previous tab
@@ -11329,7 +11430,7 @@ public class GUI extends JFrame {
         navigatorContainer.ListProjects lp = new navigatorContainer.ListProjects(this,
                 jList_NAV_projects, workspacepath);
         lp.showProjectsInList();
-
+        this.projectIdMap = lp.getProjectIds();
         this.jList_NAV_projects.updateUI();
 
     }
@@ -11644,5 +11745,13 @@ public class GUI extends JFrame {
 
     public int setEditorDividedLocation() {
         return jSplitPane5.getDividerLocation();
+    }
+
+    public HashMap<String, Integer> getProjectIdMap() {
+        return projectIdMap;
+    }
+
+    public void setProjectIdMap(HashMap<String, Integer> projectIdMap) {
+        this.projectIdMap = projectIdMap;
     }
 }
