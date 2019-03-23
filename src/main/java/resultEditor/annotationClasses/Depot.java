@@ -766,7 +766,7 @@ public class Depot {
             {
                 AttributesOfAClass attributeOfClass = DepotOfAttributes.attributeDepot.get("NULL_NULL_NULL");
                 if (attributeOfClass == null) {
-                    System.out.println("ERROR: A- failed to get the attribute of this class.");
+//                    System.out.println("ERROR: A- failed to get the attribute of this class.");
                     continue;
                 }
 

@@ -6,7 +6,7 @@
 
     <groupId>edu.utah.bmi.nlp</groupId>
     <artifactId>ehost</artifactId>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.30-SNAPSHOT</version>
     <dependencies>
         <dependency>
             <groupId>net.sf.ingenias</groupId>

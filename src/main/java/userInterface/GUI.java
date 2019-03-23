@@ -61,6 +61,7 @@ public class GUI extends JFrame {
 
     public static GUI gui;
     public static boolean ready = false;
+    private String title;
 
     // <editor-fold defaultstate="collapsed" desc="Member Variables">
     protected enum fileInputType {
@@ -729,7 +730,7 @@ public class GUI extends JFrame {
         jSplitPane_Annotations_Comparator.setVerifyInputWhenFocusTarget(false);
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        String title = "eHOST V1.20@2018.04";
+        title = "eHOST V1.30";
 //        MavenXpp3Reader reader = new MavenXpp3Reader();
 //        try {
 //            Model model = reader.read(new FileReader("pom.xml"));
