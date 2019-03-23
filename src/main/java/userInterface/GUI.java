@@ -246,6 +246,7 @@ public class GUI extends JFrame {
         display_hideEditor();
         setWorkSpace(workspacePath);
         gui = this;
+        ready=true;
     }
 
     // </editor-fold>
@@ -6021,8 +6022,8 @@ public class GUI extends JFrame {
             // );
 
             setFlag_of_DifferenceMatching_Display(env.Parameters.enabled_Diff_Display);
-            System.out.println("Current Status of the Difference Indicator = "
-                    + env.Parameters.enabled_Diff_Display);
+//            System.out.println("Current Status of the Difference Indicator = "
+//                    + env.Parameters.enabled_Diff_Display);
             display_repaintHighlighter();
 
             setFlag_of_AttributeEditorDisplay_Display(env.Parameters.enabled_displayAttributeEditor);
@@ -8634,6 +8635,8 @@ public class GUI extends JFrame {
                 return;
             jComboBox_InputFileList.setSelectedIndex(index);
             jList_corpus.setSelectedIndex(index);
+            jList_corpus.ensureIndexIsVisible(jList_corpus.getSelectedIndex());
+
             // ##2 get the file you want to show in text pane.
             // To this index, get matched absolute textsourceFilename
             // File currentTextSource =
