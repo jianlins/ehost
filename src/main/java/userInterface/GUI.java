@@ -248,6 +248,7 @@ public class GUI extends JFrame {
         setWorkSpace(workspacePath);
         gui = this;
         ready=true;
+        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     }
 
     // </editor-fold>
@@ -755,7 +756,8 @@ public class GUI extends JFrame {
                 formWindowClosing(evt);
             }
 
-            public void windowClosed(WindowEvent evt) {
+            public void windowClosed(WindowEvent evt)
+            {
                 formWindowClosed(evt);
             }
         });
