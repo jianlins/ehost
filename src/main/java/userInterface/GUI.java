@@ -11,7 +11,6 @@ import adjudication.SugarSeeder;
 import adjudication.parameters.Paras;
 import adjudication.statusBar.DiffCounter;
 import env.Parameters;
-import gov.va.vinci.annotationAdmin.integration.AnnotationAdminComMgrEvent;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -25,12 +24,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeModel;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.comparator.NameFileComparator;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
-import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
 import relationship.complex.creation.RelationshipSchemaEditor;
 import relationship.complex.dataTypes.ComplexRelImportReturn;
@@ -247,7 +241,7 @@ public class GUI extends JFrame {
         display_hideEditor();
         setWorkSpace(workspacePath);
         gui = this;
-        ready=true;
+        ready = true;
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     }
 
@@ -756,8 +750,7 @@ public class GUI extends JFrame {
                 formWindowClosing(evt);
             }
 
-            public void windowClosed(WindowEvent evt)
-            {
+            public void windowClosed(WindowEvent evt) {
                 formWindowClosed(evt);
             }
         });
@@ -8606,19 +8599,25 @@ public class GUI extends JFrame {
 
     public String showFileContextInTextPane(String fileName) {
         String response = "File: '" + fileName + "' not found in project: " + Parameters.previousProjectPath;
+        int selectFileId=this.jComboBox_InputFileList.getSelectedIndex();
         if (fileIdMap.containsKey(fileName)) {
-            showFileContextInTextPane(fileIdMap.get(fileName));
+            selectFileId=fileIdMap.get(fileName);
             response = "success";
         } else {
             for (String loadedFileName : fileIdMap.keySet()) {
                 if (loadedFileName.contains(fileName)) {
-                    showFileContextInTextPane(fileIdMap.get(loadedFileName));
+                    selectFileId=fileIdMap.get(loadedFileName);
                     response = "Load file: " + loadedFileName;
                     break;
                 }
             }
         }
-        ready = true;
+        if(selectFileId>=jComboBox_InputFileList.getItemCount()) {
+            ready = true;
+            return "No file found";
+        }
+        this.jComboBox_InputFileList.setSelectedIndex(selectFileId);
+        showFileContextInTextPane(selectFileId);
         return response;
     }
 
@@ -8664,8 +8663,10 @@ public class GUI extends JFrame {
             display.ShowTextAndBackgroundHighLight(contents);
 
         } catch (Exception ex) {
+            ready = true;
             log.LoggingToFile.log(Level.SEVERE, "error 1417");
         }
+
     }
 
     /**
@@ -8841,7 +8842,9 @@ public class GUI extends JFrame {
 
     }
 
-    private void goUserDesignatedTable() {
+
+
+    public void goUserDesignatedTable() {
         // resetVerifier();
         ((userInterface.annotationCompare.ExpandButton) jPanel60).setStatusInvisible();
         ((userInterface.annotationCompare.ExpandButton) jPanel60).noDiff();

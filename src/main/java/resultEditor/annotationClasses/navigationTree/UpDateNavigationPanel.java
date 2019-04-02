@@ -21,6 +21,7 @@ import resultEditor.annotationClasses.file_annotation;
 import resultEditor.annotationClasses.navigationTree.dataCache.*;
 import resultEditor.annotationClasses.navigationTree.treeRelated.*;
 import resultEditor.workSpace.WorkSet;
+import userInterface.GUI;
 
 /**
  *
@@ -57,6 +58,7 @@ public class UpDateNavigationPanel {
 
             public void run() {
                 display( classname );
+                GUI.gui.ready = true;
             }
         });
     }
