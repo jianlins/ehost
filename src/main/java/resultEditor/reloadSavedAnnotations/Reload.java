@@ -82,7 +82,7 @@ public class Reload {
 
 
                     _gui.totalRefresh();
-                    _gui.refreshInfo();
+//                    _gui.refreshInfo();
                     _gui.display_repaintHighlighter();
 
                

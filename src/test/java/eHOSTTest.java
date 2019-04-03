@@ -1,5 +1,4 @@
-import static org.junit.jupiter.api.Assertions.*;
-
+import main.eHOST;
 class eHOSTTest {
 
     public static void main(String[]args){

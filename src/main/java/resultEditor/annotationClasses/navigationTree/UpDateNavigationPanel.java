@@ -15,6 +15,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+
+import main.eHOST;
 import resultEditor.annotationClasses.Depot;
 import resultEditor.annotationClasses.SelectionStatusOfClasses;
 import resultEditor.annotationClasses.file_annotation;
@@ -24,7 +26,6 @@ import resultEditor.workSpace.WorkSet;
 import userInterface.GUI;
 
 /**
- *
  * @author leng
  */
 public class UpDateNavigationPanel {
@@ -33,42 +34,42 @@ public class UpDateNavigationPanel {
     protected static JTree treeview;
     // handle of main GUI for function recall
     protected static userInterface.GUI gui;
-    
+
     protected static String filename = null;
 
     /**
      * Constructor
      *
      * @param treeview Introduce the component from GUI of result editor.
-     *
-     * @param gui Introduce the handle of main GUI for function recall.
+     * @param gui      Introduce the handle of main GUI for function recall.
      */
     public UpDateNavigationPanel(JTree treeview, userInterface.GUI gui) {
         this.treeview = treeview;
         UpDateNavigationPanel.gui = gui;
     }
+
     private static String currentArticle = null;
 
     public UpDateNavigationPanel() {
     }
 
     public void display() {
-        final String classname = DepotOfAttributes.getClassname();                
-        SwingUtilities.invokeLater(new Runnable() {
-
-            public void run() {
-                display( classname );
-                GUI.gui.ready = true;
-            }
+        final String classname = DepotOfAttributes.getClassname();
+        SwingUtilities.invokeLater(() -> {
+            display(classname);
+            GUI.status++;
+            eHOST.logger.debug("NaviagteionPanel updated.\tCurrent status: " + GUI.status);
+            if (GUI.status > GUI.readyThreshold)
+                GUI.selectedFromComobox = true;
         });
     }
+
     /**
-     * Show the navigation tree on the navigation panel, it lists classes and 
-     * their annotations, a filter of attribtues and relationships and their 
+     * Show the navigation tree on the navigation panel, it lists classes and
+     * their annotations, a filter of attribtues and relationships and their
      * annotations.
-     * 
-     * @param   classname
-     *          If a classname node is 
+     *
+     * @param classname If a classname node is
      */
     public void display(String classname) {
 
@@ -76,11 +77,10 @@ public class UpDateNavigationPanel {
         try {
             // ##1## clear contents and reset root node in the tree view
             clearDisplay();
-            System.out.println( DepotOfRelationships.isExpanded );
+            System.out.println(DepotOfRelationships.isExpanded);
             // Build the basic nodes of this treeview, such as nodes: 
             // "Attributes", "Relationships:", "Classes:" 
             buildTreeFrame();
-
 
 
             File f = WorkSet.getCurrentFile();
@@ -116,24 +116,22 @@ public class UpDateNavigationPanel {
             addBranchOfClasses(root, currentFilename);
 
             // classname: the name of the focused classname            
-            updateAttributeBranch( treeview, classname);
+            updateAttributeBranch(treeview, classname);
 
-            addBranchOfRelationships( root );
+            addBranchOfRelationships(root);
             //root.add( relationshipNodes );
 
-            
 
             // #### 3 ####
             // Initialize the treeview, set cell renderer and editor
             // set cell renderer for this treeview
             Treeview_NodeRenderer renderer = new Treeview_NodeRenderer();
-            
+
             treeview.setCellRenderer(renderer);
             // set cell editor for this treeview
             treeview.setCellEditor(new Treeview_ClassNodeEditor(treeview, this.gui));
             //treeview.addTreeSelectionListener(new SelectionListener());
             treeview.setEditable(true);
-
 
 
             // set node status : selected and expansion status
@@ -147,40 +145,40 @@ public class UpDateNavigationPanel {
         }
     }
 
-    
-    public void updateAttributeBranch( final String classname ){
+
+    public void updateAttributeBranch(final String classname) {
 
         // treeview.stopEditing();
         SwingUtilities.invokeLater(new Runnable() {
 
             public void run() {
-                recountAttributes( classname );        
+                recountAttributes(classname);
                 //addBranchOfClasses()
-                updateAttributeBranch( treeview, classname );
+                updateAttributeBranch(treeview, classname);
                 treeview.updateUI();
                 setNodesStatus();
             }
         });
-        
-        
+
+
     }
-    
-    public void hideAttributes(boolean hideAttributes){
+
+    public void hideAttributes(boolean hideAttributes) {
         // System.out.println(" hide it = " + hideAttributes);
-        
-        if( treeview == null )
+
+        if (treeview == null)
             return;
-        
+
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) treeview.getModel().getRoot();
         DefaultMutableTreeNode subroot_of_atts = (DefaultMutableTreeNode) root.getChildAt(1);
-        if( hideAttributes )
-            treeview.collapsePath( new TreePath(subroot_of_atts.getPath()) );
+        if (hideAttributes)
+            treeview.collapsePath(new TreePath(subroot_of_atts.getPath()));
         else
-            treeview.expandPath( new TreePath(subroot_of_atts.getPath()) );
-                
-                //tree.collapsePath( tree.getPathForRow( 13 ) );
-        
-        
+            treeview.expandPath(new TreePath(subroot_of_atts.getPath()));
+
+        //tree.collapsePath( tree.getPathForRow( 13 ) );
+
+
         // treeview.stopEditing();
         SwingUtilities.invokeLater(new Runnable() {
 
@@ -189,41 +187,40 @@ public class UpDateNavigationPanel {
             }
         });
     }
-    
-    public void updateAttributeBranch( JTree treeview, String classname ){
-        
+
+    public void updateAttributeBranch(JTree treeview, String classname) {
+
         // #### 1 ####
         // delete possible children nodes
-        
-        
-        
+
+
         //Object rootobj = treeview.getModel().getRoot();
         //DefaultMutableTreeNode root = (DefaultMutableTreeNode) rootobj;
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) treeview.getModel().getRoot();
         int depth = treeview.getModel().getChildCount(root);
-        if( depth < 2 )
+        if (depth < 2)
             return;
         DefaultMutableTreeNode subroot_of_atts = (DefaultMutableTreeNode) root.getChildAt(1);
-        if( subroot_of_atts == null )
+        if (subroot_of_atts == null)
             return;
         subroot_of_atts.removeAllChildren();
-        
+
         // #### 2 ####
         // Put all attribute information we collected on screen from the depot 
         // of "DepotOfAttributes" 
         AttributesOfAClass attributes_of_class = DepotOfAttributes.getAttributes(classname);
-        if( attributes_of_class == null )
+        if (attributes_of_class == null)
             return;
-        
-        
+
+
         for (String attributeName : attributes_of_class.attributes.keySet()) { // name is             
 
             //int count = DepotOfAttributes.atts.get(name).count;
 
             // ##2.1## add node of class to the root of the treeview
             NodeOfAttribute node_of_att = new NodeOfAttribute(
-                    attributeName, 
-                    attributes_of_class.attributes.get(attributeName) );
+                    attributeName,
+                    attributes_of_class.attributes.get(attributeName));
             //new NodeOfAttribute(name, count, DepotOfAttributes.atts.get( name) );                        
             // node_of_att.setText( DepotOfAttributes.atts.get(name).attributeName );
 
@@ -237,7 +234,7 @@ public class UpDateNavigationPanel {
                     if (valuename != null) {
                         String attvalue = map_values.get(valuename).value;
                         int attvaluecount = map_values.get(valuename).count;
-                        if( map_values.get(valuename).count <1 )
+                        if (map_values.get(valuename).count < 1)
                             continue;
                         NodeOfAttValue mtn_value = new NodeOfAttValue(attributeName, attvalue, attvaluecount);
                         mtn_value.setSelectionStatus(map_values.get(valuename).isSelected);
@@ -260,24 +257,22 @@ public class UpDateNavigationPanel {
         subroot_of_atts.setUserObject(nar);
 
 
-
     }
-    
-    
-    private void recountAttributes(String classname){        
+
+
+    private void recountAttributes(String classname) {
         Depot depot = new Depot();
         depot.checkAllAnnotationTypes(UpDateNavigationPanel.currentArticle, classname);
-    
-    }   
-        
-    
-    
+
+    }
+
+
     private void addBranchOfClasses(DefaultMutableTreeNode root, String currentFilename) {
 
-        
+
         // get all classnames in array of string
         String[] classnames = classnames(classnames());
-        
+
         DefaultMutableTreeNode subroot_of_classes = (DefaultMutableTreeNode) root.getChildAt(0);
         subroot_of_classes.removeAllChildren();
 
@@ -307,7 +302,7 @@ public class UpDateNavigationPanel {
             // ##2.1## add node of class to the root of the treeview
             NodeOfClass classnode = new NodeOfClass(classname.trim(), isSelected,
                     annotatedclass.backgroundColor, annotationAmount_toThisClass,
-                    annotationTypeAmount_toThisClass, annotatedclass.shortComment, annotatedclass.des  );
+                    annotationTypeAmount_toThisClass, annotatedclass.shortComment, annotatedclass.des);
 
             if (env.Parameters.currentMarkables_to_createAnnotation_by1Click != null) {
                 if (classname.trim().equals(env.Parameters.currentMarkables_to_createAnnotation_by1Click)) {
@@ -356,19 +351,18 @@ public class UpDateNavigationPanel {
             }
             // add annotation type to this newly built class node
             //root.add( classnode );
-            
+
             subroot_of_classes.add(classnode);
 
             SelectionStatusOfClasses.add(classnames[i].trim(), isSelected);
         }
     }
 
-    
-    
+
     private void addBranchOfRelationships(DefaultMutableTreeNode root) {
 
         int depth = treeview.getModel().getChildCount(root);
-        if( depth < 3 )
+        if (depth < 3)
             return;
 
         //for( int i=0; i<DepotOfAttributes.atts.size(); i++ )
@@ -386,7 +380,7 @@ public class UpDateNavigationPanel {
             if (refannotations != null) {
                 for (RefAnnotation refannotation : refannotations) {
                     if ((refannotation != null) && (refannotation.annotation != null)) {
-                        
+
                         //System.out.println("[" + refannotation.filename );
 
                         boolean isCurrentFile = false;
@@ -394,13 +388,13 @@ public class UpDateNavigationPanel {
                             isCurrentFile = true;
 
                         }
-                        
+
                         if (env.Parameters.working_on_file) {
                             if (!isCurrentFile) {
                                 continue;
                             }
                         } else {
-                            
+
                         }
 
                         NodeOfRelAnnotation mtn_annotation = new NodeOfRelAnnotation(refannotation.annotation,
@@ -442,65 +436,65 @@ public class UpDateNavigationPanel {
     public void setNodesStatus() {
         //System.out.println("1we are updating " + DepotOfRelationships.isExpanded );
         resetNodeExpandtionStatusOfClass();
-        
+
         //System.out.println("2we are updating " + DepotOfRelationships.isExpanded );
         resetNodeExpandtionStatusOfAtts();
-        
+
         //System.out.println("3we are updating " + DepotOfRelationships.isExpanded );
         resetNodeExpandtionStatusOfRels();
-        
+
 
     }
-    
-    private void resetNodeExpandtionStatusOfAtts(){
-        
+
+    private void resetNodeExpandtionStatusOfAtts() {
+
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) treeview.getModel().getRoot();
-        
+
         // restore the expand/ collis sitituation of nodes of attribute
         DefaultMutableTreeNode subroot_of_attributes = (DefaultMutableTreeNode) root.getChildAt(1);
         TreePath path_subattributes = new TreePath(getTreeModel().getPathToRoot(subroot_of_attributes));
-        if( DepotOfAttributes.isExpanded ) {
+        if (DepotOfAttributes.isExpanded) {
             treeview.expandPath(path_subattributes);
-        }else
+        } else
             treeview.collapsePath(path_subattributes);
-            
-        if( DepotOfAttributes.isExpanded ) {
-        int number_of_attribtues = subroot_of_attributes.getChildCount();
 
-        for (int i = 0; i < number_of_attribtues; i++) {
-            NodeOfAttribute attnode = (NodeOfAttribute) subroot_of_attributes.getChildAt(i);
-            if (attnode.attributeName() != null) {
-                String attributename = attnode.attributeName().trim();
-                //System.out.print( "\nt="+i+", att [" +  attributename + "] = " );
-                if (isAttNodeExpanded(attributename)) {
-                    //System.out.print( "true\n");
-                    TreePath path = new TreePath(getTreeModel().getPathToRoot(attnode));
-                    if (path != null) {
-                        treeview.expandPath(path);
-                    }
-                }//else
+        if (DepotOfAttributes.isExpanded) {
+            int number_of_attribtues = subroot_of_attributes.getChildCount();
+
+            for (int i = 0; i < number_of_attribtues; i++) {
+                NodeOfAttribute attnode = (NodeOfAttribute) subroot_of_attributes.getChildAt(i);
+                if (attnode.attributeName() != null) {
+                    String attributename = attnode.attributeName().trim();
+                    //System.out.print( "\nt="+i+", att [" +  attributename + "] = " );
+                    if (isAttNodeExpanded(attributename)) {
+                        //System.out.print( "true\n");
+                        TreePath path = new TreePath(getTreeModel().getPathToRoot(attnode));
+                        if (path != null) {
+                            treeview.expandPath(path);
+                        }
+                    }//else
                     //System.out.print( "false\n");
-            }
+                }
             }
         }
-    
+
     }
-    
-    private void resetNodeExpandtionStatusOfRels(){
-        
+
+    private void resetNodeExpandtionStatusOfRels() {
+
         DefaultMutableTreeNode root = (DefaultMutableTreeNode) treeview.getModel().getRoot();
-        
+
         // restore the expand/ collis sitituation of nodes of attribute
         DefaultMutableTreeNode subroot_of_rel = (DefaultMutableTreeNode) root.getChildAt(2);
         TreePath root_of_relationship = new TreePath(getTreeModel().getPathToRoot(subroot_of_rel));
         // System.out.println("we are updating " + DepotOfRelationships.isExpanded );
-        if( DepotOfRelationships.isExpanded ) {
+        if (DepotOfRelationships.isExpanded) {
             treeview.expandPath(root_of_relationship);
-        }else {
+        } else {
             treeview.collapsePath(root_of_relationship);
         }
-            
-        
+
+
         if (DepotOfRelationships.isExpanded) {
             int number_of_rels = subroot_of_rel.getChildCount();
 
@@ -519,7 +513,7 @@ public class UpDateNavigationPanel {
                     //System.out.print( "false\n");
                 }
             }
-        }            
+        }
     }
 
     /**
@@ -550,7 +544,7 @@ public class UpDateNavigationPanel {
         return markable.isNodeExpanded;
 
     }
-    
+
     public boolean isAttNodeExpanded(String attname) {
 
         // validity check
@@ -563,14 +557,14 @@ public class UpDateNavigationPanel {
 
         // try to get the class/markable
         AttributesOfAClass attributesOfAClass = DepotOfAttributes.getAttributes();
-        
-        
+
+
         HashMap<String, Att> currentAttributes = attributesOfAClass.attributes;
-        if( currentAttributes == null )
+        if (currentAttributes == null)
             return false;
-        
-        Att att = currentAttributes.get( attname );
-        if( att == null )
+
+        Att att = currentAttributes.get(attname);
+        if (att == null)
             return false;
 
         // get saved expansion status
@@ -597,16 +591,16 @@ public class UpDateNavigationPanel {
         Depot depot = new Depot();
         depot.checkAllAnnotationTypes(UpDateNavigationPanel.currentArticle, null, force);
     }
-    
+
     public void refreshTypeMemory_refresh() {
-        refreshTypeMemory_refresh( false );
+        refreshTypeMemory_refresh(false);
     }
 
     private Color getColor(String classname) {
         if (classname == null) {
             return null;
         }
-        
+
         classname = classname.trim();
         return Depot.getColor(classname);
     }
@@ -639,46 +633,40 @@ public class UpDateNavigationPanel {
             }
 
             root.setUserObject("<html><font color=black>Annotation Navigator</font></html>");
-            
+
 
             //Vector<String> roots = new Vector<String>();
 
             // assemble the text of the subroot node of the branch of "classes"
-            
+
 
             NodeOfClassRoot mtn_classes = new NodeOfClassRoot(
                     Depot.size(),
                     Depot.TYPE_getAnnotationTypeAmount(),
-                    getAnnotationsAmount() );          
+                    getAnnotationsAmount());
             root.add(mtn_classes);
 
 
             // add the subroot node of the branch of "attribute"
             NodeOfAttRoot mtn = new NodeOfAttRoot();
-            
-                if( DepotOfAttributes.getAttributes() != null )
-                    mtn.setCount( DepotOfAttributes.getAttributes().size() );            
-                else
-                    mtn.setCount( 0 );            
-                
-                mtn.setClassname( DepotOfAttributes.getClassname() );
-                mtn.setSelected( DepotOfAttributes.isFilterOn() );
-                
+
+            if (DepotOfAttributes.getAttributes() != null)
+                mtn.setCount(DepotOfAttributes.getAttributes().size());
+            else
+                mtn.setCount(0);
+
+            mtn.setClassname(DepotOfAttributes.getClassname());
+            mtn.setSelected(DepotOfAttributes.isFilterOn());
+
             root.add(mtn);
 
-            
+
             // add the root node of "relationships"
-            SubRootOfRelationship mtn2 = new SubRootOfRelationship(DepotOfRelationships.getTotal(), DepotOfRelationships.rels.size());                        
+            SubRootOfRelationship mtn2 = new SubRootOfRelationship(DepotOfRelationships.getTotal(), DepotOfRelationships.rels.size());
             root.add(mtn2);
 
 
-
-
-
             //roots.add("Relationships: ");
-
-
-
 
 
         } catch (Exception ex) {
@@ -761,19 +749,18 @@ public class UpDateNavigationPanel {
         repaintBackgroundHighlight();
         gui.showValidPositionIndicators();
     }
-    
-    public void checkStatusChanged() {        
+
+    public void checkStatusChanged() {
         setAnnotationsVisile();
 
         repaintBackgroundHighlight();
-        
-        
-        
+
+
         gui.showValidPositionIndicators();
-        
+
         gui.setFlag_of_DifferenceMatching_Display(env.Parameters.enabled_Diff_Display); // update differences
-                    gui.display_repaintHighlighter();
-        
+        gui.display_repaintHighlighter();
+
     }
 
     private void repaintBackgroundHighlight() {
@@ -941,33 +928,34 @@ public class UpDateNavigationPanel {
         return;
     }
 
-    /**Check whether a given relationship node is expanded, only true is really 
+    /**
+     * Check whether a given relationship node is expanded, only true is really
      * trustable to say this relationship node is expanded.
      */
     private boolean isRelNodeExpanded(NodeOfRelationship node_of_rel) {
-        
+
         // validity check
-        if( node_of_rel == null ) {
+        if (node_of_rel == null) {
             return false;
-        }                        
+        }
 
         String relationshipname = node_of_rel.getRelName();
-        if( relationshipname == null ) {
+        if (relationshipname == null) {
             return false;
         }
-        
+
         // try to get the class/markable
         //DepotOfRelationships depotOfRel = new DepotOfRelationships();
-        if(DepotOfRelationships.rels == null) {
+        if (DepotOfRelationships.rels == null) {
             return false;
         }
-        
-        Rel rel = DepotOfRelationships.rels.get( relationshipname );
-        if( rel == null) {
+
+        Rel rel = DepotOfRelationships.rels.get(relationshipname);
+        if (rel == null) {
             return false;
         }
-        
-        return rel.isExpanded;                
+
+        return rel.isExpanded;
     }
 
     private void resetNodeExpandtionStatusOfClass() {
@@ -979,7 +967,6 @@ public class UpDateNavigationPanel {
 
         //treeview.expandRow( 1 );
         //treeview.expandRow( 2 );
-
 
 
         // ##2## try to get each class/markable node from the root node

@@ -393,7 +393,7 @@ public class integratedDictionary extends javax.swing.JPanel implements GUIInter
     /**
      * Check all input variables for validity and display error messages if the
      * user has entered information wrong.
-     * @return - true if everything is ready to go, false otherwise.
+     * @return - true if everything is status to go, false otherwise.
      */
     private boolean checkValid()
     {

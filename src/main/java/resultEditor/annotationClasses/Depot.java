@@ -795,7 +795,7 @@ public class Depot {
             {
                 AttributesOfAClass attributeOfAAttribute = DepotOfAttributes.attributeDepot.get(annotation.annotationclass.trim());
                 if (attributeOfAAttribute == null) {
-                    System.out.println("ERROR: failed to get the attribute of this class:" + annotation.annotationclass.trim() );
+//                    eHOST.logger.info("ERROR: failed to get the attribute of this class:" + annotation.annotationclass.trim() );
                     continue;
                 }
 

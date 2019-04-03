@@ -488,7 +488,7 @@ public class WizardVerifierLib extends javax.swing.JFrame
                 jPanel_CardLayout.removeAll();
                 jPanel_CardLayout.add(jPanel_choosefile, "2");
 
-                //Make second screen ready
+                //Make second screen status
                 jPanel_choosefile.setVisible(true);
                 jTextField_ConceptLib.setText("");
 
@@ -550,7 +550,7 @@ public class WizardVerifierLib extends javax.swing.JFrame
                 jPanel_CardLayout.add(jPanelOptions, "4");
                 jPanelOptions.setVisible(true);
 
-                //Get screen ready.
+                //Get screen status.
                 jLabel22.setVisible(true);
                 jLabel23.setVisible(true);
 

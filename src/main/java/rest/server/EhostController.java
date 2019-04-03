@@ -1,5 +1,6 @@
 package rest.server;
 
+import main.eHOST;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
@@ -9,8 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import userInterface.GUI;
 
 import java.io.File;
-import java.util.Timer;
-import java.util.TimerTask;
 
 @Controller
 public class EhostController {
@@ -19,7 +18,8 @@ public class EhostController {
     @GetMapping(value = "/status")
     @ResponseBody
     String getStatus() {
-        return GUI.gui.ready + "";
+        eHOST.logger.debug("GUI status status: "+GUI.status);
+        return (GUI.status >GUI.readyThreshold) + "";
     }
 
     @GetMapping(value = "/ehost/{projectName}/{fileName}")
@@ -27,18 +27,11 @@ public class EhostController {
     String getDoc(@PathVariable String projectName,
                   @PathVariable String fileName) throws InterruptedException {
         String response="";
-        if (projectName != null && GUI.gui.ready) {
-            GUI.gui.ready = false;
-            response= GUI.gui.selectProject(projectName);
+        eHOST.logger.debug("GUI status: "+GUI.status);
+        if (projectName != null && GUI.status >GUI.readyThreshold) {
+            GUI.status = 0;
+            response= GUI.gui.selectProject(projectName,fileName);
         }
-
-
-        if (fileName != null && GUI.gui.ready) {
-            GUI.gui.ready = false;
-            response= GUI.gui.showFileContextInTextPane(fileName);
-        }
-
-
         return response;
     }
 
@@ -46,9 +39,9 @@ public class EhostController {
     @ResponseBody
     String getProject(@PathVariable String projectName) throws InterruptedException {
         String response="";
-        if (projectName != null && GUI.gui.ready) {
-            GUI.gui.ready = false;
-            response= GUI.gui.selectProject(projectName);
+        if (projectName != null && GUI.status >GUI.readyThreshold) {
+            GUI.status = 0;
+            response= GUI.gui.selectProject(projectName,null);
             return response;
         }
         return "Ehost is busy. Try again later.";
@@ -59,14 +52,9 @@ public class EhostController {
     @ResponseBody
     public String displayFileByPath(@RequestBody PathElements pathElements) {
         String response="";
-        if (pathElements != null && pathElements.projectpath != null && GUI.gui.ready) {
-            GUI.gui.ready = false;
-            GUI.gui.selectProject(new File(pathElements.projectpath));
-        }
-
-        if (pathElements != null && pathElements.file != null && GUI.gui.ready) {
-            GUI.gui.ready = false;
-            response=GUI.gui.showFileContextInTextPane(pathElements.file);
+        if (pathElements != null && pathElements.projectpath != null && GUI.status >GUI.readyThreshold) {
+            GUI.status = 0;
+            GUI.gui.selectProject(new File(pathElements.projectpath),pathElements.file);
         }
         return response;
     }
@@ -79,17 +67,7 @@ public class EhostController {
     @ResponseBody
     public String shutdownApp() {
 //      Sent out msg before shutdown completely.
-        new Timer().schedule(
-                new TimerTask() {
-                    @Override
-                    public void run() {
-                        // Your code here
-                        int exitCode = SpringApplication.exit(context, (ExitCodeGenerator) () -> 0);
-                        System.exit(exitCode);
-                    }
-                },
-                500
-        );
+        SpringApplication.exit(context, (ExitCodeGenerator) () -> 0);
         return "Ehost with its REST server is shutting down";
 
     }

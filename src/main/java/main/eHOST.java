@@ -1,4 +1,4 @@
-/*
+package main;/*
  * The contents of this file are subject to the GNU GPL v3 (the "License");
  * you may not use this file except in compliance with the License. You may
  * obtain a copy of the License at URL http://www.gnu.org/licenses/gpl.html
@@ -40,13 +40,13 @@
  *
  */
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import env.Parameters;
 import log.LogCleaner;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import rest.server.EhostServerApp;
+import org.slf4j.Logger;
+
 
 /**
  * The entrance class to load the GUI of eHOST and display the splash dialog
@@ -55,6 +55,7 @@ import rest.server.EhostServerApp;
  * @author Jianwei "Chris" Leng
  */
 public class eHOST {
+    public static Logger logger = LoggerFactory.getLogger(eHOST.class);
 
     /**
      * Initial works, before finishing loading the GUI.
@@ -64,7 +65,7 @@ public class eHOST {
         // check whether current OS is a Mac OS
         // and switchpool.iniMSP.isUnixOS = true if its a Mac OS / Unix;
         // we use '/' as the path separator
-        env.Parameters.isUnixOS = commons.OS.isMacOS();
+        Parameters.isUnixOS = commons.OS.isMacOS();
 
         // log begin
         String text = "#eHOST# Reading configure file ...";
@@ -77,10 +78,10 @@ public class eHOST {
         config.system.SysConf.loadSystemConfigure();
 
         // set the flag, after loading configure information
-        env.Parameters.isFirstTimeLoadingConfigureFile = false;
+        Parameters.isFirstTimeLoadingConfigureFile = false;
 
         // set the latest mention id to the module if XML output
-        int latest_used_metion_id = env.Parameters.getLatestUsedMentionID();
+        int latest_used_metion_id = Parameters.getLatestUsedMentionID();
         algorithmNegex.XMLMaker
                 .set_mention_id_startpoint(latest_used_metion_id);
     }
@@ -134,8 +135,14 @@ public class eHOST {
                 }
             }.start();
 
-            if(Parameters.RESTFulServer)
-                SpringApplication.run(EhostServerApp.class, args);
+            if (Parameters.RESTFulServer) {
+                try {
+                    SpringApplication.run(EhostServerApp.class, args);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Parameters.RESTFulServer = false;
+                }
+            }
 
         } catch (Exception e) {
             //e.printStackTrace();

@@ -127,6 +127,7 @@
                     <outputDirectory>
                         target/deploy
                     </outputDirectory>
+                    <finalName>ehost</finalName>
                 </configuration>
                 <executions>
                     <execution>

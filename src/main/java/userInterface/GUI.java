@@ -11,18 +11,7 @@ import adjudication.SugarSeeder;
 import adjudication.parameters.Paras;
 import adjudication.statusBar.DiffCounter;
 import env.Parameters;
-
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeModel;
-
+import main.eHOST;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.comparator.NameFileComparator;
 import org.springframework.web.client.RestTemplate;
@@ -42,6 +31,19 @@ import verifier.VerifyChallenge2011;
 import webservices.AssignmentsScreen;
 import workSpace.switcher.RecentWorkSpace;
 
+import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeModel;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Timer;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * main GUI of eHOST
  * <p>
@@ -54,8 +56,10 @@ import workSpace.switcher.RecentWorkSpace;
 public class GUI extends JFrame {
 
     public static GUI gui;
-    public static boolean ready = false;
+    public static int status = 0;
+    public final static int readyThreshold = 2;
     private String title;
+    public static boolean selectedFromComobox;
 
     // <editor-fold defaultstate="collapsed" desc="Member Variables">
     protected enum fileInputType {
@@ -241,7 +245,8 @@ public class GUI extends JFrame {
         display_hideEditor();
         setWorkSpace(workspacePath);
         gui = this;
-        ready = true;
+        status = 4;
+        eHOST.logger.debug("eHOST initiated.");
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     }
 
@@ -777,7 +782,7 @@ public class GUI extends JFrame {
         jToggleButton_ResultEditor.setSelected(true);
         jToggleButton_ResultEditor.setFocusable(false);
         jToggleButton_ResultEditor.setHorizontalTextPosition(SwingConstants.RIGHT);
-        jToggleButton_ResultEditor.setLabel("<html>Result<br>Editor<html> ");
+        jToggleButton_ResultEditor.setText("<html>Result<br>Editor<html> ");
         jToggleButton_ResultEditor.setMaximumSize(new Dimension(90, 100));
         jToggleButton_ResultEditor.setMinimumSize(new Dimension(90, 0));
         jToggleButton_ResultEditor.setVerticalTextPosition(SwingConstants.BOTTOM);
@@ -900,7 +905,7 @@ public class GUI extends JFrame {
         jToggleButton_exit.setIcon(new ImageIcon(getClass().getClassLoader().getResource("res/exit.png"))); // NOI18N
         jToggleButton_exit.setFocusable(false);
         jToggleButton_exit.setHorizontalTextPosition(SwingConstants.RIGHT);
-        jToggleButton_exit.setLabel("EXIT ");
+        jToggleButton_exit.setText("EXIT ");
         jToggleButton_exit.setMaximumSize(new Dimension(100, 100));
         jToggleButton_exit.setMinimumSize(new Dimension(100, 0));
         jToggleButton_exit.addActionListener(new ActionListener() {
@@ -1365,6 +1370,7 @@ public class GUI extends JFrame {
         });
         jList_corpus.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
+                status=1;
                 jList_corpusMouseClicked(evt);
             }
         });
@@ -1638,11 +1644,9 @@ public class GUI extends JFrame {
                 "Item 1", "Item 2", "Item 3", "Item 4"}));
         jComboBox_InputFileList.setMaximumSize(new Dimension(32767, 22));
         jComboBox_InputFileList.setPreferredSize(new Dimension(56, 22));
-        jComboBox_InputFileList.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                jComboBox_InputFileListActionPerformed(evt);
-            }
-        });
+        jComboBox_InputFileList.addActionListener(this::jComboBox_InputFileListActionPerformed);
+
+
         jToolBar3.add(jComboBox_InputFileList);
 
         jLabel3.setBackground(new Color(238, 238, 239));
@@ -3107,8 +3111,8 @@ public class GUI extends JFrame {
         // show inputted file into the combobox
         for (int qi = 0; qi < sizew; qi++) {
             jComboBox_InputFileList.addItem(env.Parameters.corpus.getFileName(qi));
-        }
 
+        }
     }// GEN-LAST:event_jButton2ActionPerformed
     // insert text into textpanel with assigned color
 
@@ -3239,6 +3243,7 @@ public class GUI extends JFrame {
         }
     }// GEN-LAST:event_jButton14ActionPerformed
 
+
     private void jComboBox_InputFileListActionPerformed(ActionEvent evt) {// GEN-FIRST:event_jComboBox_InputFileListActionPerformed
         // by the user disignated textsourceFilename, show its text contents in
         // text
@@ -3253,12 +3258,12 @@ public class GUI extends JFrame {
         if (timeinterval < 100)
             return;
 
-        goUserDesignated();
+        if (selectedFromComobox)
+            goUserDesignated();
         if (jTabbedPane3.getSelectedIndex() != 0)
             jTabbedPane3.getSelectedComponent().repaint();
-        // log.LoggingToFile.log(Level.INFO,
-        // "\n~~~~ DEBUG ~~~~:: open user designated document, called from combobox");
-    }// GEN-LAST:event_jComboBox_InputFileListActionPerformed
+    }
+
 
     private void jTextField_searchtextActionPerformed(ActionEvent evt) {// GEN-FIRST:event_jTextField_searchtextActionPerformed
         // TODO add your process code here:
@@ -3824,7 +3829,7 @@ public class GUI extends JFrame {
             case VERIFIER:
                 if (infoList.getSelectedIndex() >= 0) {
                     this.jTabbedPane3.setSelectedIndex(0);
-                    displayInfoForAnnotation(infoList.getSelectedValues());
+                    displayInfoForAnnotation(infoList.getSelectedValuesList());
                     Depot depot = new Depot();
                     infoList.setToolTipText(depot.getContext((Annotation) infoList.getSelectedValue()));
                 }
@@ -4612,7 +4617,7 @@ public class GUI extends JFrame {
                 if ((selected < 0) || (selected > size - 1))
                     return;
 
-                selectProject(selected);
+                selectProject(selected, null);
 
             }
         } catch (Exception ex) {
@@ -4621,22 +4626,24 @@ public class GUI extends JFrame {
 
     }// GEN-LAST:event_jList_NAV_projectsMouseClicked
 
-    public String selectProject(String projectName) {
+    public String selectProject(String projectName, String fileName) {
         String response = "Project: " + projectName + " not found";
         if (projectIdMap.containsKey(projectName)) {
             if (Parameters.previousProjectPath == null || !Parameters.previousProjectPath.endsWith(projectName)) {
-                selectProject(projectIdMap.get(projectName));
+                selectProject(projectIdMap.get(projectName), fileName);
                 response = "success";
             } else {
                 response = "Project: " + projectName + " has already loaded";
-                ready = true;
+                status = 1;
+                showFileContextInTextPane(fileName);
             }
         } else
-            ready = true;
+            status = 4;
+        eHOST.logger.debug(response);
         return response;
     }
 
-    public void selectProject(int projectId) {
+    public void selectProject(int projectId, String fileName) {
         // ##1## empty the corpus list for current project
         env.Parameters.corpus.RemoveAll();
         adjudication.data.AdjudicationDepot.clear();
@@ -4659,8 +4666,8 @@ public class GUI extends JFrame {
             return;
         }
 
-        File f = entry.getFolder();
-        if (f == null) {
+        File p = entry.getFolder();
+        if (p == null) {
             log.LoggingToFile
                     .log(Level.SEVERE,
                             "#### ERROR #### 1102110353:: current project we got from you selected item in the list of project is NULL");
@@ -4671,12 +4678,17 @@ public class GUI extends JFrame {
         // adding new span
 
         // move code to a separate function
-        selectProject(f);
+        selectProject(p, fileName);
     }
 
-    public void selectProject(File f) {
+    public void selectProject(File f, String fileName) {
         try {
-            ready = false;
+            if (status > 1) {
+                eHOST.logger.debug("Reset gui status to 0.");
+                status = 0;
+            }
+
+            eHOST.logger.debug("Selecting project: " + f.getName() + "...\t Current status" + status);
             this.setReviewMode(reviewmode.ANNOTATION_MODE);
             // ##3## set current project
             env.Parameters.WorkSpace.CurrentProject = f;
@@ -4736,7 +4748,7 @@ public class GUI extends JFrame {
             File[] corpus = listCorpus_inProjectFolder(f);
 
             listCorpus(corpus);
-
+            status = 1;
             // add into memory
             if (corpus != null) {
                 env.Parameters.corpus.LIST_ClinicalNotes.clear();
@@ -4754,7 +4766,7 @@ public class GUI extends JFrame {
 
                 showTextFiles_inComboBox();
 
-                showFirstFile_of_corpus();
+                showFirstFile_of_corpus(fileName, false);
             }
 
             // update screen
@@ -4811,7 +4823,7 @@ public class GUI extends JFrame {
 
             jLabel_infobar.setText("<html><b>Current Project:</b> <font color=blue>"
                     + f.getAbsolutePath() + "</font>.</html>");
-            ready = true;
+//            status = true;
 
         } catch (Exception ex) {
             System.out.println("error 1204031721");
@@ -4824,7 +4836,7 @@ public class GUI extends JFrame {
      * read file list from
      */
     public void refreshFileList() {
-        ready = false;
+        eHOST.logger.debug("Starting refreshFileList...");
         File[] corpus = listCorpus_inProjectFolder(env.Parameters.WorkSpace.CurrentProject);
         if (corpus != null)
             Arrays.sort(corpus, NameFileComparator.NAME_COMPARATOR);
@@ -4842,7 +4854,6 @@ public class GUI extends JFrame {
 
         showTextFiles_inComboBox();
         goUserDesignated();
-        ready = true;
     }
 
     private void listCorpus(File[] corpus) {
@@ -6020,7 +6031,7 @@ public class GUI extends JFrame {
             setFlag_of_DifferenceMatching_Display(env.Parameters.enabled_Diff_Display);
 //            System.out.println("Current Status of the Difference Indicator = "
 //                    + env.Parameters.enabled_Diff_Display);
-            display_repaintHighlighter();
+//            display_repaintHighlighter();
 
             setFlag_of_AttributeEditorDisplay_Display(env.Parameters.enabled_displayAttributeEditor);
 
@@ -6367,9 +6378,27 @@ public class GUI extends JFrame {
                 continue;
             if (corpusfile.file == null)
                 continue;
-
             jComboBox_InputFileList.addItem(corpusfile.file.getName());
+
         }
+
+
+//        jComboBox_InputFileList.addPopupMenuListener(new PopupMenuListener() {
+//            @Override
+//            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+//            }
+//
+//            @Override
+//            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+//                eHOST.logger.debug("Selectd " + jComboBox_InputFileList.getSelectedIndex());
+//            }
+//
+//            @Override
+//            public void popupMenuCanceled(PopupMenuEvent e) {
+//            }
+//        });
+
+
     }
 
     /**
@@ -6411,6 +6440,16 @@ public class GUI extends JFrame {
         if (_userWantToQuit) {
             if (Parameters.RESTFulServer) {
                 shutdownRESTServer();
+                new Timer().schedule(
+                        new TimerTask() {
+                            @Override
+                            public void run() {
+                                // Your code here
+                                System.exit(0);
+                            }
+                        },
+                        500
+                );
             } else
                 System.exit(-99);
         }
@@ -6420,7 +6459,12 @@ public class GUI extends JFrame {
     private void shutdownRESTServer() {
         final String uri = String.format("http://%s:%s/shutdown", RESTFulConfig._address, RESTFulConfig._port);
         RestTemplate restTemplate = new RestTemplate();
-        String result = restTemplate.getForObject(uri, String.class);
+        String result = "eHOST REST Server cannot be connected.";
+        try {
+            result = restTemplate.getForObject(uri, String.class);
+        } catch (Exception e) {
+
+        }
         System.out.println(result);
     }
 
@@ -7247,12 +7291,12 @@ public class GUI extends JFrame {
         // boolean refreshScreen = false;
 
         // get current span and annotation
-        Object[] selectedObjs = this.jList_Spans.getSelectedValues();
+        List selectedObjs = this.jList_Spans.getSelectedValuesList();
         if (selectedObjs == null)
             return;
         userInterface.structure.SpanObj spanobj = null;
         try {
-            spanobj = (userInterface.structure.SpanObj) selectedObjs[0];
+            spanobj = (userInterface.structure.SpanObj) selectedObjs.get(0);
         } catch (Exception ex) {
             spanobj = null;
         }
@@ -8047,7 +8091,9 @@ public class GUI extends JFrame {
             }
 
             ((userInterface.txtScreen.TextScreen) this.textPaneforClinicalNotes).repaint();
+            eHOST.logger.debug("display_showSymbolIndicators done.");
         } catch (Exception ex) {
+            eHOST.logger.debug(ex.getMessage());
         }
     }
 
@@ -8370,7 +8416,7 @@ public class GUI extends JFrame {
         // for it
         // and jump to it.
         if (currentNext != null) {
-            displayInfoForAnnotation(new Object[]{currentNext});
+            displayInfoForAnnotation(Arrays.asList(new Object[]{currentNext}));
             display_setCarpetOn(currentNext.spanset.getMinimumStart());
         }
         return true;
@@ -8410,7 +8456,7 @@ public class GUI extends JFrame {
      *
      * @param annotations - the annotations to display info for.
      */
-    private void displayInfoForAnnotation(Object[] annotations) {
+    private void displayInfoForAnnotation(List annotations) {
         Vector<Annotation> toSet = new Vector<Annotation>();
         for (Object annotation : annotations) {
             toSet.add((Annotation) annotation);
@@ -8515,6 +8561,7 @@ public class GUI extends JFrame {
                     "~~~~ WARNING ~~~~:: fail to refresh the combolist for ");
         }
         jComboBox_InputFileList.updateUI();
+
         showFileContextInTextPane(jComboBox_InputFileList.getSelectedIndex());
 
     }
@@ -8596,28 +8643,56 @@ public class GUI extends JFrame {
         return commons.Filesys.ReadFileContents(_rawTextDocument);
     }
 
+    private int getFileIdByName(String fileName) {
+        int selectFileId = -1;
+        if (fileName == null || fileName.trim().length() == 0)
+            return selectFileId;
+        if (fileIdMap.containsKey(fileName)) {
+            selectFileId = fileIdMap.get(fileName);
+        } else {
+            for (String loadedFileName : fileIdMap.keySet()) {
+                if (loadedFileName.contains(fileName)) {
+                    selectFileId = fileIdMap.get(loadedFileName);
+                    break;
+                }
+            }
+        }
+        return selectFileId;
+    }
+
 
     public String showFileContextInTextPane(String fileName) {
         String response = "File: '" + fileName + "' not found in project: " + Parameters.previousProjectPath;
-        int selectFileId=this.jComboBox_InputFileList.getSelectedIndex();
+        int previousSelectFileId = this.jComboBox_InputFileList.getSelectedIndex();
+        int selectFileId = -1;
         if (fileIdMap.containsKey(fileName)) {
-            selectFileId=fileIdMap.get(fileName);
+            selectFileId = fileIdMap.get(fileName);
             response = "success";
         } else {
             for (String loadedFileName : fileIdMap.keySet()) {
                 if (loadedFileName.contains(fileName)) {
-                    selectFileId=fileIdMap.get(loadedFileName);
+                    selectFileId = fileIdMap.get(loadedFileName);
                     response = "Load file: " + loadedFileName;
                     break;
                 }
             }
         }
-        if(selectFileId>=jComboBox_InputFileList.getItemCount()) {
-            ready = true;
+        if (previousSelectFileId == selectFileId) {
+            status = 4;
+            return "Still the same file";
+        }
+
+        if (selectFileId >= this.jList_corpus.getModel().getSize()) {
+            status = 4;
+            eHOST.logger.debug("No file found for file index id: " + selectFileId);
             return "No file found";
         }
-        this.jComboBox_InputFileList.setSelectedIndex(selectFileId);
-        showFileContextInTextPane(selectFileId);
+        this.jList_corpus.ensureIndexIsVisible(selectFileId);
+        this.jList_corpus.setSelectedIndex(selectFileId);
+
+//        setFlag_allowToAddSpan(false);
+
+        goUserDesignatedTable();
         return response;
     }
 
@@ -8637,7 +8712,7 @@ public class GUI extends JFrame {
                 return;
             jComboBox_InputFileList.setSelectedIndex(index);
             jList_corpus.setSelectedIndex(index);
-            jList_corpus.ensureIndexIsVisible(jList_corpus.getSelectedIndex());
+            jList_corpus.ensureIndexIsVisible(index);
 
             // ##2 get the file you want to show in text pane.
             // To this index, get matched absolute textsourceFilename
@@ -8661,10 +8736,10 @@ public class GUI extends JFrame {
             );
 
             display.ShowTextAndBackgroundHighLight(contents);
-
+            eHOST.logger.debug("file content highlighted.\t Current status\t" + status);
         } catch (Exception ex) {
-            ready = true;
-            log.LoggingToFile.log(Level.SEVERE, "error 1417");
+            status = 4;
+            eHOST.logger.warn("error 1417");
         }
 
     }
@@ -8674,7 +8749,7 @@ public class GUI extends JFrame {
      */
     public void showFileContextInTextPane(File _current_text_file) {
         if (_current_text_file == null) {
-            log.LoggingToFile.log(Level.SEVERE, "error 1103251356:: fail to find file context");
+            eHOST.logger.warn("error 1103251356:: fail to find file context");
             return;
         }
 
@@ -8792,7 +8867,7 @@ public class GUI extends JFrame {
         }
     }
 
-    public void showFirstFile_of_corpus() {
+    public void showFirstFile_of_corpus(String fileName, boolean refresh) {
 
         textPaneforClinicalNotes.setText(null);
         // ##1##
@@ -8814,7 +8889,11 @@ public class GUI extends JFrame {
             }
 
             WorkSet.latestScrollBarValue = 0;
-            showFileContextInTextPane(loadProjectPreviousViewedFileId());
+            int fileId = getFileIdByName(fileName);
+            if (fileId == -1)
+                fileId = loadProjectPreviousViewedFileId();
+            showFileContextInTextPane(fileId);
+
 
         } catch (Exception ex) {
             log.LoggingToFile.log(Level.SEVERE,
@@ -8825,7 +8904,8 @@ public class GUI extends JFrame {
         disableAnnotationDisplay();
         disable_AnnotationEditButtons();
         // currentScreen = infoScreens.NONE;
-        refreshInfo();
+        if (refresh)
+            refreshInfo();
     }
 
     private void restoreDeleted() {
@@ -8843,9 +8923,9 @@ public class GUI extends JFrame {
     }
 
 
-
     public void goUserDesignatedTable() {
         // resetVerifier();
+        selectedFromComobox = false;
         ((userInterface.annotationCompare.ExpandButton) jPanel60).setStatusInvisible();
         ((userInterface.annotationCompare.ExpandButton) jPanel60).noDiff();
 
@@ -9706,7 +9786,7 @@ public class GUI extends JFrame {
             try {
                 writer.write("\n");
             } catch (IOException ex) {
-                Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(eHOST.class.getName()).log(Level.SEVERE, null, ex);
             }
             for (Annotation annot : art.annotations) {
                 annot.setVerified(false);
@@ -9738,7 +9818,7 @@ public class GUI extends JFrame {
         try {
             writer.close();
         } catch (IOException ex) {
-            Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(eHOST.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -10081,8 +10161,13 @@ public class GUI extends JFrame {
                         verifierFlagged.setText("<html>" + verifierText + "<font color = \"blue\">"
                                 + verifierAnnotations.size() + "</font></html>");
                     }
+                    GUI.status++;
+                    if (GUI.status > GUI.readyThreshold)
+                        GUI.selectedFromComobox = true;
+                    eHOST.logger.debug("refreshInfo finished.\t Current status: " + status);
                 } catch (Exception ex) {
-
+                    eHOST.logger.debug("refreshInfo throw exceptions");
+                    GUI.status = 4;
                 }
             }
 
@@ -10637,7 +10722,7 @@ public class GUI extends JFrame {
 
     public void switchTo(String project, String file) {
         File projectFile = new File(project);
-        selectProject(projectFile);
+        selectProject(projectFile, null);
         enterTab_ResultEditor();
         int n = jComboBox_InputFileList.getItemCount();
         for (int i = 0; i < n; i++) {

@@ -33,7 +33,7 @@ public class LogCleaner {
      * Return the files under the root folder of eHOST.
      *
      * @return files under the root folder of eHOST.
-     * @throws Exception.
+     * @throws Exception
      */
     private File[] getFiles() throws Exception {
         try {
