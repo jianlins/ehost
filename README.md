@@ -11,6 +11,7 @@ A few highglighted updates:
 6. Sync the highlighter of file navigation panel when selecting file from other places (e.g. dropdown list)
 7. Save last view file within each project, so that annotators can be easily resumed to that file when open a project next time.
 8. Allows remote control through RESTful API.
+9. Optimize GUI rendering. Previous version has several redundant refreshing and rendering.
 
 ******
 To enable RESTful server for outside app controls:
