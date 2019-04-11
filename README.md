@@ -28,12 +28,12 @@ http://127.0.0.1:8009/shutdown
 
 To navigate to a project:
 http://127.0.0.1:8009/ehost/xxx
-xxx is the project directory name (not absolute path)
+* xxx is the project directory name (not absolute path)
 
 To navigate to a project and display a specific file:
 http://127.0.0.1:8009/ehost/xxx/yyy
-xxx is the project directory name (not absolute path)
-yyy file name or partial file name (if multiple file matched, only first one will be displayed)
+* xxx is the project directory name (not absolute path)
+* yyy is the file name or partial file name (if multiple file matched, only first one will be displayed)
 
 You can change the server port by editing the *application.properties* file.
 
