@@ -5,13 +5,14 @@ This is an imported and polished version of [eHOST: The Extensible Human Oracle 
 A few highglighted updates: 
 1. Rearrange the code under maven framework
 2. Allows to delete annotation with single press "Delete" key
-3. Sort projects on names
-4. Sort files on names
-5. Allows to export annotations to excel (Developed by [Chris Leng](https://github.com/chrisleng/ehost))
-6. Sync the highlighter of file navigation panel when selecting file from other places (e.g. dropdown list)
-7. Save last view file within each project, so that annotators can be easily resumed to that file when open a project next time.
-8. Allows remote control through RESTful API.
-9. Optimize GUI rendering. Previous version has several redundant refreshing and rendering.
+3. Allows hot key navigate among documents (Ctrl+PageUp, Ctrl+PageDown)
+4. Sort projects on names
+5. Sort files on names
+6. Allows to export annotations to excel (Developed by [Chris Leng](https://github.com/chrisleng/ehost))
+7. Sync the highlighter of file navigation panel when selecting file from other places (e.g. dropdown list)
+8. Save last view file within each project, so that annotators can be easily resumed to that file when open a project next time.
+9. Allows remote control through RESTful API.
+10. Optimize GUI rendering. Previous version has several redundant refreshing and rendering.
 
 ******
 To enable RESTful server for outside app controls:
