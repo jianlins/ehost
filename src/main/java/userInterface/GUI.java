@@ -1370,7 +1370,7 @@ public class GUI extends JFrame {
         });
         jList_corpus.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent evt) {
-                status=1;
+                status = 1;
                 jList_corpusMouseClicked(evt);
             }
         });
@@ -4306,6 +4306,16 @@ public class GUI extends JFrame {
                 case KeyEvent.VK_RIGHT:
                 case KeyEvent.VK_DOWN:
                     moveToNextAnnotation(true);
+                    break;
+                case KeyEvent.VK_PAGE_DOWN:
+                    if (!evt.isAltDown() && evt.isControlDown()) {
+                        jButton14.doClick();
+                    }
+                    break;
+                case KeyEvent.VK_PAGE_UP:
+                    if (!evt.isAltDown() && evt.isControlDown()) {
+                        jButton13.doClick();
+                    }
                     break;
             }
         }
