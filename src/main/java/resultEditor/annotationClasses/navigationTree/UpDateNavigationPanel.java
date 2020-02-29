@@ -77,7 +77,7 @@ public class UpDateNavigationPanel {
         try {
             // ##1## clear contents and reset root node in the tree view
             clearDisplay();
-            System.out.println(DepotOfRelationships.isExpanded);
+//            System.out.println(DepotOfRelationships.isExpanded);
             // Build the basic nodes of this treeview, such as nodes: 
             // "Attributes", "Relationships:", "Classes:" 
             buildTreeFrame();

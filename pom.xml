@@ -3,10 +3,9 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>edu.utah.bmi.nlp</groupId>
     <artifactId>ehost</artifactId>
-    <version>1.30-SNAPSHOT</version>
+    <version>1.31-SNAPSHOT</version>
     <dependencies>
         <dependency>
             <groupId>net.sf.ingenias</groupId>
@@ -136,7 +135,14 @@
                         </goals>
                     </execution>
                 </executions>
-
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19.1</version>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -148,6 +154,112 @@
                 <goals>
                     <goal>testCompile</goal>
                 </goals>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.0.1</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>copy-conf</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/deploy</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}</directory>
+                                    <filtering>false</filtering>
+                                    <includes>
+                                        <include>*.properties</include>
+                                        <include>*.sys</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-script</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/deploy</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>script</directory>
+                                    <filtering>true</filtering>
+                                    <excludes>
+                                        <exclude>mvn_install_jar.sh</exclude>
+                                        <exclude>zipper.sh</exclude>
+                                    </excludes>
+                                </resource>
+                            </resources>
+                            <nonFilteredFileExtensions>
+                                <nonFilteredFileExtension>docx</nonFilteredFileExtension>
+                            </nonFilteredFileExtensions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-license</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/deploy/</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>./</directory>
+                                    <filtering>false</filtering>
+                                    <includes>
+                                        <include>LICENSE</include>
+                                        <include>NOTICE</include>
+                                        <include>eHOST.sys</include>
+                                        <include>*.pdf</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>reset_permission</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <target>
+                                <chmod file="target/deploy/run" perm="755"/>
+                                <chmod file="target/deploy/run.bat" perm="755"/>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                    <!--                    <execution>-->
+                    <!--                        <id>rename_jar</id>-->
+                    <!--                        <phase>package</phase>-->
+                    <!--                        <configuration>-->
+                    <!--                            <target>-->
+                    <!--                                <copy file="${project.build.directory}/tmp/ehost-1.30-SNAPSHOT.jar" tofile="${project.build.directory}/deploy/ehost_${version}.jar" />-->
+                    <!--                            </target>-->
+                    <!--                        </configuration>-->
+                    <!--                        <goals>-->
+                    <!--                            <goal>run</goal>-->
+                    <!--                        </goals>-->
+                    <!--                    </execution>-->
+                </executions>
             </plugin>
             <!--<plugin>-->
             <!--<groupId>org.apache.maven.plugins</groupId>-->

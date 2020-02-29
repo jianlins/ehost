@@ -1,0 +1,3 @@
+cd "$( dirname "$0" )";
+echo "Welcome to eHOST ${version}"
+jre/bin/java -jar ehost-${version}.jar
