@@ -6,6 +6,11 @@
     <groupId>edu.utah.bmi.nlp</groupId>
     <artifactId>ehost</artifactId>
     <version>1.31-SNAPSHOT</version>
+    <properties>
+        <project.java.version>1.8</project.java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>net.sf.ingenias</groupId>
