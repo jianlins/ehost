@@ -2,6 +2,8 @@
 
 This is an imported and polished version of [eHOST: The Extensible Human Oracle Suite of Tools an open source annotation tool](https://code.google.com/archive/p/ehost/).
 
+Compiled jars can be downloaded from the [Releases](https://github.com/jianlins/ehost/releases)
+
 A few highglighted updates: 
 1. Rearrange the code under maven framework
 2. Allows to delete annotation with single press "Delete" key
