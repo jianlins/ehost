@@ -11,6 +11,16 @@
     <classMention id="EHOST_Instance_1">
         <mentionClass id="CONCEPT">attention</mentionClass>
     </classMention>
+    <annotation>
+        <mention id="EHOST_Instance_2" />
+        <annotator id="eHOST_2010">Extensible_Human_Oracle_Suite_of_Tools</annotator>
+        <span start="490" end="494" />
+        <spannedText>then</spannedText>
+        <creationDate>Fri Jan 19 03:16:57 MST 2024</creationDate>
+    </annotation>
+    <classMention id="EHOST_Instance_2">
+        <mentionClass id="CONCEPT">then</mentionClass>
+    </classMention>
     <eHOST_Adjudication_Status version="1.0">
         <Adjudication_Selected_Annotators version="1.0" />
         <Adjudication_Selected_Classes version="1.0" />
