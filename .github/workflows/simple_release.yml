@@ -26,7 +26,7 @@ jobs:
         run: mvn clean package
 
       - name: Zip the package
-        run: zip -r myapp-${{ env.MAVEN_VERSION }}.zip target/
+        run: zip -r eHOST-${{ env.MAVEN_VERSION }}.zip target/deploy/*
 
       - name: Create Release
         id: create_release
@@ -45,7 +45,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.id }}
-          asset_path: ./myapp-${{ env.MAVEN_VERSION }}.zip
-          asset_name: myapp-${{ env.MAVEN_VERSION }}.zip
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./eHOST-${{ env.MAVEN_VERSION }}.zip
+          asset_name: eHOST-${{ env.MAVEN_VERSION }}.zip
           asset_content_type: application/zip
