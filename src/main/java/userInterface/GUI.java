@@ -728,7 +728,7 @@ public class GUI extends JFrame {
         jSplitPane_Annotations_Comparator.setVerifyInputWhenFocusTarget(false);
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        title = "eHOST V1.30";
+        title = "eHOST V1.32";
 //        MavenXpp3Reader reader = new MavenXpp3Reader();
 //        try {
 //            Model model = reader.read(new FileReader("pom.xml"));
