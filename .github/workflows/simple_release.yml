@@ -15,6 +15,9 @@ jobs:
         with:
           java-version: 1.8
 
+      - name: install custom jars
+        run: bash script/mvn_install_jar.sh
+
       - name: Get the version
         id: get_version
         run: echo "MAVEN_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
