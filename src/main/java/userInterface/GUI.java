@@ -29,6 +29,7 @@ import resultEditor.workSpace.WorkSet;
 import umls.UMLSBrowser;
 import verifier.VerifyChallenge2011;
 import webservices.AssignmentsScreen;
+import workSpace.ProjectLock;
 import workSpace.switcher.RecentWorkSpace;
 
 import javax.swing.*;
@@ -65,8 +66,6 @@ public class GUI extends JFrame {
     protected enum fileInputType {
         importXMLandPin, selectClinicalTextFiles, setXmlOutputforConcepts
     }
-
-    ;
 
     private AnnotationRelationship addingTo = null;
 
@@ -106,7 +105,6 @@ public class GUI extends JFrame {
      * standard border of text field
      */
     protected javax.swing.border.Border STANDARD_TEXTFIELD_BOARD;
-    final protected boolean RELEASE = true;
 
 
     /**
@@ -121,12 +119,12 @@ public class GUI extends JFrame {
     }
 
     private infoScreens currentScreen = infoScreens.NONE;
-    private HashSet<String> classesList = new HashSet<String>();
-    private HashSet<String> annotatorsList = new HashSet<String>();
-    private Vector<Annotation> annotationsList = new Vector<Annotation>();
-    private Vector<classConflict> conflictWithWorking = new Vector<classConflict>();
-    private Vector<spanOverlaps> overlappingAnnotations = new Vector<spanOverlaps>();
-    private Vector<Annotation> verifierAnnotations = new Vector<Annotation>();
+    private HashSet<String> classesList = new HashSet<>();
+    private HashSet<String> annotatorsList = new HashSet<>();
+    private Vector<Annotation> annotationsList = new Vector<>();
+    private Vector<classConflict> conflictWithWorking = new Vector<>();
+    private Vector<spanOverlaps> overlappingAnnotations = new Vector<>();
+    private Vector<Annotation> verifierAnnotations = new Vector<>();
     private String annotationsText = "Number of Annotations: ";
     private String annotatorsText = "Number of Annotators: ";
     private String classesText = "Number of Markables: ";
@@ -562,11 +560,11 @@ public class GUI extends JFrame {
         confirmExit.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         confirmExit.setTitle("Closing?");
         confirmExit.setAlwaysOnTop(true);
-        confirmExit.setResizable(false);
+        confirmExit.setResizable(true);
 
         jPanel13.setBorder(BorderFactory.createLineBorder(new Color(238, 238,
                 238), 4));
-        jPanel13.setMaximumSize(new Dimension(388, 136));
+        jPanel13.setMaximumSize(new Dimension(388, 156));
         jPanel13.setLayout(new BorderLayout());
 
         jPanel14.setLayout(new BorderLayout());
@@ -3154,6 +3152,8 @@ public class GUI extends JFrame {
 
         // popup a dialog to ask whether you want to save modificaiton or not
         // if there is any changed have been made on annotations.
+
+
         this.saveModification();
         this.saveProjectCurrentViewingFileId();
 
@@ -3161,6 +3161,7 @@ public class GUI extends JFrame {
         config.system.SysConf.saveSystemConfigure();
         // save setting for current project
         config_saveProjectSetting();
+
         popupExitDialog();
 
     }// GEN-LAST:event_formWindowClosing
@@ -4698,6 +4699,16 @@ public class GUI extends JFrame {
                 status = 0;
             }
 
+            // check if project is used by another eHOST instance
+
+            ProjectLock lock = new ProjectLock(f);
+
+            if (!lock.acquireLock()) {
+                eHOST.logger.warn("The project is already in use by another user.");
+                return;
+            }
+
+
             eHOST.logger.debug("Selecting project: " + f.getName() + "...\t Current status" + status);
             this.setReviewMode(reviewmode.ANNOTATION_MODE);
             // ##3## set current project
@@ -4949,7 +4960,7 @@ public class GUI extends JFrame {
      * <p>
      * false : if user selected "no".
      */
-    private boolean popDialog_Asking_ChangeSaving() {
+    private boolean popDialog_Asking_YesNo(String message, String title) {
         Object[] options = {"Yes, please", "No"};
         final JOptionPane optionPane = new JOptionPane();
         int xp = NavigationPanel1.getWidth();
@@ -4958,15 +4969,17 @@ public class GUI extends JFrame {
 
         optionPane.setLocation(this.getX() + xp + (int) ((this.getWidth() - xp - 500) / 2),
                 this.getY() + yp + (int) ((this.getHeight() - yp - 300) / 2));
-        int answer = optionPane.showOptionDialog(this,
-                "<html>Do you want to save your modifications?<html>", "Save Changes:",
-                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        int answer = optionPane.showOptionDialog(this, message, title, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
         if (answer == JOptionPane.YES_OPTION) {
             return true;
         } else {
             return false;
         }
+    }
+
+    private boolean popDialog_Asking_ChangeSaving() {
+        return this.popDialog_Asking_YesNo("<html>Do you want to save your modifications?<html>", "Save Changes:");
     }
 
     private void jLabel21MouseClicked(MouseEvent evt) {// GEN-FIRST:event_jLabel21MouseClicked
@@ -4983,6 +4996,10 @@ public class GUI extends JFrame {
                 this.saveto_originalxml();
             }
         }
+
+//        release project lock
+        ProjectLock lock = new ProjectLock(env.Parameters.WorkSpace.CurrentProject.getAbsolutePath());
+        lock.releaseLock();
 
         hideStatusButtons();
 
@@ -6488,7 +6505,7 @@ public class GUI extends JFrame {
         // program will confirm whether user wants "exit" or not
 
         // set this dialog in the middle of current window
-        confirmExit.setSize(416, 200);
+        confirmExit.setSize(416, 230);
         int x = this.getX() + (int) ((this.getWidth() - confirmExit.getWidth()) / 2);
         int y = this.getY() + (int) ((this.getHeight() - confirmExit.getHeight()) / 2);
         confirmExit.setLocation(x, y);
@@ -7513,6 +7530,18 @@ public class GUI extends JFrame {
      * save annotations belongs to designated files and assigned directionary.
      */
     private void saveto_originalxml() {
+
+
+        // add safety checking
+        ProjectLock lock = new ProjectLock(env.Parameters.WorkSpace.CurrentProject.getAbsolutePath());
+        if (!lock.lockedByMe()) {
+            boolean forceSave = this.popDialog_Asking_YesNo("<html>It seems another user (" + lock.getUserName() + " on " + lock.getMachineName() + ") has opened this project while you are working on it. Force to save the annotations will results the other instance lost all the work. Are you sure to proceed?<html>", "Warning:");
+            if (!forceSave) {
+                eHOST.logger.info("Skip saving by user's choice.");
+                return;
+            }
+        }
+
         // save annotations to XML
         resultEditor.save.Save saver = new resultEditor.save.Save(this);
         String return_msg = saver.quickXMLSaving();
@@ -7944,6 +7973,7 @@ public class GUI extends JFrame {
         try {
             annotation = WorkSet.currentAnnotation;
         } catch (Exception ex) {
+            ex.printStackTrace();
             log.LoggingToFile
                     .log(Level.SEVERE,
                             "Error 1009231710 : fail to get current while try to save changes of comments!");
@@ -8728,6 +8758,14 @@ public class GUI extends JFrame {
             // To this index, get matched absolute textsourceFilename
             // File currentTextSource =
             // env.clinicalNoteList.CorpusLib.getFile(index);
+            if (env.Parameters.corpus.LIST_ClinicalNotes.size() < 0) {
+                eHOST.logger.debug("No file opened yet.");
+                return;
+            }
+            if (index >= env.Parameters.corpus.LIST_ClinicalNotes.size()) {
+                eHOST.logger.warn("Try to access file index " + index + " greater than the total number of files (" + env.Parameters.corpus.LIST_ClinicalNotes.size() + ")in current project. Ignore this request.");
+                return;
+            }
             File currentTextSource = env.Parameters.corpus.LIST_ClinicalNotes.get(index).file;
 
             // ##2.1 record current operatig file into workset
@@ -10580,6 +10618,8 @@ public class GUI extends JFrame {
                 this.saveto_originalxml();
             }
         }
+        ProjectLock lock = new ProjectLock(env.Parameters.WorkSpace.CurrentProject.getAbsolutePath());
+        lock.releaseLock();
     }
 
     private void saveProjectCurrentViewingFileId() {

@@ -6,6 +6,8 @@
 package config.system;
 
 import config.Block;
+
+import java.nio.file.Paths;
 import java.util.Vector;
 
 /**
@@ -17,12 +19,24 @@ import java.util.Vector;
 public class SysConf {
 
     /**The name of eHOST system configure*/
-    public final static String SYS_CONFIGURE = "eHOST.sys";
+    public static String SYS_CONFIGURE;
 
     /**Load systemm setting variables of eHOST from disk to memory.*/
-    public static void loadSystemConfigure()
+
+    public static void loadSystemConfigure(){
+        if (SYS_CONFIGURE==null)
+            loadSystemConfigure(null);
+        else
+            loadSystemConfigure(SYS_CONFIGURE);
+    }
+    public static void loadSystemConfigure(String ehostConfigHome)
     {
         // split configure file into blocks
+        if (ehostConfigHome!=null)
+            SYS_CONFIGURE=Paths.get(ehostConfigHome,"eHOST.sys").toString();
+        else
+            SYS_CONFIGURE= Paths.get(System.getProperty("user.home"),".ehost","eHOST.sys").toString();
+
         config.Extracter extracter = new config.Extracter(SYS_CONFIGURE);
         Vector<Block> blocks = extracter.getBlocks();
 

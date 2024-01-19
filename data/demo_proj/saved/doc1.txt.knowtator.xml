@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<annotations textSource="doc1.txt">
+    <annotation>
+        <mention id="EHOST_Instance_1" />
+        <annotator id="eHOST_2010">sjl</annotator>
+        <span start="578" end="587" />
+        <spannedText>attention</spannedText>
+        <annotationComment>eeedd</annotationComment>
+        <creationDate>Thu Jan 18 19:04:39 MST 2024</creationDate>
+    </annotation>
+    <classMention id="EHOST_Instance_1">
+        <mentionClass id="CONCEPT">attention</mentionClass>
+    </classMention>
+    <eHOST_Adjudication_Status version="1.0">
+        <Adjudication_Selected_Annotators version="1.0" />
+        <Adjudication_Selected_Classes version="1.0" />
+        <Adjudication_Others>
+            <CHECK_OVERLAPPED_SPANS>false</CHECK_OVERLAPPED_SPANS>
+            <CHECK_ATTRIBUTES>false</CHECK_ATTRIBUTES>
+            <CHECK_RELATIONSHIP>false</CHECK_RELATIONSHIP>
+            <CHECK_CLASS>false</CHECK_CLASS>
+            <CHECK_COMMENT>false</CHECK_COMMENT>
+        </Adjudication_Others>
+    </eHOST_Adjudication_Status>
+</annotations>
+

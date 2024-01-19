@@ -11,7 +11,6 @@
 
 
 [ANNOTATOR]
-sjl
 
 [ENABLE_DIFF_BUTTON]
 false
@@ -39,4 +38,3 @@ true
 
 [RESTFUL_SERVER]
 true
-

@@ -573,8 +573,9 @@ public class OutputToXML {
             //#### handle comment and verifier suggestions here
             String commentstr = handleCommentAndVerifierSuggestions( annotationComment, verifierSuggestions, verifierFounds );            
             if ( commentstr != null ){
-                if ( (commentstr.trim().length() > 0) && ( commentstr.replaceAll("\"", " ").trim().length() > 0 ) )
-                    annotation.addContent( new Element("annotationComment").setText( commentstr ) );
+                String cleaned_commentstr=commentstr.replace("\"","").trim();
+                if ( cleaned_commentstr.length() > 0 )
+                    annotation.addContent( new Element("annotationComment").setText( cleaned_commentstr ) );
             }
             
             
