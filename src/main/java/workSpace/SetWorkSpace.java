@@ -308,7 +308,8 @@ public class SetWorkSpace extends javax.swing.JFrame {
 
         
 
-            gui.display_hideEditor();  
+            gui.display_hideEditor();
+
             // make sure current workspace is displayed on the combobox
             //gui.setCurrentWorkspace_selected(env.Parameters.WorkSpace.CurrentProject);
             this.dispose();

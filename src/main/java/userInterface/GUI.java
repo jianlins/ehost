@@ -256,6 +256,8 @@ public class GUI extends JFrame {
      */
     public void display_hideEditor() {
         jCardcontainer_interactive.setVisible(false);
+        this.requestFocus();
+        this.toFront();
     }
 
     /**
@@ -7181,6 +7183,7 @@ public class GUI extends JFrame {
 
             ((resultEditor.customComponents.ExpandablePanel_editor) NavigationPanel_editor)
                     .setDiffSplitPane(this.jPanel_MainFrame_Right);
+
             // ((ResultEditor.CustomComponents.ExpandablePanel_editor)NavigationPanel_editor).
             // Import components into custom component, expandable button, for
             // control.
