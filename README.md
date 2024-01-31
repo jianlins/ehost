@@ -22,6 +22,8 @@ java -jar eHOST-xxx.jar -w /home/ehost_workspace/
 ```
 4. Add a project lock to prevent multiple users (or single user open mutliple instances of eHOST) from working on the same project at the same time. Because in that situation, the saving will be competition with each other and result in annotation lost.
 
+
+What's new in 1.3.1:
 A few highglighted updates: 
 1. Rearrange the code under maven framework
 2. Allows to delete annotation with single press "Delete" key
