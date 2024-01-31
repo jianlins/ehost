@@ -24,6 +24,7 @@ java -jar eHOST-xxx.jar -w /home/ehost_workspace/
 
 
 What's new in 1.3.1:
+
 A few highglighted updates: 
 1. Rearrange the code under maven framework
 2. Allows to delete annotation with single press "Delete" key
