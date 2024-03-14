@@ -18,6 +18,7 @@ import report.iaaReport.analysis.detailsNonMatches.AnalyzedAnnotationDifference;
 import report.iaaReport.analysis.detailsNonMatches.Comparator;
 import report.iaaReport.analysis.detailsNonMatches.OthersAnnotations;
 import resultEditor.annotations.Annotation;
+import rest.server.RESTFulConfig;
 
 /**
  *
@@ -57,7 +58,7 @@ public class GenHtmlForNonMatches
                 // assemble the name of the file
                 File file = new File(reportfolder.getAbsolutePath() + File.separatorChar + filenameStr + "-UNMATCHED-SUMMARY"  + ".html" );
                 FileOutputStream output = new FileOutputStream( file );
-
+                String projectName=reportfolder.getParentFile().getName();
                 PrintStream p = new PrintStream(output);
 
                 // #### assemble html head
@@ -68,7 +69,7 @@ public class GenHtmlForNonMatches
 
                 // #### html assemble: output each non-matched annotaions of current annotator
                 outputNonMatchedDetails( p, analyzedAnnotator, analyzedAnnotator.mainAnnotator.trim(),
-                        analyzedAnnotator.annotators );
+                        analyzedAnnotator.annotators ,projectName);
 
                 // print separated details of matches
                 buildSeparatedDetailsByClass( reportfolder, analyzedAnnotator.mainAnnotator.trim() );
@@ -159,18 +160,18 @@ public class GenHtmlForNonMatches
 
 
 
-    /**To the given record of non-matched annotations of an annotator, we
+    /**
+     * To the given record of non-matched annotations of an annotator, we
      * list them and assemble them in a html report.
      *
-     * @param   p
-     *          the object of the PrintStream of the html which we are generating.
-     *
+     * @param p           the object of the PrintStream of the html which we are generating.
+     * @param projectName
      */
     private PrintStream outputNonMatchedDetails(
             PrintStream p,
             AnalyzedAnnotator analyzedAnnotator,
             String annotatorName,
-            String[] annotators) throws Exception{
+            String[] annotators, String projectName) throws Exception{
 
         if(p==null)
             throw new Exception("1108292228:: null instance of Class PrintStream is given.");
@@ -241,8 +242,8 @@ public class GenHtmlForNonMatches
                     // Default value is false.
                     boolean foundDifference = false;
 
-
-                    Onerecord.add("<div>File: " + article.filename + "</div>");
+                    String fileStemName=article.filename.substring(0, article.filename.lastIndexOf("."));
+                    Onerecord.add(String.format("<div><a href=\"#\" class=\"load-content\" data-url=\"http://localhost:%s/ehost/%s/%s\">File: ",RESTFulConfig._port, projectName, fileStemName) + article.filename + "</a></div>");
                     Annotation mainAnnotation0 = getMainAnnotation(0, analyzedAnnotation);
 
                     if(mainAnnotation0!=null){
@@ -653,7 +654,31 @@ public class GenHtmlForNonMatches
                      
                 }
             }
-            p.println("<div><a href=\"index.html\"><b><br> [Back to the index.html]</b></a><br></div>");
+            p.println("<div><a href=\"index.html\"><b><br> [Back to the index.html]</b></a><br></div><div id=\"content-container\"></div>" +
+                    "<script>\n" +
+                    "  const contentLinks = document.querySelectorAll(\".load-content\");\n" +
+                    "\n" +
+                    "  contentLinks.forEach(link => {\n" +
+                    "    link.addEventListener(\"click\", (event) => {\n" +
+                    "      event.preventDefault(); // Prevent default navigation\n" +
+                    "\n" +
+                    "      const url = event.target.dataset.url;\n" +
+                    "\n" +
+                    "      fetch(url)\n" +
+                    "        .then(response => response.text()) // Parse the response as text (assuming the server sends plain text)\n" +
+                    "        .then(data => {\n" +
+                    "          const contentContainer = document.getElementById(\"content-container\");\n" +
+                    "          contentContainer.innerHTML = data; // Update content container with fetched data\n" +
+                    "        })\n" +
+                    "        .catch(error => {\n" +
+                    "          console.error(\"Error fetching content:\", error);\n" +
+                    "          // Handle errors by displaying a message or alternative content\n" +
+                    "          const contentContainer = document.getElementById(\"content-container\");\n" +
+                    "          contentContainer.innerHTML = \"<p>Error: Could not load content.</p>\";\n" +
+                    "        });\n" +
+                    "    });\n" +
+                    "  });\n" +
+                    "  </script>");
          
         
         }catch(Exception ex){
