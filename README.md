@@ -4,7 +4,7 @@ This is an imported and polished version of [eHOST: The Extensible Human Oracle 
 
 Compiled jars can be downloaded from the [Releases](https://github.com/jianlins/ehost/releases)
 
-What's new in 1.3.2:
+What's new in 1.32:
 1. Fix comments not saved issue
 2. Fix opening a new project, the main application window will automatically hide.
 3. If not local configuration files (from where the command is executed) are not available, try to read from USER_HOME/.ehost/ folder. If still empty, set the default configuration files under USER_HOME/.ehost. So that multiple users can share a single copy of eHOST software without making multiple copies.
@@ -21,7 +21,7 @@ java -jar eHOST-xxx.jar --workspace=/home/ehost_workspace/
 java -jar eHOST-xxx.jar -w /home/ehost_workspace/
 ```
 4. Add a project lock to prevent multiple users (or single user open mutliple instances of eHOST) from working on the same project at the same time. Because in that situation, the saving will be competition with each other and result in annotation lost.
-
+5. In the unmatched report, file names are clickable---will navigate to the corresponding file in eHOST after click.
 
 What's new in 1.3.1:
 
