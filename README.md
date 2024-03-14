@@ -20,8 +20,8 @@ java -jar eHOST-xxx.jar --workspace=/home/ehost_workspace/
 #or
 java -jar eHOST-xxx.jar -w /home/ehost_workspace/
 ```
-4. Add a project lock to prevent multiple users (or single user open mutliple instances of eHOST) from working on the same project at the same time. Because in that situation, the saving will be competition with each other and result in annotation lost.
-5. In the unmatched report, file names are clickable---will navigate to the corresponding file in eHOST after click.
+6. Add a project lock to prevent multiple users (or single user open mutliple instances of eHOST) from working on the same project at the same time. Because in that situation, the saving will be competition with each other and result in annotation lost.
+7. In the unmatched report, file names are clickable---will navigate to the corresponding file in eHOST after click.
 
 What's new in 1.3.1:
 
