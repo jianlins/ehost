@@ -10621,8 +10621,11 @@ public class GUI extends JFrame {
                 this.saveto_originalxml();
             }
         }
-        ProjectLock lock = new ProjectLock(env.Parameters.WorkSpace.CurrentProject.getAbsolutePath());
-        lock.releaseLock();
+        if (env.Parameters.WorkSpace.CurrentProject!=null) {
+//          After switch out of(close) a project this is set to null
+            ProjectLock lock = new ProjectLock(env.Parameters.WorkSpace.CurrentProject.getAbsolutePath());
+            lock.releaseLock();
+        }
     }
 
     private void saveProjectCurrentViewingFileId() {
