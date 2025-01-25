@@ -18,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 import relationship.complex.creation.RelationshipSchemaEditor;
 import relationship.complex.dataTypes.ComplexRelImportReturn;
 import relationship.simple.dataTypes.AttributeSchemaDef;
+import report.iaaReport.IAA;
 import rest.server.RESTFulConfig;
 import resultEditor.annotations.*;
 import resultEditor.conflicts.classConflict;
@@ -6672,7 +6673,7 @@ public class GUI extends JFrame {
                         return false;
                     boolean samerel = report.iaaReport.analysis.detailsNonMatches.Comparator
                             .equalRelationships(annotation1, annotation2, WorkSet.getCurrentFile()
-                                    .getName());
+                                    .getName(), IAA.CHECK_OVERLAPPED_SPANS);
                     if (!samerel)
                         return false;
 

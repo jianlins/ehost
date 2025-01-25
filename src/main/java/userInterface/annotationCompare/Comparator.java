@@ -17,6 +17,8 @@ import java.util.logging.Level;
 import javax.swing.Icon;
 import javax.swing.JList;
 import javax.swing.JTextPane;
+
+import report.iaaReport.IAA;
 import resultEditor.annotations.Annotation.AdjudicationStatus;
 import resultEditor.annotations.*;
 import resultEditor.relationship.iListable;
@@ -1616,7 +1618,7 @@ public class Comparator extends javax.swing.JPanel {
             // ##3.6## compare complex relationships of annotations
             try{
                 
-                if( report.iaaReport.analysis.detailsNonMatches.Comparator.equalRelationships(annotation, primaryAnnotation, WorkSet.getCurrentFile().getName()))
+                if( report.iaaReport.analysis.detailsNonMatches.Comparator.equalRelationships(annotation, primaryAnnotation, WorkSet.getCurrentFile().getName(), IAA.CHECK_OVERLAPPED_SPANS))
                     flags_of_differences.isDifference_inComplexRelationship = false;
                 else
                     flags_of_differences.isDifference_inComplexRelationship = true;

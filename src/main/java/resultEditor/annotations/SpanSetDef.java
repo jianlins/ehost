@@ -88,6 +88,8 @@ public class SpanSetDef {
     public boolean equals(SpanSetDef objSpans) throws Exception {
         return isDuplicates(objSpans);
     }
+
+
            
     /**Check to spanset, and return false if there are not same to each other.*/
     public boolean isDuplicates(SpanSetDef objSpans) {

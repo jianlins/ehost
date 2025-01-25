@@ -492,7 +492,7 @@ public class Analysis {
                                     }
 
                                     if (IAA.CHECK_RELATIONSHIP) {
-                                        if (!Comparator.equalRelationships(leftAnnotation, rightAnnotation, article.filename)) {
+                                        if (!Comparator.equalRelationships(leftAnnotation, rightAnnotation, article.filename, IAA.CHECK_OVERLAPPED_SPANS)) {
                                             addtionalConditions = false;
 
                                         }
@@ -764,7 +764,7 @@ public class Analysis {
                     }
 
                     if (IAA.CHECK_RELATIONSHIP) {
-                        if (!Comparator.equalRelationships(_leftAnnotation, rightannotation, _article.filename)) {
+                        if (!Comparator.equalRelationships(_leftAnnotation, rightannotation, _article.filename, IAA.CHECK_OVERLAPPED_SPANS)) {
                             addtionalConditions = false;
 
                         }

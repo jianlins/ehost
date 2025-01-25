@@ -251,7 +251,7 @@ public class Do {
                         //sameClass = Comparator.equalClasses(annotation_rowhead, annotation);
                         // System.out.println("same class = " + sameClass + ":  " + annotation_rowhead.annotationText + " || " + annotation.annotationText);
                         sameNormalRelationship = Comparator.equalAttributes(annotation_rowhead, annotation);
-                        sameComplexRelationship = Comparator.equalRelationships(annotation_rowhead, annotation, article.filename );
+                        sameComplexRelationship = Comparator.equalRelationships(annotation_rowhead, annotation, article.filename, IAA.CHECK_OVERLAPPED_SPANS );
                         sameComment = Comparator.equalComments(annotation_rowhead, annotation);
 
                         // #### check spans
@@ -382,7 +382,7 @@ public class Do {
                         sameSpan = Comparator.equalSpans(annotation_rowhead, annotation);
                         sameClass = Comparator.equalClasses(annotation_rowhead, annotation);
                         sameNormalRelationship = Comparator.equalAttributes(annotation_rowhead, annotation);
-                        sameComplexRelationship = Comparator.equalRelationships(annotation_rowhead, annotation, article.filename);
+                        sameComplexRelationship = Comparator.equalRelationships(annotation_rowhead, annotation, article.filename, IAA.CHECK_OVERLAPPED_SPANS);
                         sameComment = Comparator.equalComments(annotation_rowhead, annotation);
 
                         if( IAA.CHECK_OVERLAPPED_SPANS ){ // if IAA wants overlapped annotations
@@ -512,7 +512,7 @@ public class Do {
                         sameSpan = Comparator.equalSpans(annotation_rowhead, annotation);
                         sameClass = Comparator.equalClasses(annotation_rowhead, annotation);
                         sameNormalRelationship = Comparator.equalAttributes(annotation_rowhead, annotation);
-                        sameComplexRelationship = Comparator.equalRelationships(annotation_rowhead, annotation, article.filename);
+                        sameComplexRelationship = Comparator.equalRelationships(annotation_rowhead, annotation, article.filename, IAA.CHECK_OVERLAPPED_SPANS);
                         sameComment = Comparator.equalComments(annotation_rowhead, annotation);
                         overlap = Comparator.isSpanOverLap(annotation_rowhead, annotation);
 

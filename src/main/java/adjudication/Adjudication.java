@@ -48,6 +48,8 @@ import java.util.logging.Logger;
 import javax.swing.JList;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
+
+import report.iaaReport.IAA;
 import report.iaaReport.analysis.detailsNonMatches.Comparator;
 import resultEditor.annotations.*;
 import userInterface.GUI;
@@ -1181,7 +1183,7 @@ public class Adjudication extends javax.swing.JFrame {
                     }
                     if (Paras.CHECK_RELATIONSHIP) {
                         if (!Comparator.equalRelationships(sourceAnnotation,
-                                similarAnnotation, article.filename)) {
+                                similarAnnotation, article.filename, Paras.CHECK_OVERLAPPED_SPANS)) {
                             same = false;
                         }
                     }
@@ -1338,7 +1340,7 @@ public class Adjudication extends javax.swing.JFrame {
 
                     if (Paras.CHECK_RELATIONSHIP) {
                         if (!Comparator.equalRelationships(sourceAnnotation,
-                                objectAnnotation, article.filename)) {
+                                objectAnnotation, article.filename, Paras.CHECK_OVERLAPPED_SPANS)) {
                             addtionalConditions = false;
 
                         }
