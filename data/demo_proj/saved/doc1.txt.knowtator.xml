@@ -2,7 +2,7 @@
 <annotations textSource="doc1.txt">
     <annotation>
         <mention id="EHOST_Instance_1" />
-        <annotator id="eHOST_2010">sjl</annotator>
+        <annotator id="01">test1</annotator>
         <span start="578" end="587" />
         <spannedText>attention</spannedText>
         <annotationComment>eeedd</annotationComment>
@@ -13,13 +13,34 @@
     </classMention>
     <annotation>
         <mention id="EHOST_Instance_2" />
-        <annotator id="eHOST_2010">Extensible_Human_Oracle_Suite_of_Tools</annotator>
-        <span start="490" end="494" />
-        <spannedText>then</spannedText>
-        <creationDate>Fri Jan 19 03:16:57 MST 2024</creationDate>
+        <annotator id="eHOST_2010">test1</annotator>
+        <span start="495" end="499" />
+        <spannedText>skin</spannedText>
+        <creationDate>Tue Apr 15 22:38:19 MDT 2025</creationDate>
     </annotation>
     <classMention id="EHOST_Instance_2">
-        <mentionClass id="CONCEPT">then</mentionClass>
+        <mentionClass id="CONCEPT">skin</mentionClass>
+    </classMention>
+    <annotation>
+        <mention id="EHOST_Instance_3" />
+        <annotator id="eHOST_2010">sjl</annotator>
+        <span start="578" end="587" />
+        <spannedText>attention</spannedText>
+        <annotationComment>eeedd</annotationComment>
+        <creationDate>Thu Jan 18 19:04:39 MST 2024</creationDate>
+    </annotation>
+    <classMention id="EHOST_Instance_3">
+        <mentionClass id="CONCEPT">attention</mentionClass>
+    </classMention>
+    <annotation>
+        <mention id="EHOST_Instance_4" />
+        <annotator id="eHOST_2010">ADJ</annotator>
+        <span start="354" end="364" />
+        <spannedText>undermined</spannedText>
+        <creationDate>Tue Apr 15 22:36:58 MDT 2025</creationDate>
+    </annotation>
+    <classMention id="EHOST_Instance_4">
+        <mentionClass id="CONCEPT">undermined</mentionClass>
     </classMention>
     <eHOST_Adjudication_Status version="1.0">
         <Adjudication_Selected_Annotators version="1.0" />

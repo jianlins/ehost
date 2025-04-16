@@ -32,11 +32,11 @@ false
 NOPASSWORD
 
 [WORKSPACE_PATH]
-C:\Users\VHASLCShiJ\IProjects\deaProjects\ehost\data
+C:\Users\VHASLCShiJ\Projects\IdeaProjects\ehost\data
 
 [OracleFunction]
 true
 
 [RESTFUL_SERVER]
-false
+true
 

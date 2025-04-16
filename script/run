@@ -1,3 +1,2 @@
 cd "$( dirname "$0" )";
-echo "Welcome to eHOST ${project.version}"
 java -jar ehost-${project.version}.jar

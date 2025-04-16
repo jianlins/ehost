@@ -70,6 +70,7 @@ public class eHOST {
     public static String workspace;
     public static String restConfig;
 
+
     /**
      * Initial works, before finishing loading the GUI.
      */
@@ -117,7 +118,9 @@ public class eHOST {
     public static void main(String[] args) {
 
         String text;
+        VersionInfo.printVersionInfo();
         initConfigsFromArgs(args);
+
 
         // start the splash window
         userInterface.splashWindow.SplashController.start();
@@ -134,9 +137,23 @@ public class eHOST {
             text = "#eHOST# Initializing ...";
             //log.LoggingToFile.log(Level.INFO, text);
             userInterface.splashWindow.SplashController.showtext(text);
+            initial();
+            if (Parameters.RESTFulServer) {
+                try {
+                    SpringApplication app = new SpringApplication(EhostServerApp.class);
+                    Properties properties = new Properties();
+                    String configLocation=Paths.get(restConfig).toAbsolutePath().toUri().toString();
+                    properties.setProperty("spring.config.location", configLocation);
+                    app.setDefaultProperties(properties);
+                    app.run(args);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Parameters.RESTFulServer = false;
+                }
+            }
 
             // read configure settings and load values into memory
-            initial();
+
 
             // show the first sentence on the splash window
             text = "#eHOST# Launching the main GUI ...";
@@ -160,19 +177,7 @@ public class eHOST {
                 }
             }.start();
 
-            if (Parameters.RESTFulServer) {
-                try {
-                    SpringApplication app = new SpringApplication(EhostServerApp.class);
-                    Properties properties = new Properties();
-                    String configLocation=Paths.get(restConfig).toAbsolutePath().toUri().toString();
-                    properties.setProperty("spring.config.location", configLocation);
-                    app.setDefaultProperties(properties);
-                    app.run(args);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Parameters.RESTFulServer = false;
-                }
-            }
+
 
         } catch (Exception e) {
             //e.printStackTrace();
@@ -270,4 +275,6 @@ public class eHOST {
             e.printStackTrace();
         }
     }
+
+
 }

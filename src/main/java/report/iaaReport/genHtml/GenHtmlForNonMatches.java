@@ -17,8 +17,8 @@ import report.iaaReport.analysis.detailsNonMatches.AnalyzedAnnotation;
 import report.iaaReport.analysis.detailsNonMatches.AnalyzedAnnotationDifference;
 import report.iaaReport.analysis.detailsNonMatches.Comparator;
 import report.iaaReport.analysis.detailsNonMatches.OthersAnnotations;
+import rest.server.PropertiesUtil;
 import resultEditor.annotations.Annotation;
-import rest.server.RESTFulConfig;
 
 /**
  *
@@ -104,6 +104,10 @@ public class GenHtmlForNonMatches
                  "shown in the text that it was found in.  If user selected, then overlapping " +
                  "annotations from the other annotation sets are also shown.");
          p.println("</font><hr>");
+         p.println("<div id='statusMessage' style='position: fixed; bottom: 20px; left: 0; right: 0; " +
+                 "padding: 5px 10px; background: #f5f5f5; border-top: 1px solid #ddd; " +
+                 "font-size: 12px; display: none; color: #006400;'></div>");
+
 
          return p;
      }
@@ -243,7 +247,14 @@ public class GenHtmlForNonMatches
                     boolean foundDifference = false;
 
                     String fileStemName=article.filename.substring(0, article.filename.lastIndexOf("."));
-                    Onerecord.add(String.format("<div><a href=\"#\" class=\"load-content\" data-url=\"http://localhost:%s/ehost/%s/%s\">File: ",RESTFulConfig._port, projectName, fileStemName) + article.filename + "</a></div>");
+                    Onerecord.add(String.format(
+                            "<div><a href=\"#\" class=\"load-content\" " +
+                                    "data-url=\"http://localhost:%s/ehost/%s/%s\" " +
+                                    "onclick=\"return showStatus(this, '%s');\">"+
+                                    "File: ",
+                            PropertiesUtil.getPort(), projectName, fileStemName, fileStemName)
+                            + article.filename + "</a></div>");
+
                     Annotation mainAnnotation0 = getMainAnnotation(0, analyzedAnnotation);
 
                     if(mainAnnotation0!=null){
@@ -654,31 +665,52 @@ public class GenHtmlForNonMatches
                      
                 }
             }
-            p.println("<div><a href=\"index.html\"><b><br> [Back to the index.html]</b></a><br></div><div id=\"content-container\"></div>" +
-                    "<script>\n" +
-                    "  const contentLinks = document.querySelectorAll(\".load-content\");\n" +
-                    "\n" +
-                    "  contentLinks.forEach(link => {\n" +
-                    "    link.addEventListener(\"click\", (event) => {\n" +
-                    "      event.preventDefault(); // Prevent default navigation\n" +
-                    "\n" +
-                    "      const url = event.target.dataset.url;\n" +
-                    "\n" +
-                    "      fetch(url)\n" +
-                    "        .then(response => response.text()) // Parse the response as text (assuming the server sends plain text)\n" +
-                    "        .then(data => {\n" +
-                    "          const contentContainer = document.getElementById(\"content-container\");\n" +
-                    "          contentContainer.innerHTML = data; // Update content container with fetched data\n" +
-                    "        })\n" +
-                    "        .catch(error => {\n" +
-                    "          console.error(\"Error fetching content:\", error);\n" +
-                    "          // Handle errors by displaying a message or alternative content\n" +
-                    "          const contentContainer = document.getElementById(\"content-container\");\n" +
-                    "          contentContainer.innerHTML = \"<p>Error: Could not load content.</p>\";\n" +
-                    "        });\n" +
-                    "    });\n" +
-                    "  });\n" +
-                    "  </script>");
+            p.println("<script>");
+            p.println("function showStatus(element, filename) {");
+            p.println("    var statusDiv = document.getElementById('statusMessage');");
+            p.println("    statusDiv.textContent = 'try to load ' + filename;");
+            p.println("    statusDiv.style.display = 'block';");
+            p.println("    ");
+            p.println("    var url = element.getAttribute('data-url');");
+            p.println("    fetch(url)");
+            p.println("        .then(response => response.text())");
+            p.println("        .then(data => {");
+            p.println("            statusDiv.textContent =  data;");
+            p.println("        })");
+            p.println("        .catch(error => {");
+            p.println("            statusDiv.textContent = 'Error loading content: ' + error;");
+            p.println("            console.error('Error:', error);");
+            p.println("        });");
+            p.println("    return false;"); // Prevent default link behavior
+            p.println("}");
+            p.println("</script>");
+
+//
+//            p.println("<div><a href=\"index.html\"><b><br> [Back to the index.html]</b></a><br></div><div id=\"content-container\"></div>" +
+//                    "<script>\n" +
+//                    "  const contentLinks = document.querySelectorAll(\".load-content\");\n" +
+//                    "\n" +
+//                    "  contentLinks.forEach(link => {\n" +
+//                    "    link.addEventListener(\"click\", (event) => {\n" +
+//                    "      event.preventDefault(); // Prevent default navigation\n" +
+//                    "\n" +
+//                    "      const url = event.target.dataset.url;\n" +
+//                    "\n" +
+//                    "      fetch(url)\n" +
+//                    "        .then(response => response.text()) // Parse the response as text (assuming the server sends plain text)\n" +
+//                    "        .then(data => {\n" +
+//                    "          const contentContainer = document.getElementById(\"content-container\");\n" +
+//                    "          contentContainer.innerHTML = data; // Update content container with fetched data\n" +
+//                    "        })\n" +
+//                    "        .catch(error => {\n" +
+//                    "          console.error(\"Error fetching content:\", error);\n" +
+//                    "          // Handle errors by displaying a message or alternative content\n" +
+//                    "          const contentContainer = document.getElementById(\"content-container\");\n" +
+//                    "          contentContainer.innerHTML = \"<p>Error: Could not load content.</p>\";\n" +
+//                    "        });\n" +
+//                    "    });\n" +
+//                    "  });\n" +
+//                    "  </script>");
          
         
         }catch(Exception ex){

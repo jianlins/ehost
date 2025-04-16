@@ -11,6 +11,7 @@ import adjudication.SugarSeeder;
 import adjudication.parameters.Paras;
 import adjudication.statusBar.DiffCounter;
 import env.Parameters;
+import main.VersionInfo;
 import main.eHOST;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.comparator.NameFileComparator;
@@ -19,7 +20,7 @@ import relationship.complex.creation.RelationshipSchemaEditor;
 import relationship.complex.dataTypes.ComplexRelImportReturn;
 import relationship.simple.dataTypes.AttributeSchemaDef;
 import report.iaaReport.IAA;
-import rest.server.RESTFulConfig;
+import rest.server.PropertiesUtil;
 import resultEditor.annotations.*;
 import resultEditor.conflicts.classConflict;
 import resultEditor.conflicts.spanOverlaps;
@@ -731,7 +732,7 @@ public class GUI extends JFrame {
         jSplitPane_Annotations_Comparator.setVerifyInputWhenFocusTarget(false);
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        title = "eHOST V1.32";
+        title = "eHOST V"+ VersionInfo.getVersion();
 //        MavenXpp3Reader reader = new MavenXpp3Reader();
 //        try {
 //            Model model = reader.read(new FileReader("pom.xml"));
@@ -4647,9 +4648,9 @@ public class GUI extends JFrame {
                 selectProject(projectIdMap.get(projectName), fileName);
                 response = "success";
             } else {
-                response = "Project: " + projectName + " has already loaded";
-                status = 1;
                 showFileContextInTextPane(fileName);
+                status = 1;
+                response = projectName + " / " +fileName+ " loaded";
             }
         } else
             status = 4;
@@ -6487,7 +6488,7 @@ public class GUI extends JFrame {
 
 
     private void shutdownRESTServer() {
-        final String uri = String.format("http://%s:%s/shutdown", RESTFulConfig._address, RESTFulConfig._port);
+        final String uri = String.format("http://%s:%s/shutdown", PropertiesUtil.getAddress(), PropertiesUtil.getPort());
         RestTemplate restTemplate = new RestTemplate();
         String result = "eHOST REST Server cannot be connected.";
         try {

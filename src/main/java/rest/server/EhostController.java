@@ -59,6 +59,12 @@ public class EhostController {
         return response;
     }
 
+    public void updateServerPort(String newPort) {
+        PropertiesUtil.updatePort(newPort);
+        // You might need to restart the server for the new port to take effect
+    }
+
+
 
     @Autowired
     private ApplicationContext context;
