@@ -54,6 +54,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import rest.server.EhostServerApp;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -342,25 +343,37 @@ public class eHOST {
             }).start();
         }
 
-        private void showRESTfulInfo(ConfigurableApplicationContext context){
+        private void showRESTfulInfo(ConfigurableApplicationContext context) {
             Environment env = context.getEnvironment();
-            String port = env.getProperty("server.port", "8080"); // Default to 8080 if not specified
+            String port = env.getProperty("server.port", "8080");
             String contextPath = env.getProperty("server.servlet.context-path", "");
             String host = env.getProperty("server.address", "localhost");
 
-            // Print server information to console
+            // Base URL
+            String baseUrl = "http://" + host + ":" + port + contextPath;
+
             System.out.println("\n--------------------------------------------------------------");
             System.out.println("eHOST RESTful Server is running at:");
-            System.out.println(" - Local URL: http://" + host + ":" + port + contextPath);
-
+            System.out.println(" - Local URL: " + baseUrl);
+            System.out.println("--------------------------------------------------------------\n");
         }
 
         private void loadGUI() throws Exception {
+            String baseUrl ="";
+            if (Parameters.RESTFulServer) {
+                // With static import for Paths.get
+                Properties properties = new Properties();
+                properties.load(new FileInputStream(restConfig));
+                String port = properties.getProperty("server.port");
+                String host = properties.getProperty("server.address");
+                baseUrl = "http://" + host + ":" + port;
+            }
+
             userInterface.GUI gui;
             if (workspace != null)
-                gui = new userInterface.GUI(workspace);
+                gui = new userInterface.GUI(workspace, baseUrl);
             else
-                gui = new userInterface.GUI();
+                gui = new userInterface.GUI(env.Parameters.WorkSpace.WorkSpace_AbsolutelyPath, baseUrl);
 
             gui.setVisible(true);
             resultEditor.loadingNotes.ShowNotes.setGUIHandler(gui);

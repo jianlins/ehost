@@ -40,6 +40,8 @@ import javax.swing.tree.TreeModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Timer;
@@ -63,6 +65,7 @@ public class GUI extends JFrame {
     public final static int readyThreshold = 2;
     private String title;
     public static boolean selectedFromComobox;
+    private String restfulServerURL="";
 
     // <editor-fold defaultstate="collapsed" desc="Member Variables">
     protected enum fileInputType {
@@ -172,17 +175,18 @@ public class GUI extends JFrame {
      * Creates new form GUIgate
      */
     public GUI() {
-        init(env.Parameters.WorkSpace.WorkSpace_AbsolutelyPath);
-
-
+//        init(env.Parameters.WorkSpace.WorkSpace_AbsolutelyPath, "");
     }
 
     public GUI(String workspacePath) {
-        init(workspacePath);
-
+        init(workspacePath, "");
+    }
+    public GUI(String workspacePath, String restfulServerURL) {
+        init(workspacePath, restfulServerURL);
     }
 
-    public void init(String workspacePath) {
+
+    public void init(String workspacePath, String restfulServerURL) {
         /*
          * try{ javax.swing.UIManager.setLookAndFeel(UIManager.
          * getCrossPlatformLookAndFeelClassName() ); }catch(Exception ee){}
@@ -218,7 +222,36 @@ public class GUI extends JFrame {
         // reload panels into the cardlayout
         resetCardLayout();
         // jPanelDesktop.removeAll();
-        jLabel_infobar.setText("Welcome to eHOST!");
+        if (restfulServerURL=="")
+            jLabel_infobar.setText("Welcome to eHOST!");
+        else{
+            jLabel_infobar.setText("<html>Welcome to eHOST!&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n<a href=''><span style=\"color:rgb(58,95,147)\">Goto the eHOST Control Server</span></a></html>");
+            // Make the label opaque to ensure proper rendering of the HTML
+            jLabel_infobar.setOpaque(false);
+            // Add mouse listener to handle click events
+            jLabel_infobar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            jLabel_infobar.addMouseListener(new MouseAdapter() {
+                private boolean clicked = false;
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (!clicked) {
+                        try {
+                            Desktop.getDesktop().browse(new URI(restfulServerURL));
+                            // Disable the link after clicking
+                            jLabel_infobar.setText("<html>Welcome to eHOST!</html>");
+                            jLabel_infobar.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                            clicked = true;
+                        } catch (IOException | URISyntaxException ex) {
+                            JOptionPane.showMessageDialog(null,
+                                    "Could not open browser: " + ex.getMessage(),
+                                    "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                }
+            });
+
+
+        }
         // set the width of first column of the table
 
         // **** end of setting the location of gui window

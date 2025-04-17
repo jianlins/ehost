@@ -14,7 +14,7 @@ import java.io.File;
 @Controller
 public class EhostController {
 
-    private static final String HTML_HEADER = "<!DOCTYPE html><html><head><title>eHOST Server</title>" +
+    private static final String HTML_HEADER = "<!DOCTYPE html><html><head><title>eHOST Control Server</title>" +
             "<style>" +
             "body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }" +
             "h1 { color: #2c3e50; }" +
@@ -54,17 +54,17 @@ public class EhostController {
         eHOST.logger.debug("GUI status status: "+GUI.status);
 
         StringBuilder htmlResponse = new StringBuilder(HTML_HEADER);
-        htmlResponse.append("<h1>eHOST Server Status</h1>");
+        htmlResponse.append("<h1>eHOST Control Server Status</h1>");
 
         if (GUI.status > GUI.readyThreshold) {
             htmlResponse.append("<div class='info' style='background-color: #d4edda; color: #155724;'>" +
                     "<h2>Server is READY</h2>" +
-                    "<p>The eHOST server is available and ready to process requests.</p>" +
+                    "<p>The eHOST control server is available and ready to process requests.</p>" +
                     "</div>");
         } else {
             htmlResponse.append("<div class='info' style='background-color: #f8d7da; color: #721c24;'>" +
                     "<h2>Server is BUSY</h2>" +
-                    "<p>The eHOST server is currently busy. Please try again later.</p>" +
+                    "<p>The eHOST control server is currently busy. Please try again later.</p>" +
                     "</div>");
         }
 
