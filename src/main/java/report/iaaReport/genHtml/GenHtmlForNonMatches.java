@@ -4,21 +4,14 @@
  */
 package report.iaaReport.genHtml;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-import java.util.Vector;
-import java.util.logging.Level;
 import report.iaaReport.IAA;
-import report.iaaReport.analysis.detailsNonMatches.AnalyzedResult;
-import report.iaaReport.analysis.detailsNonMatches.AnalyzedAnnotator;
-import report.iaaReport.analysis.detailsNonMatches.AnalyzedArticle;
-import report.iaaReport.analysis.detailsNonMatches.AnalyzedAnnotation;
-import report.iaaReport.analysis.detailsNonMatches.AnalyzedAnnotationDifference;
-import report.iaaReport.analysis.detailsNonMatches.Comparator;
-import report.iaaReport.analysis.detailsNonMatches.OthersAnnotations;
+import report.iaaReport.analysis.detailsNonMatches.*;
 import rest.server.PropertiesUtil;
 import resultEditor.annotations.Annotation;
+
+import java.io.*;
+import java.util.Vector;
+import java.util.logging.Level;
 
 /**
  *
@@ -26,8 +19,8 @@ import resultEditor.annotations.Annotation;
  */
 public class GenHtmlForNonMatches
 {
-     public void genHtml(File reportfolder) throws Exception
-     {
+    public void genHtml(File reportfolder) throws Exception
+    {
         try
         {
 
@@ -57,27 +50,26 @@ public class GenHtmlForNonMatches
                 String filenameStr = annotatorName;
                 // assemble the name of the file
                 File file = new File(reportfolder.getAbsolutePath() + File.separatorChar + filenameStr + "-UNMATCHED-SUMMARY"  + ".html" );
-                FileOutputStream output = new FileOutputStream( file );
                 String projectName=reportfolder.getParentFile().getName();
-                PrintStream p = new PrintStream(output);
+                StringBuilder sb = new StringBuilder();
 
                 // #### assemble html head
-                p = printhtmlhead(p, analyzedAnnotator.mainAnnotator.trim() );
+                addHtmlhead(sb, analyzedAnnotator.mainAnnotator.trim() );
 
                 SeparatedDetailsByClass.clear();
                 SeparatedDetailsByClass.setAnnotatorName(annotatorName);
 
                 // #### html assemble: output each non-matched annotaions of current annotator
-                outputNonMatchedDetails( p, analyzedAnnotator, analyzedAnnotator.mainAnnotator.trim(),
+                outputNonMatchedDetails( sb, analyzedAnnotator, analyzedAnnotator.mainAnnotator.trim(),
                         analyzedAnnotator.annotators ,projectName);
 
                 // print separated details of matches
                 buildSeparatedDetailsByClass( reportfolder, analyzedAnnotator.mainAnnotator.trim() );
-                
+
                 // record classes which has nonmatches so we can remove class without any annotations in the index.html
                 SeparatedDetailsByClass.registerUnMatchesClass(analyzedAnnotator.mainAnnotator.trim());
 
-                p.close();
+                writeStringBuilder(sb, file);
             }
 
         }catch(Exception ex){
@@ -88,79 +80,77 @@ public class GenHtmlForNonMatches
         }
     }
 
+    private void writeStringBuilder(StringBuilder sb, File file) {
+        try (FileWriter writer = new FileWriter(file);
+             BufferedWriter bufferedWriter = new BufferedWriter(writer)) {
+            bufferedWriter.write(sb.toString());
+        } catch (IOException e) {
+            // Handle exception appropriately
+            e.printStackTrace();
+        }
+    }
+
+
+    /**prepare the html head for each html. This only can be called from
+     * method "genHtml" in same class.
+     */
+    private StringBuilder addHtmlhead(StringBuilder p, String annotatorName){
+        p.append("<html> ");
+        p.append("<head><title>Non-Matching annotations of Annotator ("+annotatorName+") </title></head>");
+        p.append("<body style=\"margin: 2 5 5 5; font-family: Candara;\">");
+        p.append("<div><a href=\"index.html\"><b>Back to the index.html</b></a><br></div>");
+        p.append("<h1>Non-matches for Annotator: ("+annotatorName+") , </h1>");
+        p.append("Each annotation that was considered a non-match is " +
+                "shown in the text that it was found in.  If user selected, then overlapping " +
+                "annotations from the other annotation sets are also shown.");
+        p.append("</font><hr>");
+        p.append("<div id='statusMessage' style='position: fixed; bottom: 20px; left: 0; right: 0; " +
+                "padding: 5px 10px; background: #f5f5f5; border-top: 1px solid #ddd; " +
+                "font-size: 12px; display: none; color: #006400;'></div>");
+
+
+        return p;
+    }
 
 
 
-     /**prepare the html head for each html. This only can be called from
-      * method "genHtml" in same class.
-      */
-     private PrintStream printhtmlhead(PrintStream p, String annotatorName){
-         p.println("<html> ");
-         p.println("<head><title>Non-Matching annotations of Annotator ("+annotatorName+") </title></head>");
-         p.println("<body style=\"margin: 2 5 5 5; font-family: Candara;\">");
-         p.println("<div><a href=\"index.html\"><b>Back to the index.html</b></a><br></div>");
-         p.println("<h1>Non-matches for Annotator: ("+annotatorName+") , </h1>");
-         p.println("Each annotation that was considered a non-match is " +
-                 "shown in the text that it was found in.  If user selected, then overlapping " +
-                 "annotations from the other annotation sets are also shown.");
-         p.println("</font><hr>");
-         p.println("<div id='statusMessage' style='position: fixed; bottom: 20px; left: 0; right: 0; " +
-                 "padding: 5px 10px; background: #f5f5f5; border-top: 1px solid #ddd; " +
-                 "font-size: 12px; display: none; color: #006400;'></div>");
+    /*print separated details of matches*/
+    private void buildSeparatedDetailsByClass(File reportfolder, String annotatorName) {
+        if (SeparatedDetailsByClass.separatedDetails == null) {
+            log.LoggingToFile.log(Level.WARNING, "1109301329:: empty results of non-matches to a specific class.");
+            return;
+        }
 
+        try {
+            for (ClassedFormat cf : SeparatedDetailsByClass.separatedDetails) {
+                File file = new File(reportfolder.getAbsolutePath() + File.separatorChar + cf.filename);
+                StringBuilder sb = new StringBuilder();
 
-         return p;
-     }
+                sb.append("<html> \n");
+                sb.append("<head><title>Non-Matches annotations of Annotator (").append(annotatorName).append(") to certain class </title></head>\n");
+                sb.append("<body style=\"margin: 2 5 5 5; font-family: Candara;\">\n");
+                sb.append("<div><a href=\"index.html\"><b>Back to the index.html</b></a><br></div>\n");
+                sb.append("<h1>Matches and Non-matches for Annotator: (").append(annotatorName).append(")  to class(")
+                        .append(cf.classname)
+                        .append("), </h1>\n");
+                sb.append("Each annotation that was considered as non-matches is " +
+                        "shown in the text that it was found in.  If user selected, then overlapping " +
+                        "annotations from the other annotation sets are also shown.\n");
+                sb.append("</font><hr>\n");
 
-
-
-      /*print separated details of matches*/
-     private void buildSeparatedDetailsByClass(File reportfolder, String annotatorName ){
-         
-         if( SeparatedDetailsByClass.separatedDetails == null )
-         {
-             log.LoggingToFile.log(Level.WARNING, "1109301329:: empty results of non-matches to a specific class.");
-             return;
-         }
-
-         try{
-             for(ClassedFormat cf : SeparatedDetailsByClass.separatedDetails)
-             {
-                File file = new File( reportfolder.getAbsolutePath() + File.separatorChar + cf.filename );
-                FileOutputStream output = new FileOutputStream( file );
-                PrintStream p = new PrintStream(output);
-
-                p.println("<html> ");
-                p.println("<head><title>Non-Matches annotations of Annotator ("+annotatorName+") to certain class </title></head>");
-                p.println("<body style=\"margin: 2 5 5 5; font-family: Candara;\">");
-                p.println("<div><a href=\"index.html\"><b>Back to the index.html</b></a><br></div>");
-                p.println("<h1>Matches and Non-matches for Annotator: ("+annotatorName+")  to class("
-                        + cf.classname
-                        +"), </h1>");
-                p.println("Each annotation that was considered as non-matches is " +
-                     "shown in the text that it was found in.  If user selected, then overlapping " +
-                     "annotations from the other annotation sets are also shown.");
-                p.println("</font><hr>");
-
-                for(String code : cf.htmlcodes )
-                {
-                    p.println(code);
+                for (String code : cf.htmlcodes) {
+                    sb.append(code).append("\n");
                 }
 
-                p.println("<div><a href=\"index.html\"><b><br> [Back to the index.html]</b></a><br></div>");
+                sb.append("<div><a href=\"index.html\"><b><br> [Back to the index.html]</b></a><br></div>\n");
 
-                p.close();
-             }
-         }catch(Exception ex){
-             log.LoggingToFile.log(Level.SEVERE, "1109301030::fail to output separated details of matched annotations");
-         }
-
-
-
-
-
-     }
-
+                // Use the existing writeStringBuilder method to write the content to file
+                writeStringBuilder(sb, file);
+            }
+        } catch (Exception ex) {
+            log.LoggingToFile.log(Level.SEVERE, "1109301030::fail to output separated details of matched annotations");
+        }
+    }
 
 
 
@@ -168,23 +158,23 @@ public class GenHtmlForNonMatches
      * To the given record of non-matched annotations of an annotator, we
      * list them and assemble them in a html report.
      *
-     * @param p           the object of the PrintStream of the html which we are generating.
+     * @param sb           StringBuilder to set the output.
      * @param projectName
      */
-    private PrintStream outputNonMatchedDetails(
-            PrintStream p,
+    private StringBuilder outputNonMatchedDetails(
+            StringBuilder sb,
             AnalyzedAnnotator analyzedAnnotator,
             String annotatorName,
             String[] annotators, String projectName) throws Exception{
 
-        if(p==null)
+        if(sb==null)
             throw new Exception("1108292228:: null instance of Class PrintStream is given.");
 
         if(   (analyzedAnnotator==null)
-           || (analyzedAnnotator.analyzedArticles==null))
+                || (analyzedAnnotator.analyzedArticles==null))
         {
             log.LoggingToFile.log(Level.WARNING, "11082922XX");
-            return p;
+            return sb;
         }
 
         try{
@@ -194,7 +184,7 @@ public class GenHtmlForNonMatches
             if(articles==null)
             {
                 log.LoggingToFile.log(Level.WARNING, "1108292EEE:: no article format for current annotator.");
-                return p;
+                return sb;
             }
 
             for( AnalyzedArticle article : articles)
@@ -222,9 +212,9 @@ public class GenHtmlForNonMatches
                         log.LoggingToFile.log(Level.WARNING,  "1110041859KE: null value.");
                         continue;
                     }
-                    
+
                     Classes classes = new Classes();
-                    
+
                     int maxsize=0;
                     // #### get max rows of this table
 
@@ -270,7 +260,7 @@ public class GenHtmlForNonMatches
                     for(int ii=0; ii<maxsize; ii++)
                     {
                         // get annotations that will appeared in 2nd, 3rd, and other column
-                        
+
                         int size_other = analyzedAnnotation.othersAnnotations.length;
                         for(int jj=0; jj<size_other; jj++){
                             Vector<AnalyzedAnnotationDifference> diffs = analyzedAnnotation.othersAnnotations[jj].annotationsDiffs;
@@ -281,10 +271,10 @@ public class GenHtmlForNonMatches
                                 break;
                             }
 
-                            
+
                         }
                         if(textcontent!=null)
-                                break;
+                            break;
                     }
                     Onerecord.add("<div>"+textcontent+"</div>");
                     Onerecord.add("<table border=\"1\">");
@@ -298,22 +288,22 @@ public class GenHtmlForNonMatches
                     }
                     Onerecord.add("</tr>");
 
-                    
+
                     //#### print the rest rows
                     for(int i=0; i<maxsize; i++)
-                    {                        
+                    {
 
                         Annotation mainAnnotation = getMainAnnotation(i, analyzedAnnotation);
                         Annotation mainAnnotation_first = getMainAnnotation(0, analyzedAnnotation);  // main Annotation in first column, first row
-                        
+
                         if (mainAnnotation != null) {
 
                             differenceStart = mainAnnotation.spanstart;
                             differenceEnd = mainAnnotation.spanend;
                             classes.add(mainAnnotation.annotationclass); // record we have this class
-                            
+
                         }
-                        
+
                         if (mainAnnotation_first != null) {
                             if (mainAnnotation_first.spanstart < differenceStart) {
                                 differenceStart = mainAnnotation_first.spanstart;
@@ -322,7 +312,7 @@ public class GenHtmlForNonMatches
                                 differenceEnd = mainAnnotation_first.spanend;
                             }
                         }
-                         
+
                         //#### get annotation that will be listed in the first column
                         Onerecord.add("<tr>");
                         Onerecord.add("<td>Annotation Text</td>");
@@ -340,7 +330,7 @@ public class GenHtmlForNonMatches
                         {
                             Vector<AnalyzedAnnotationDifference> diffs = analyzedAnnotation.othersAnnotations[j].annotationsDiffs;
                             AnalyzedAnnotationDifference diff = getOtherAnnotation(i, diffs);
-                            
+
                             if (diff != null) {
 
                                 if (diff.annotation.spanstart < differenceStart) {
@@ -355,8 +345,8 @@ public class GenHtmlForNonMatches
                             if((diff!=null)&&(diff.annotation!=null)&&(diff.annotation.annotationclass!=null))
                                 classes.add( diff.annotation.annotationclass );
 
-                            
-     
+
+
                             if ((diff != null) && (diff.annotation.annotationText != null)) {
                                 // if main annotation is null, and the diff annotation isn't null
                                 // they are different
@@ -370,7 +360,7 @@ public class GenHtmlForNonMatches
                                     // if main and diff has same span
                                     if (IAA.CHECK_OVERLAPPED_SPANS) {
                                         if ( (Comparator.equalSpans(diff.annotation, mainAnnotation_first))
-                                        ||(Comparator.isSpanOverLap(diff.annotation, mainAnnotation_first)))
+                                                ||(Comparator.isSpanOverLap(diff.annotation, mainAnnotation_first)))
                                         {
                                             Onerecord.add("<td>" + diff.annotation.annotationText + "</td>");
                                         } else {
@@ -412,7 +402,7 @@ public class GenHtmlForNonMatches
                             Onerecord.add("<td>");
                             Onerecord.add( mainAnnotation.getSpansInText() );
                             Onerecord.add( "</td>");
-                            
+
                         }else
                             Onerecord.add("<td BGCOLOR=\"#E0E0E0\"></td>");
 
@@ -437,36 +427,36 @@ public class GenHtmlForNonMatches
                                         if ((Comparator.equalSpans(diff.annotation, mainAnnotation_first))
                                                 || (Comparator.isSpanOverLap(diff.annotation, mainAnnotation_first))) {
                                             Onerecord.add("<td >");
-                                            Onerecord.add( diff.annotation.getSpansInText() ) ; 
+                                            Onerecord.add( diff.annotation.getSpansInText() ) ;
                                             Onerecord.add( "</td>");
                                         } else {
-                                            // if main and diff has same span                                            
+                                            // if main and diff has same span
                                             Onerecord.add("<td BGCOLOR=\"#FFD0D0\">");
-                                            Onerecord.add( diff.annotation.getSpansInText() ) ; 
+                                            Onerecord.add( diff.annotation.getSpansInText() ) ;
                                             Onerecord.add( "</td>");
-                                            
-                                            foundDifference = true;                                        
+
+                                            foundDifference = true;
                                         }
                                     } else {
                                         // if main and diff has same span
-                                        if ((diff.annotation.spanstart == mainAnnotation_first.spanstart) && (diff.annotation.spanend == mainAnnotation_first.spanend)) 
+                                        if ((diff.annotation.spanstart == mainAnnotation_first.spanstart) && (diff.annotation.spanend == mainAnnotation_first.spanend))
                                         {
                                             Onerecord.add("<td >");
-                                            Onerecord.add( diff.annotation.getSpansInText() ) ; 
+                                            Onerecord.add( diff.annotation.getSpansInText() ) ;
                                             Onerecord.add( "</td>");
-                                                                                        
+
                                         } else {
-                                            // if main and diff has same span                                           
+                                            // if main and diff has same span
                                             Onerecord.add("<td BGCOLOR=\"#FFD0D0\">");
-                                            Onerecord.add( diff.annotation.getSpansInText() ) ; 
+                                            Onerecord.add( diff.annotation.getSpansInText() ) ;
                                             Onerecord.add( "</td>");
-                                            
+
                                             foundDifference = true;
                                         }
                                     }
                                 }
 
-                        }else
+                            }else
                                 Onerecord.add("<td BGCOLOR=\"#E0E0E0\"></td>");
                         }
                         Onerecord.add("</tr>");
@@ -540,7 +530,7 @@ public class GenHtmlForNonMatches
                                 }
                                 else
                                 {
-                                        Onerecord.add("<td BGCOLOR=\"#E0E0E0\"></td>");
+                                    Onerecord.add("<td BGCOLOR=\"#E0E0E0\"></td>");
                                 }
                             }
                         }
@@ -587,11 +577,11 @@ public class GenHtmlForNonMatches
                                 }
                                 else
                                 {
-                                        Onerecord.add("<td BGCOLOR=\"#E0E0E0\"></td>");
+                                    Onerecord.add("<td BGCOLOR=\"#E0E0E0\"></td>");
                                 }
                             }
                         }
-                        
+
                         //#### get annotation attributes
                         if(IAA.CHECK_COMMENT)
                         {
@@ -633,16 +623,16 @@ public class GenHtmlForNonMatches
                                 }
                                 else
                                 {
-                                        Onerecord.add("<td BGCOLOR=\"#E0E0E0\"></td>");
+                                    Onerecord.add("<td BGCOLOR=\"#E0E0E0\"></td>");
                                 }
                             }
                         }
 
                         Onerecord.add("</tr>");
-                        
+
 
                     }
-                    
+
                     Onerecord.add("</table>");
                     Onerecord.add("<br>");
 
@@ -650,7 +640,7 @@ public class GenHtmlForNonMatches
                     {
                         // build html for overall report of unmatches
                         for(String str : Onerecord){
-                            p.println(str);
+                            sb.append(str);
                         }
 
                         // build html reports for non-matches and split them by classes
@@ -659,31 +649,31 @@ public class GenHtmlForNonMatches
                             SeparatedDetailsByClass.addHtmlLine(cla, Onerecord, false);
                         }
 
-                        
+
                     }
-                     
-                     
+
+
                 }
             }
-            p.println("<script>");
-            p.println("function showStatus(element, filename) {");
-            p.println("    var statusDiv = document.getElementById('statusMessage');");
-            p.println("    statusDiv.textContent = 'try to load ' + filename;");
-            p.println("    statusDiv.style.display = 'block';");
-            p.println("    ");
-            p.println("    var url = element.getAttribute('data-url');");
-            p.println("    fetch(url)");
-            p.println("        .then(response => response.text())");
-            p.println("        .then(data => {");
-            p.println("            statusDiv.textContent =  data;");
-            p.println("        })");
-            p.println("        .catch(error => {");
-            p.println("            statusDiv.textContent = 'Error loading content: ' + error;");
-            p.println("            console.error('Error:', error);");
-            p.println("        });");
-            p.println("    return false;"); // Prevent default link behavior
-            p.println("}");
-            p.println("</script>");
+            sb.append("<script>");
+            sb.append("function showStatus(element, filename) {");
+            sb.append("    var statusDiv = document.getElementById('statusMessage');");
+            sb.append("    statusDiv.textContent = 'try to load ' + filename;");
+            sb.append("    statusDiv.style.display = 'block';");
+            sb.append("    ");
+            sb.append("    var url = element.getAttribute('data-url');");
+            sb.append("    fetch(url)");
+            sb.append("        .then(response => response.text())");
+            sb.append("        .then(data => {");
+            sb.append("            statusDiv.textContent =  data;");
+            sb.append("        })");
+            sb.append("        .catch(error => {");
+            sb.append("            statusDiv.textContent = 'Error loading content: ' + error;");
+            sb.append("            console.error('Error:', error);");
+            sb.append("        });");
+            sb.append("    return false;"); // Prevent default link behavior
+            sb.append("}");
+            sb.append("</script>");
 
 //
 //            p.println("<div><a href=\"index.html\"><b><br> [Back to the index.html]</b></a><br></div><div id=\"content-container\"></div>" +
@@ -711,14 +701,14 @@ public class GenHtmlForNonMatches
 //                    "    });\n" +
 //                    "  });\n" +
 //                    "  </script>");
-         
-        
+
+
         }catch(Exception ex){
             throw new Exception( "1101WOC" + ex.getMessage() );
         }
 
- 
-        return p;
+
+        return sb;
     }
 
     private Annotation getMainAnnotation(int index, AnalyzedAnnotation analyzedAnnotation){

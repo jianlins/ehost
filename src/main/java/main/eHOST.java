@@ -69,6 +69,8 @@ public class eHOST {
     public static String ehostconfighome;
     public static String workspace;
     public static String restConfig;
+    private static CustomSplash splash;
+
 
 
     /**
@@ -81,14 +83,6 @@ public class eHOST {
         // we use '/' as the path separator
         Parameters.isUnixOS = commons.OS.isMacOS();
 
-        // log begin
-        String text = "#eHOST# Reading configure file ...";
-        //log.LoggingToFile.log(Level.INFO, text);
-
-        // display the splash window for this software
-        userInterface.splashWindow.SplashController.showtext(text);
-
-        // load eHOST system configure information
         config.system.SysConf.loadSystemConfigure(ehostconfighome);
 
         if (workspace!=null && Files.exists(Paths.get(workspace))){
@@ -99,8 +93,6 @@ public class eHOST {
             workspace=env.Parameters.WorkSpace.WorkSpace_AbsolutelyPath;
             logger.info("Now workspace=\t"+workspace);
         }
-
-
 
         // set the flag, after loading configure information
         Parameters.isFirstTimeLoadingConfigureFile = false;
@@ -119,69 +111,65 @@ public class eHOST {
 
         String text;
         VersionInfo.printVersionInfo();
-        initConfigsFromArgs(args);
+        splash = new CustomSplash("/splash.png", VersionInfo.getVersion());
+        splash.show();
 
 
-        // start the splash window
-        userInterface.splashWindow.SplashController.start();
+        new Thread(() -> {
+            try {
+                splash.updateStatus("Initializing configurations...");
+                initConfigsFromArgs(args);
+                splash.updateProgress(10);
+                Thread.sleep(1000);
 
-        try {
-            LogCleaner deleteLocker = new LogCleaner();
-            deleteLocker.doit();
+                splash.updateStatus("Initializing settings...");
+                LogCleaner deleteLocker = new LogCleaner();
+                deleteLocker.doit();
+                initial();
+                splash.updateProgress(20);
+                Thread.sleep(1000);
 
-            // init the log system
-            //Logger logger = Logger.getLogger("eHOST");
-            //log.LoggingToFile.setLogingProperties(logger, Level.ALL);
-            //log.LoggingToFile.setLogger(logger);
+                if (Parameters.RESTFulServer) {
+                    splash.updateStatus("Starting RESTful server in the background...");
+                    // No need to wait on this
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            try {
+                                SpringApplication app = new SpringApplication(EhostServerApp.class);
+                                Properties properties = new Properties();
+                                String configLocation=Paths.get(restConfig).toAbsolutePath().toUri().toString();
+                                properties.setProperty("spring.config.location", configLocation);
+                                app.setDefaultProperties(properties);
+                                app.run(args);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                Parameters.RESTFulServer = false;
+                            }
 
-            text = "#eHOST# Initializing ...";
-            //log.LoggingToFile.log(Level.INFO, text);
-            userInterface.splashWindow.SplashController.showtext(text);
-            initial();
-            if (Parameters.RESTFulServer) {
-                try {
-                    SpringApplication app = new SpringApplication(EhostServerApp.class);
-                    Properties properties = new Properties();
-                    String configLocation=Paths.get(restConfig).toAbsolutePath().toUri().toString();
-                    properties.setProperty("spring.config.location", configLocation);
-                    app.setDefaultProperties(properties);
-                    app.run(args);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Parameters.RESTFulServer = false;
+                        }
+                    }.start();
+                    Thread.sleep(700);
                 }
+
+                splash.updateStatus("Loading GUI...");
+                userInterface.GUI gui;
+                if (workspace!=null)
+                    gui = new userInterface.GUI(workspace);
+                else
+                    gui = new userInterface.GUI();
+                    splash.updateProgress(80);
+                Thread.sleep(5000);
+                gui.setVisible(true);
+                resultEditor.loadingNotes.ShowNotes.setGUIHandler(gui);
+                splash.updateProgress(100);
+            } catch (Exception e) {
+                e.printStackTrace();
+                splash.closeSplash();
+            } finally {
+                splash.closeSplash();
             }
-
-            // read configure settings and load values into memory
-
-
-            // show the first sentence on the splash window
-            text = "#eHOST# Launching the main GUI ...";
-            //log.LoggingToFile.log(Level.INFO, text);
-            userInterface.splashWindow.SplashController.showtext(text);
-
-            // start loading the main GUI in a new thread
-            new Thread() {
-                @Override
-                public void run() {
-
-                    // show dialog - main GUI window of eHOST project
-                    userInterface.GUI gui;
-                    if (workspace!=null)
-                        gui = new userInterface.GUI(workspace);
-                    else
-                        gui = new userInterface.GUI();
-                    gui.setVisible(true);
-                    resultEditor.loadingNotes.ShowNotes.setGUIHandler(gui);
-
-                }
-            }.start();
-
-
-
-        } catch (Exception e) {
-            //e.printStackTrace();
-        }
+        }).start();
     }
 
     private static void initConfigsFromArgs(String[] args) {
