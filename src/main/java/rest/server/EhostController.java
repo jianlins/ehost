@@ -14,13 +14,66 @@ import java.io.File;
 @Controller
 public class EhostController {
 
+    private static final String HTML_HEADER = "<!DOCTYPE html><html><head><title>eHOST Server</title>" +
+            "<style>" +
+            "body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }" +
+            "h1 { color: #2c3e50; }" +
+            "h2 { color: #3498db; }" +
+            ".info { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; }" +
+            "code { background-color: #f1f1f1; padding: 2px 5px; border-radius: 3px; }" +
+            "ul { margin-left: 20px; }" +
+            "</style></head><body>";
+
+    private static final String HTML_FOOTER = "</body></html>";
+
+    // Helper method to create help section content
+    private String getHelpContent() {
+        return "<div class='info'>" +
+                "<h2>Available Endpoints:</h2>" +
+                "<ul>" +
+                "<li>Status check: <code>http://127.0.0.1:8009/</code> or <code>http://127.0.0.1:8009/status</code></li>" +
+                "<li>Shutdown server: <code>http://127.0.0.1:8009/shutdown</code></li>" +
+                "<li>Navigate to project: <code>http://127.0.0.1:8009/ehost/{projectName}</code></li>" +
+                "<li>Navigate to file in project: <code>http://127.0.0.1:8009/ehost/{projectName}/{fileName}</code></li>" +
+                "</ul>" +
+                "<p>Note: You can change the server port by editing the application.properties file.</p>" +
+                "</div>";
+    }
+
+    @GetMapping(value = "/")
+    @ResponseBody
+    String getRoot() {
+        // Reuse the existing implementation of getStatus
+        return getStatus();
+    }
+
 
     @GetMapping(value = "/status")
     @ResponseBody
     String getStatus() {
         eHOST.logger.debug("GUI status status: "+GUI.status);
-        return (GUI.status >GUI.readyThreshold) + "";
+
+        StringBuilder htmlResponse = new StringBuilder(HTML_HEADER);
+        htmlResponse.append("<h1>eHOST Server Status</h1>");
+
+        if (GUI.status > GUI.readyThreshold) {
+            htmlResponse.append("<div class='info' style='background-color: #d4edda; color: #155724;'>" +
+                    "<h2>Server is READY</h2>" +
+                    "<p>The eHOST server is available and ready to process requests.</p>" +
+                    "</div>");
+        } else {
+            htmlResponse.append("<div class='info' style='background-color: #f8d7da; color: #721c24;'>" +
+                    "<h2>Server is BUSY</h2>" +
+                    "<p>The eHOST server is currently busy. Please try again later.</p>" +
+                    "</div>");
+        }
+
+        htmlResponse.append(getHelpContent());
+        htmlResponse.append(HTML_FOOTER);
+
+        return htmlResponse.toString();
     }
+
 
     @GetMapping(value = "/ehost/{projectName}/{fileName}")
     @ResponseBody

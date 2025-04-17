@@ -1,4 +1,5 @@
-package main;/*
+package main;
+/*
  * The contents of this file are subject to the GNU GPL v3 (the "License");
  * you may not use this file except in compliance with the License. You may
  * obtain a copy of the License at URL http://www.gnu.org/licenses/gpl.html
@@ -37,6 +38,7 @@ package main;/*
  *   Jianwei "Chris" Leng <Chris.Leng@utah.edu> (Original Author), 2009-2012
  *   Kyle Anderson added the Verifier Function, 2010
  *   Annotation Admin Team added the Sync functions, 2011-2012
+ *   Jianlins reimplement the loading process with multiple threads to speedup loading, 2025
  *
  */
 
@@ -46,6 +48,8 @@ import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import rest.server.EhostServerApp;
@@ -70,8 +74,6 @@ public class eHOST {
     public static String workspace;
     public static String restConfig;
     private static CustomSplash splash;
-
-
 
     /**
      * Initial works, before finishing loading the GUI.
@@ -108,67 +110,13 @@ public class eHOST {
      * create and display an instance of the primary GUI from class "GUI.java".
      */
     public static void main(String[] args) {
-
-        String text;
         VersionInfo.printVersionInfo();
         splash = new CustomSplash("/splash.png", VersionInfo.getVersion());
         splash.show();
 
-
         new Thread(() -> {
-            try {
-                splash.updateStatus("Initializing configurations...");
-                initConfigsFromArgs(args);
-                splash.updateProgress(10);
-                Thread.sleep(1000);
-
-                splash.updateStatus("Initializing settings...");
-                LogCleaner deleteLocker = new LogCleaner();
-                deleteLocker.doit();
-                initial();
-                splash.updateProgress(20);
-                Thread.sleep(1000);
-
-                if (Parameters.RESTFulServer) {
-                    splash.updateStatus("Starting RESTful server in the background...");
-                    // No need to wait on this
-                    new Thread() {
-                        @Override
-                        public void run() {
-                            try {
-                                SpringApplication app = new SpringApplication(EhostServerApp.class);
-                                Properties properties = new Properties();
-                                String configLocation=Paths.get(restConfig).toAbsolutePath().toUri().toString();
-                                properties.setProperty("spring.config.location", configLocation);
-                                app.setDefaultProperties(properties);
-                                app.run(args);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                Parameters.RESTFulServer = false;
-                            }
-
-                        }
-                    }.start();
-                    Thread.sleep(700);
-                }
-
-                splash.updateStatus("Loading GUI...");
-                userInterface.GUI gui;
-                if (workspace!=null)
-                    gui = new userInterface.GUI(workspace);
-                else
-                    gui = new userInterface.GUI();
-                    splash.updateProgress(80);
-                Thread.sleep(5000);
-                gui.setVisible(true);
-                resultEditor.loadingNotes.ShowNotes.setGUIHandler(gui);
-                splash.updateProgress(100);
-            } catch (Exception e) {
-                e.printStackTrace();
-                splash.closeSplash();
-            } finally {
-                splash.closeSplash();
-            }
+            InitializationManager initManager = new InitializationManager(splash, args);
+            initManager.performInitializationSequence();
         }).start();
     }
 
@@ -233,8 +181,6 @@ public class eHOST {
         }
 
         workspace = cmd.getOptionValue("w");
-
-
     }
 
     private static void copyDefaultFileFromResources(String resourcePath, String targetFile){
@@ -264,5 +210,166 @@ public class eHOST {
         }
     }
 
+    /**
+     * Manages the application initialization process with visual progress feedback
+     */
+    public static class InitializationManager {
+        private final CustomSplash splash;
+        private final String[] args;
+        private int currentProgress = 0;
 
+        public InitializationManager(CustomSplash splash, String[] args) {
+            this.splash = splash;
+            this.args = args;
+        }
+
+        public void performInitializationSequence() {
+            try {
+                // Execute each step in sequence with specified minimum durations
+                executeStep("Initializing configurations...", this::initConfigurations, 5, 10,500);
+                executeStep("Initializing settings...", this::initSettings, 15,20, 500);
+
+                if (Parameters.RESTFulServer) {
+                    executeStep("Starting RESTful server in the background...", this::startRESTServer, 30, 50, 600);
+                }
+
+                executeStep("Loading GUI...", this::loadGUI, 70, 90, 1800);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                splash.closeSplash();
+            }
+        }
+
+        /**
+         * Executes a single initialization step with status update, progress animation, and minimum duration.
+         *
+         * @param statusMessage The status message to display
+         * @param step The initialization step to execute
+         * @param startProgress The starting progress percentage for this step
+         * @param endProgress The ending progress percentage for this step
+         * @param minimumStepTimeMs The minimum time this step should take in milliseconds
+         */
+        private void executeStep(String statusMessage, InitializationStep step, int startProgress, int endProgress, long minimumStepTimeMs) {
+            splash.updateStatus(statusMessage);
+
+            // Update progress to start position
+            updateProgressToValue(startProgress);
+
+            long startTime = System.currentTimeMillis();
+            try {
+                // Execute the step
+                step.execute();
+
+                // Update progress bar to end position
+                updateProgressWithAnimation(startProgress, endProgress);
+
+                // Ensure minimum time has passed
+                long elapsedTime = System.currentTimeMillis() - startTime;
+                long remainingTime = minimumStepTimeMs - elapsedTime;
+                if (remainingTime > 0) {
+                    Thread.sleep(remainingTime);
+                }
+            } catch (Exception e) {
+                logger.error("Error during initialization step: " + statusMessage, e);
+                throw new RuntimeException(e);
+            }
+        }
+
+        /**
+         * Overloaded method with default minimum time of 500ms
+         */
+        private void executeStep(String statusMessage, InitializationStep step, int startProgress, int endProgress) {
+            executeStep(statusMessage, step, startProgress, endProgress, 500);
+        }
+
+        /**
+         * Updates progress immediately to a specific value without animation
+         */
+        private void updateProgressToValue(int targetProgress) {
+            currentProgress = targetProgress;
+            splash.updateProgress(currentProgress);
+        }
+
+        /**
+         * Animates the progress bar from start value to end value
+         */
+        private void updateProgressWithAnimation(int startValue, int endValue) {
+            try {
+                // Animate progress bar smoothly between values
+                int totalChange = endValue - startValue;
+                int steps = 5; // Number of animation steps
+                int progressStep = Math.max(1, totalChange / steps);
+
+                currentProgress = startValue;
+                while (currentProgress < endValue) {
+                    currentProgress += progressStep;
+                    currentProgress = Math.min(currentProgress, endValue);
+                    splash.updateProgress(currentProgress);
+                    Thread.sleep(100);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        // Individual initialization steps - now focused purely on their tasks without timing concerns
+        private void initConfigurations() throws Exception {
+            initConfigsFromArgs(args);
+        }
+
+        private void initSettings() throws Exception {
+            LogCleaner deleteLocker = new LogCleaner();
+            deleteLocker.doit();
+            initial();
+        }
+
+        private void startRESTServer() {
+            // Start REST server in background thread
+            new Thread(() -> {
+                try {
+                    SpringApplication app = new SpringApplication(EhostServerApp.class);
+                    Properties properties = new Properties();
+                    String configLocation = Paths.get(restConfig).toAbsolutePath().toUri().toString();
+                    properties.setProperty("spring.config.location", configLocation);
+                    app.setDefaultProperties(properties);
+                    ConfigurableApplicationContext context = app.run(args);
+                    showRESTfulInfo(context);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Parameters.RESTFulServer = false;
+                }
+            }).start();
+        }
+
+        private void showRESTfulInfo(ConfigurableApplicationContext context){
+            Environment env = context.getEnvironment();
+            String port = env.getProperty("server.port", "8080"); // Default to 8080 if not specified
+            String contextPath = env.getProperty("server.servlet.context-path", "");
+            String host = env.getProperty("server.address", "localhost");
+
+            // Print server information to console
+            System.out.println("\n--------------------------------------------------------------");
+            System.out.println("eHOST RESTful Server is running at:");
+            System.out.println(" - Local URL: http://" + host + ":" + port + contextPath);
+
+        }
+
+        private void loadGUI() throws Exception {
+            userInterface.GUI gui;
+            if (workspace != null)
+                gui = new userInterface.GUI(workspace);
+            else
+                gui = new userInterface.GUI();
+
+            gui.setVisible(true);
+            resultEditor.loadingNotes.ShowNotes.setGUIHandler(gui);
+        }
+
+        // Functional interface for initialization steps
+        @FunctionalInterface
+        private interface InitializationStep {
+            void execute() throws Exception;
+        }
+    }
 }

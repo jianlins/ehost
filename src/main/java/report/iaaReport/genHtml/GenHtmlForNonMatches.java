@@ -15,7 +15,7 @@ import java.util.logging.Level;
 
 /**
  *
- * @author Chris 2011-9-9 21:33
+ * @author Chris 2011-9-9 21:33 Jianlins updated with StringBuilder
  */
 public class GenHtmlForNonMatches
 {
