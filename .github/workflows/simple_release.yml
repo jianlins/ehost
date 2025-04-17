@@ -4,7 +4,7 @@ on:
   workflow_dispatch
   push:
     tags:
-      - '*'
+      - '*'  # Match any tag
 jobs:
   build:
     runs-on: ubuntu-latest
