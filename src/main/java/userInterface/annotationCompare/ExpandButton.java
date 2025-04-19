@@ -244,7 +244,7 @@ public class ExpandButton extends JPanel{
             this.noDiff();
             // ##3## show primary annotation on editor panel (annotation on list
             // and details on other fileds)   
-            gui.display_RelationshipPath_Remove();
+            gui.getContentRenderer().display_RelationshipPath_Remove();
             gui.remove_all_underline_highlighter();
             gui.display_showSelectedAnnotations_inListOnEditorPanel(-1);
             gui.display_repaintHighlighter();
@@ -268,7 +268,7 @@ public class ExpandButton extends JPanel{
             
             // ##3## show primary annotation on editor panel (annotation on list
             // and details on other fileds)   
-            gui.display_RelationshipPath_Remove();
+            gui.getContentRenderer().display_RelationshipPath_Remove();
             gui.remove_all_underline_highlighter();
             //gui.display_showSelectedAnnotations_inListOnEditorPanel(-1);
             gui.display_repaintHighlighter();
@@ -296,7 +296,7 @@ public class ExpandButton extends JPanel{
             
             // ##3## show primary annotation on editor panel (annotation on list
             // and details on other fileds)
-            gui.display_RelationshipPath_Remove();
+            gui.getContentRenderer().display_RelationshipPath_Remove();
             gui.remove_all_underline_highlighter();
             gui.display_showSelectedAnnotations_inListOnEditorPanel(-1);
             gui.display_repaintHighlighter();
@@ -371,7 +371,7 @@ public class ExpandButton extends JPanel{
 
                 // ##3## show primary annotation on editor panel (annotation on list
                 // and details on other fileds)
-                gui.display_RelationshipPath_Remove();
+                gui.getContentRenderer().display_RelationshipPath_Remove();
                 gui.remove_all_underline_highlighter();
                 gui.display_showSelectedAnnotations_inListOnEditorPanel(-1);
                 gui.display_repaintHighlighter();
@@ -395,7 +395,7 @@ public class ExpandButton extends JPanel{
 
                 // ##2.2## show primary annotation on editor panel (annotation
                 // on list and details on other fileds)
-                gui.display_RelationshipPath_Remove();
+                gui.getContentRenderer().display_RelationshipPath_Remove();
                 //gui.remove_all_underline_highlighter();
                 gui.display_showSelectedAnnotations_inListOnEditorPanel(-1);
                 gui.display_repaintHighlighter();
@@ -409,7 +409,7 @@ public class ExpandButton extends JPanel{
                 // it on
                 int uniqueindex = Depot.SelectedAnnotationSet.getSelectedAnnotationSet().get(0);
                 Depot.SelectedAnnotationSet.uniqueIndex_of_annotationOnEditor = uniqueindex;
-                gui.display_RelationshipPath_Remove();
+                gui.getContentRenderer().display_RelationshipPath_Remove();
                 gui.remove_all_underline_highlighter();
                 gui.display_showOneAnnotation_inListOnEditorPanel(uniqueindex);
                 gui.showAnnotationCategoriesInTreeView_refresh();
@@ -450,7 +450,7 @@ public class ExpandButton extends JPanel{
             this.noDiff();
             // ##3## show primary annotation on editor panel (annotation on list
             // and details on other fileds)   
-            gui.display_RelationshipPath_Remove();
+            gui.getContentRenderer().display_RelationshipPath_Remove();
             gui.remove_all_underline_highlighter();
             gui.display_showSelectedAnnotations_inListOnEditorPanel(-1);
             gui.display_repaintHighlighter();
@@ -486,7 +486,7 @@ public class ExpandButton extends JPanel{
                 
                 // ##2.2## show primary annotation on editor panel (annotation
                 // on list and details on other fileds)
-                gui.display_RelationshipPath_Remove();
+                gui.getContentRenderer().display_RelationshipPath_Remove();
                 gui.remove_all_underline_highlighter();
                 gui.display_showSelectedAnnotations_inListOnEditorPanel(-1);
                 gui.display_repaintHighlighter();
@@ -496,7 +496,7 @@ public class ExpandButton extends JPanel{
                 // it on
                 int uniqueindex = Depot.SelectedAnnotationSet.getSelectedAnnotationSet().get( 0 );
                 Depot.SelectedAnnotationSet.uniqueIndex_of_annotationOnEditor = uniqueindex;
-                gui.display_RelationshipPath_Remove();
+                gui.getContentRenderer().display_RelationshipPath_Remove();
                 gui.remove_all_underline_highlighter();
                 gui.display_showOneAnnotation_inListOnEditorPanel( uniqueindex );
                 isComparingInProcessing = true;
@@ -543,7 +543,7 @@ public class ExpandButton extends JPanel{
                 
                 // ##2.2## show primary annotation on editor panel (annotation
                 // on list and details on other fileds)
-                gui.display_RelationshipPath_Remove();
+                gui.getContentRenderer().display_RelationshipPath_Remove();
                 gui.remove_all_underline_highlighter();
                 gui.display_showSelectedAnnotations_inListOnEditorPanel(-1);
                 gui.display_repaintHighlighter();
@@ -551,7 +551,7 @@ public class ExpandButton extends JPanel{
             }else{
                 // ##3## find first one annotation in rest annotations and show
                 // it on
-                gui.display_RelationshipPath_Remove();
+                gui.getContentRenderer().display_RelationshipPath_Remove();
                 gui.remove_all_underline_highlighter();
                 this.display_showAnnotations_inComparatorList();
                 gui.display_repaintHighlighter();
@@ -594,7 +594,7 @@ public class ExpandButton extends JPanel{
                 
                 // ##2.2## show primary annotation on editor panel (annotation
                 // on list and details on other fileds)
-                gui.display_RelationshipPath_Remove();
+                gui.getContentRenderer().display_RelationshipPath_Remove();
                 gui.remove_all_underline_highlighter();
                 gui.display_showSelectedAnnotations_inListOnEditorPanel(-1);
                 gui.display_repaintHighlighter();
@@ -602,7 +602,7 @@ public class ExpandButton extends JPanel{
             }else{
                 // ##3## find first one annotation in rest annotations and show
                 // it on
-                gui.display_RelationshipPath_Remove();
+                gui.getContentRenderer().display_RelationshipPath_Remove();
                 gui.remove_all_underline_highlighter();
                 this.display_showAnnotations_inComparatorList();
                 gui.display_repaintHighlighter();

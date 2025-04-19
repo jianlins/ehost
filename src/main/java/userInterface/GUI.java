@@ -14,7 +14,6 @@ import env.Parameters;
 import main.VersionInfo;
 import main.eHOST;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.comparator.NameFileComparator;
 import org.springframework.web.client.RestTemplate;
 import relationship.complex.creation.RelationshipSchemaEditor;
 import relationship.complex.dataTypes.ComplexRelImportReturn;
@@ -24,7 +23,6 @@ import rest.server.PropertiesUtil;
 import resultEditor.annotations.*;
 import resultEditor.conflicts.classConflict;
 import resultEditor.conflicts.spanOverlaps;
-import resultEditor.conflicts.tmp_Conflicts;
 import resultEditor.relationship.complex.RelCheckResult;
 import resultEditor.relationship.iListable;
 import resultEditor.workSpace.WorkSet;
@@ -40,17 +38,12 @@ import javax.swing.tree.TreeModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Timer;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.ToolTipManager;
 
 
 /**
@@ -69,10 +62,12 @@ public class GUI extends JFrame {
     public final static int readyThreshold = 2;
     private String title;
     public static boolean selectedFromComobox;
-    private String restfulServerURL="";
-    public String infoBarTarget="server";
+    private String restfulServerURL = "";
+    public String infoBarTarget = "server";
     private javax.swing.Timer hoverTimer;
-    private InfoBarManager infoBarManager;
+    protected InfoBarManager infoBarManager;
+    private NavigationManager navigationManager;
+    private ContentRenderer contentRenderer;
 
     // <editor-fold defaultstate="collapsed" desc="Member Variables">
     protected enum fileInputType {
@@ -85,7 +80,7 @@ public class GUI extends JFrame {
      * a flag that used to indicate if there is any annotation got modified,
      * deleted, or added into current document
      */
-    private boolean modified = false;
+    protected boolean modified = false;
 
     /**
      * this path depend on operation system type, and it will be set to correct
@@ -94,7 +89,7 @@ public class GUI extends JFrame {
     private resultEditor.relationship.Editor editor = null;
     private resultEditor.simpleSchema.Editor simpleEditor = null;
     private RelationshipSchemaEditor complexEditor = null;
-    private resultEditor.annotationBuilder.Popmenu popmenu = null;
+    protected resultEditor.annotationBuilder.Popmenu popmenu = null;
     private HotKeys hotkeyDialog = null;
     /**
      * the dialog we used to create/modify/delete classes.
@@ -126,23 +121,23 @@ public class GUI extends JFrame {
 
     protected resultEditor.positionIndicator.JPositionIndicator jpositionIndicator;
 
-    private enum infoScreens {
+    protected enum infoScreens {
         CLASSCONFLICT, SPANCONFLICT, ANNOTATIONS, CLASSES, ANNOTATORS, VERIFIER, NONE
     }
 
-    private infoScreens currentScreen = infoScreens.NONE;
-    private HashSet<String> classesList = new HashSet<>();
-    private HashSet<String> annotatorsList = new HashSet<>();
-    private Vector<Annotation> annotationsList = new Vector<>();
-    private Vector<classConflict> conflictWithWorking = new Vector<>();
-    private Vector<spanOverlaps> overlappingAnnotations = new Vector<>();
-    private Vector<Annotation> verifierAnnotations = new Vector<>();
-    private String annotationsText = "Number of Annotations: ";
-    private String annotatorsText = "Number of Annotators: ";
-    private String classesText = "Number of Markables: ";
-    private String conflictsText = "Annotations in Conflict with Working Set: ";
-    private String overlappingText = "Overlapping Annotations: ";
-    private String verifierText = "Annotations Flagged by Verifier: ";
+    protected infoScreens currentScreen = infoScreens.NONE;
+    protected HashSet<String> classesList = new HashSet<>();
+    protected HashSet<String> annotatorsList = new HashSet<>();
+    protected Vector<Annotation> annotationsList = new Vector<>();
+    protected Vector<classConflict> conflictWithWorking = new Vector<>();
+    protected Vector<spanOverlaps> overlappingAnnotations = new Vector<>();
+    protected Vector<Annotation> verifierAnnotations = new Vector<>();
+    protected String annotationsText = "Number of Annotations: ";
+    protected String annotatorsText = "Number of Annotators: ";
+    protected String classesText = "Number of Markables: ";
+    protected String conflictsText = "Annotations in Conflict with Working Set: ";
+    protected String overlappingText = "Overlapping Annotations: ";
+    protected String verifierText = "Annotations Flagged by Verifier: ";
 
     /**
      * This is the jPanel contains components and functions of the NLP
@@ -161,7 +156,7 @@ public class GUI extends JFrame {
     private static Icon icon_oracle_disabled, icon_oracle_enabled, icon_graphicpath_disabled,
             icon_graphicpath_enabled, icon_difference_disabled, icon_difference_enabled,
             icon_attribute_enabled, icon_attribute_disabled;
-    private static Icon icon_note, icon_note2;
+    protected static Icon icon_note, icon_note2;
     private static Icon icon_span, icon_spanaddingOn, icon_spanaddingOff;
 
     // /**set it to true while you just pop*/
@@ -188,6 +183,7 @@ public class GUI extends JFrame {
     public GUI(String workspacePath) {
         init(workspacePath, "");
     }
+
     public GUI(String workspacePath, String restfulServerURL) {
         init(workspacePath, restfulServerURL);
     }
@@ -224,11 +220,10 @@ public class GUI extends JFrame {
 
         setHandCursor();
 
-        setNAVCurrentTab(1);
+        navigationManager.setNAVCurrentTab(1);
 
         // reload panels into the cardlayout
         resetCardLayout();
-
 
 
         // set the width of first column of the table
@@ -288,6 +283,8 @@ public class GUI extends JFrame {
     // <editor-fold defaultstate="collapsed"
     // desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        navigationManager = new NavigationManager(this);
+        contentRenderer = new ContentRenderer(this);
 
         buttonGroup_MainButton_startAnalysis = new ButtonGroup();
         jFileChooser1 = new JFileChooser();
@@ -744,7 +741,7 @@ public class GUI extends JFrame {
         jSplitPane_Annotations_Comparator.setVerifyInputWhenFocusTarget(false);
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        title = "eHOST V"+ VersionInfo.getVersion();
+        title = "eHOST V" + VersionInfo.getVersion();
 //        MavenXpp3Reader reader = new MavenXpp3Reader();
 //        try {
 //            Model model = reader.read(new FileReader("pom.xml"));
@@ -1008,7 +1005,7 @@ public class GUI extends JFrame {
 //            }
 //        });
 
-        infoBarManager=new InfoBarManager(restfulServerURL);
+        infoBarManager = new InfoBarManager(restfulServerURL);
         jPanel_infobar_center.add(infoBarManager.getjLabel_infobar(), BorderLayout.CENTER);
 
         jPanel58.setBackground(new Color(183, 183, 183));
@@ -2160,7 +2157,7 @@ public class GUI extends JFrame {
                 .setToolTipText("<html>Only show the currently displayed annotations<br> on the clinical notes</html>");
         displayCurrent.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
-                displayCurrentActionPerformed(evt);
+                contentRenderer.displayCurrentActionPerformed(evt);
             }
         });
         jPanel83.add(displayCurrent);
@@ -3042,6 +3039,7 @@ public class GUI extends JFrame {
 
         getContentPane().add(GUIContainer, BorderLayout.CENTER);
 
+
         getAccessibleContext().setAccessibleName("eHOST - 1.137");
 
         pack();
@@ -3112,7 +3110,7 @@ public class GUI extends JFrame {
             i--;
         }
 
-        this.refreshFileList();
+        navigationManager.refreshFileList();
 
         if (isCurrentDocumentGotDeleted)
             enterTab_ResultEditor();
@@ -3279,7 +3277,7 @@ public class GUI extends JFrame {
             return;
 
         if (selectedFromComobox)
-            goUserDesignated();
+            contentRenderer.goUserDesignated();
         if (jTabbedPane3.getSelectedIndex() != 0)
             jTabbedPane3.getSelectedComponent().repaint();
     }
@@ -3324,7 +3322,7 @@ public class GUI extends JFrame {
 
         setFlag_allowToAddSpan(false); // cancel possible operation of adding
         // new span
-        this.display_RelationshipPath_Remove();
+        contentRenderer.display_RelationshipPath_Remove();
 
         // ##1## if is in mode of annotation comparing, this function will be
         // disabled
@@ -3707,92 +3705,6 @@ public class GUI extends JFrame {
         }
     }// GEN-LAST:event_infoListMouseClicked
 
-    /*
-     * Called when display current list in viewer button is pressed. This method
-     * will display whatever is in the current list, if it is a list of
-     * annotations.
-     */
-    private void displayCurrentActionPerformed(ActionEvent evt)// GEN-FIRST:event_displayCurrentActionPerformed
-    {// GEN-HEADEREND:event_displayCurrentActionPerformed
-        // Make sure we're viewing a list of annotations... either from the
-        // Verifier or just
-        // annotations
-        if (currentScreen == infoScreens.ANNOTATIONS || currentScreen == infoScreens.VERIFIER) {
-            // Get all of the Annotations in the list
-            int entries = infoList.getModel().getSize();
-
-            // if there are no entries then return.
-            if (entries == 0) {
-                return;
-            }
-            // If the first object is not an annotation then return.
-            if (!infoList.getModel().getElementAt(0).getClass().isInstance(new Annotation())) {
-                return;
-            }
-            // to store results
-            Vector<Annotation> currentlyViewing = new Vector<Annotation>();
-
-            // get the list of annotations so we can display them.
-            for (int i = 0; i < entries; i++) {
-                currentlyViewing.add((Annotation) infoList.getModel().getElementAt(i));
-            }
-
-            // Draw the selected annotations(highlights)
-            repaintNewAnnotations(currentlyViewing);
-        }
-        // If we're viewing class conflicts then display all annotations
-        // involved.
-        else if (currentScreen == infoScreens.CLASSCONFLICT) {
-            // Get the number of class conflicts
-            int entries = infoList.getModel().getSize();
-
-            // Return if there are no entries.
-            if (entries == 0) {
-                return;
-            }
-            // return if the first element is not a class conflict
-            if (!infoList.getModel().getElementAt(0).getClass().isInstance(new classConflict())) {
-                return;
-            }
-            // Get the curently viewed class conflicts.
-            Vector<classConflict> currentlyViewing = new Vector<classConflict>();
-            for (int i = 0; i < entries; i++) {
-                currentlyViewing.add((classConflict) infoList.getModel().getElementAt(i));
-            }
-
-            // Get the annotations from each class conflict.
-            Vector<Annotation> annotations = new Vector<Annotation>();
-            for (classConflict conflict : currentlyViewing) {
-                annotations.addAll(conflict.getInvolved());
-            }
-            // Redraw the highlighting
-            repaintNewAnnotations(annotations);
-        }
-        // Display all annotations in a span conflict.
-        else if (currentScreen == infoScreens.SPANCONFLICT) {
-            int entries = infoList.getModel().getSize();
-            // return if there are no entries
-            if (entries == 0) {
-                return;
-            }
-            // return if it's not a list of span overlaps
-            if (!infoList.getModel().getElementAt(0).getClass().isInstance(new spanOverlaps())) {
-                return;
-            }
-            // get the span overlaps
-            Vector<spanOverlaps> currentlyViewing = new Vector<spanOverlaps>();
-            for (int i = 0; i < entries; i++) {
-                currentlyViewing.add((spanOverlaps) infoList.getModel().getElementAt(i));
-            }
-            // get the annotations
-            Vector<Annotation> annotations = new Vector<Annotation>();
-            for (spanOverlaps conflict : currentlyViewing) {
-                annotations.addAll(conflict.getInvolved());
-            }
-            // redraw the annotations
-            repaintNewAnnotations(annotations);
-        }
-    }// GEN-LAST:event_displayCurrentActionPerformed
 
     private void workingConflictsMouseClicked(MouseEvent evt)// GEN-FIRST:event_workingConflictsMouseClicked
     {// GEN-HEADEREND:event_workingConflictsMouseClicked
@@ -3818,7 +3730,7 @@ public class GUI extends JFrame {
      */
     private void textPaneforClinicalNotesMouseReleased(MouseEvent evt) {// GEN-FIRST:event_textPaneforClinicalNotesMouseReleased
         // ResultEditor.WorkSpace.WorkSet.mouse_clicked_on = 2;
-        mouseClickOnTextPane(evt);
+        contentRenderer.mouseClickOnTextPane(evt);
     }// GEN-LAST:event_textPaneforClinicalNotesMouseReleased
 
     private void jButton21ActionPerformed(ActionEvent evt) {// GEN-FIRST:event_jButton21ActionPerformed
@@ -3838,7 +3750,7 @@ public class GUI extends JFrame {
     {// GEN-HEADEREND:event_verifierOnCurrentActionPerformed
         this.callVerifierWithCurrent();
         currentScreen = infoScreens.VERIFIER;
-        refreshInfo();
+        contentRenderer.refreshInfo();
     }// GEN-LAST:event_verifierOnCurrentActionPerformed
 
     private void infoListValueChanged(javax.swing.event.ListSelectionEvent evt)// GEN-FIRST:event_infoListValueChanged
@@ -3861,7 +3773,7 @@ public class GUI extends JFrame {
     /**
      * ONLY used for method "setNAVonFirstOrSecondPage()"
      */
-    private int ActivedNVATAB = -1;
+    protected int ActivedNVATAB = -1;
 
     public void setNAVonFirstOrSecondPage() {
         if (this.jPanel_NAV_Card2.isVisible()) {
@@ -3870,15 +3782,15 @@ public class GUI extends JFrame {
 
         if (this.jPanel_NAV_Card3.isVisible()) {
             if (ActivedNVATAB == 1)
-                this.setNAVCurrentTab(1);
+                navigationManager.setNAVCurrentTab(1);
             else if (ActivedNVATAB == 2)
-                this.setNAVCurrentTab(2);
+                navigationManager.setNAVCurrentTab(2);
 
         }
     }
 
     public void setNAVonThirdPage() {
-        this.setNAVCurrentTab(3);
+        navigationManager.setNAVCurrentTab(3);
     }
 
     // </editor-fold>
@@ -3889,22 +3801,22 @@ public class GUI extends JFrame {
     private JPanel Editor;
     private JPanel GUIContainer;
     private JPanel JPanel_PinsExtractor;
-    private JPanel NavigationPanel1;
-    private JPanel NavigationPanel_editor;
-    private JToolBar ToolBar;
-    private JLabel annotations;
-    private JLabel annotators;
+    protected JPanel NavigationPanel1;
+    protected JPanel NavigationPanel_editor;
+    protected JToolBar ToolBar;
+    protected JLabel annotations;
+    protected JLabel annotators;
     private ButtonGroup buttonGroup1;
     private ButtonGroup buttonGroup_MainButton_startAnalysis;
     private ButtonGroup buttonGroup_Tabs;
     private ButtonGroup buttonGroup_listAnnotationsInSequences;
     private ButtonGroup buttonGroup_quicknlp;
     private ButtonGroup buttonGroup_treeview;
-    private JLabel classes;
+    protected JLabel classes;
     private JDialog confirmExit;
-    private JButton delete_Relationships;
+    protected JButton delete_Relationships;
     private JButton displayCurrent;
-    private JList infoList;
+    protected JList infoList;
     private JButton jButton1;
     private JButton jButton11;
     private JButton jButton12;
@@ -3916,38 +3828,38 @@ public class GUI extends JFrame {
     private JButton jButton18;
     private JButton jButton19;
     private JButton jButton2;
-    private JButton jButton20;
+    protected JButton jButton20;
     private JButton jButton21;
     private JButton jButton22;
     private JButton jButton23;
     private JButton jButton24;
     private JButton jButton26;
-    private JButton jButton4_spanEditor_rightToRight;
+    protected JButton jButton4_spanEditor_rightToRight;
     private JButton jButton5;
     private JButton jButton6;
     private JButton jButton7;
     private JButton jButton8;
-    private JButton jButton9;
+    protected JButton jButton9;
     private JButton jButton_AddClinicalTexts;
     private JButton jButton_AddClinicalTexts1;
-    private JButton jButton_SelectClass;
+    protected JButton jButton_SelectClass;
     private JButton jButton_SpanAdd;
     private JButton jButton_SpanRemove;
-    private JButton jButton_attribute;
+    protected JButton jButton_attribute;
     private JToggleButton jButton_cr;
-    private JButton jButton_importAnnotations;
+    protected JButton jButton_importAnnotations;
     private JButton jButton_importAnnotations1;
-    private JButton jButton_relationships;
-    private JButton jButton_removeAllAnnotations;
+    protected JButton jButton_relationships;
+    protected JButton jButton_removeAllAnnotations;
     private JButton jButton_removeduplicates;
     private JButton jButton_save;
     private JButton jButton_save1;
-    private JButton jButton_span_rightToLeft;
-    private JButton jButton_spaneditor_delete;
-    private JButton jButton_spaneditor_leftToRight;
-    private JButton jButton_spaneditor_lefttToLeft;
-    private JPanel jCardcontainer_interactive;
-    private JComboBox jComboBox_InputFileList;
+    protected JButton jButton_span_rightToLeft;
+    protected JButton jButton_spaneditor_delete;
+    protected JButton jButton_spaneditor_leftToRight;
+    protected JButton jButton_spaneditor_lefttToLeft;
+    protected JPanel jCardcontainer_interactive;
+    protected JComboBox jComboBox_InputFileList;
     private JComboBox jComboBox_currentworkspace_abspath;
     private JDialog jDialog_Confirm_before_Removing_Annotations;
     private JFileChooser jFileChooser1;
@@ -3961,7 +3873,7 @@ public class GUI extends JFrame {
     private JLabel jLabel20;
     private JLabel jLabel21;
     private JLabel jLabel22;
-    private JLabel jLabel23;
+    protected JLabel jLabel23;
     private JLabel jLabel24;
     private JLabel jLabel25;
     private JLabel jLabel26;
@@ -3989,22 +3901,22 @@ public class GUI extends JFrame {
     private JLabel jLabel_info_annotator;
     private JLabel jLabel_info_annotatorlabel;
     private JLabel jLabel_infobar;
-    private JLabel jLabel_infobar_FlagOfDiff;
-    private JLabel jLabel_infobar_FlagOfOracle;
+    protected JLabel jLabel_infobar_FlagOfDiff;
+    protected JLabel jLabel_infobar_FlagOfOracle;
     private JLabel jLabel_infobar_attributeEditor;
-    private JList jList3;
-    private JList jList_NAV_projects;
+    protected JList jList3;
+    protected JList jList_NAV_projects;
     private JList jList_Spans;
-    private JList jList_complexrelationships;
-    private JList jList_corpus;
+    protected JList jList_complexrelationships;
+    protected JList jList_corpus;
 
     //    map file name to navigation list id
-    private HashMap<String, Integer> fileIdMap = new HashMap<>();
+    protected HashMap<String, Integer> fileIdMap = new HashMap<>();
     //    map project name to navigation list id
-    private HashMap<String, Integer> projectIdMap = new HashMap<>();
+    protected HashMap<String, Integer> projectIdMap = new HashMap<>();
 
-    private JList jList_normalrelationship;
-    private JList jList_selectedAnnotations;
+    protected JList jList_normalrelationship;
+    protected JList jList_selectedAnnotations;
     private JPanel jPanel1;
     private JPanel jPanel10;
     private JPanel jPanel11;
@@ -4045,7 +3957,7 @@ public class GUI extends JFrame {
     private JPanel jPanel58;
     private JPanel jPanel59;
     private JPanel jPanel6;
-    private JPanel jPanel60;
+    protected JPanel jPanel60;
     private JPanel jPanel61;
     private JPanel jPanel63;
     private JPanel jPanel64;
@@ -4091,7 +4003,7 @@ public class GUI extends JFrame {
     private JPanel jPanel_NAV_Card1;
     private JPanel jPanel_NAV_Card2;
     private JPanel jPanel_NAV_Card3;
-    private JPanel jPanel_NAV_CardContainer;
+    protected JPanel jPanel_NAV_CardContainer;
     private JPanel jPanel_NLP;
     private JPanel jPanel_annotation_details;
     private JPanel jPanel_colorfulTextBar_filebrowser2;
@@ -4110,8 +4022,8 @@ public class GUI extends JFrame {
     private JPanel jPanel_position_indicator_container;
     private JPanel jPanel_reportFormContainer;
     private JPanel jPanel_textPane;
-    private JRadioButton jRadioButton_adjudicationMode;
-    private JRadioButton jRadioButton_annotationMode;
+    protected JRadioButton jRadioButton_adjudicationMode;
+    protected JRadioButton jRadioButton_annotationMode;
     private JRadioButton jRadioButton_treeview_currentarticle;
     private JRadioButton jRadioButton_treeview_overall;
     private JScrollPane jScrollPane11;
@@ -4123,7 +4035,7 @@ public class GUI extends JFrame {
     private JScrollPane jScrollPane7;
     private JScrollPane jScrollPane8;
     private JScrollPane jScrollPane9;
-    private JScrollPane jScrollPane_Spans;
+    protected JScrollPane jScrollPane_Spans;
     private JScrollPane jScrollPane_classtree;
     private JScrollPane jScrollPane_textpane;
     private JSeparator jSeparator1;
@@ -4138,38 +4050,38 @@ public class GUI extends JFrame {
     private JSplitPane jSplitPane_Annotations_Comparator;
     private JSplitPane jSplitPane_between_viewer_and_allatttibutes;
     private JTabbedPane jTabbedPane1;
-    private JTabbedPane jTabbedPane3;
-    private JTextArea jTextArea_comment;
-    private JTextField jTextField_annotationClassnames;
-    private JTextField jTextField_annotator;
-    private JTextField jTextField_creationdate;
+    protected JTabbedPane jTabbedPane3;
+    protected JTextArea jTextArea_comment;
+    protected JTextField jTextField_annotationClassnames;
+    protected JTextField jTextField_annotator;
+    protected JTextField jTextField_creationdate;
     private JTextField jTextField_sample;
     private JTextField jTextField_searchtext;
-    private JTextPane jTextPane_explanations;
-    private JToggleButton jToggleButton_Converter;
-    private JToggleButton jToggleButton_CreateAnnotaion;
-    private JToggleButton jToggleButton_DictionaryManager;
-    private JToggleButton jToggleButton_DictionarySetting;
-    private JToggleButton jToggleButton_PinExtractor;
+    protected JTextPane jTextPane_explanations;
+    protected JToggleButton jToggleButton_Converter;
+    protected JToggleButton jToggleButton_CreateAnnotaion;
+    protected JToggleButton jToggleButton_DictionaryManager;
+    protected JToggleButton jToggleButton_DictionarySetting;
+    protected JToggleButton jToggleButton_PinExtractor;
     private JToggleButton jToggleButton_ResultEditor;
     private JToggleButton jToggleButton_exit;
     private JToggleButton jToggleButton_sequence_inCharacters;
     private JToggleButton jToggleButton_sequence_inLocation;
-    private JToggleButton jToggle_AssignmentsScreen;
+    protected JToggleButton jToggle_AssignmentsScreen;
     private JToolBar jToolBar3;
     private JToolBar jToolBar4;
     private JToolBar jToolBar5;
     private JToolBar jToolBar6;
     private JToolBar jToolBar_editopanel_comparison;
     private JTree jTree_class;
-    private JLabel overlapping;
+    protected JLabel overlapping;
     private JButton refresh;
     public static final JLabel res_conflictIcon = new JLabel();
-    private JTextPane textPaneforClinicalNotes;
-    private JLabel verifierFlagged;
+    protected JTextPane textPaneforClinicalNotes;
+    protected JLabel verifierFlagged;
     private JButton verifierOnAll;
     private JButton verifierOnCurrent;
-    private JLabel workingConflicts;
+    protected JLabel workingConflicts;
 
     // End of variables declaration//GEN-END:variables
     // </editor-fold>
@@ -4220,7 +4132,7 @@ public class GUI extends JFrame {
         if (jTabbedPane3.getSelectedIndex() == 0)
             refreshResultEditor();
         else if (jTabbedPane3.getSelectedIndex() == 1)
-            refreshInfo();
+            contentRenderer.refreshInfo();
         else if (jTabbedPane3.getSelectedIndex() == 2) {
             // load report system to eHOST
             load_ReportSystem();
@@ -4231,8 +4143,8 @@ public class GUI extends JFrame {
      * remove any information about annotation on the panel of annotation editor
      */
     public void clear_annotation_display() {
-        this.disableAnnotationDisplay();
-        this.disable_AnnotationEditButtons();
+        contentRenderer.disableAnnotationDisplay();
+        contentRenderer.disable_AnnotationEditButtons();
     }
 
     /**
@@ -4244,7 +4156,7 @@ public class GUI extends JFrame {
     {// GEN-HEADEREND:event_verifierOnAllActionPerformed
         // Call Verifier with all and refresh the info.
         callVerifierWithAll();
-        refreshInfo();
+        contentRenderer.refreshInfo();
     }// GEN-LAST:event_verifierOnAllActionPerformed
 
     /**
@@ -4647,7 +4559,7 @@ public class GUI extends JFrame {
                 if ((selected < 0) || (selected > size - 1))
                     return;
 
-                selectProject(selected, null);
+                navigationManager.selectProject(selected, null);
 
             }
         } catch (Exception ex) {
@@ -4656,343 +4568,6 @@ public class GUI extends JFrame {
 
     }// GEN-LAST:event_jList_NAV_projectsMouseClicked
 
-    public String selectProject(String projectName, String fileName) {
-        CompletableFuture<String> responseFuture = new CompletableFuture<>();
-        SwingUtilities.invokeLater(() -> {
-            String response = "Project: " + projectName + " not found";
-            try {
-                if (projectIdMap.containsKey(projectName)) {
-                    if (Parameters.previousProjectPath == null || !Parameters.previousProjectPath.endsWith(projectName)) {
-                        selectProject(projectIdMap.get(projectName), fileName);
-                        response = "success";
-                    } else {
-                        showFileContextInTextPane(fileName);
-                        response = projectName + " / " + fileName + " loaded";
-                    }
-                    status = 3;
-                } else {
-                    status = 4;
-                }
-                eHOST.logger.debug(response);
-
-                // Complete the future with the response value
-                responseFuture.complete(response);
-            } catch (Exception e) {
-                // Handle any exceptions during the operation
-                responseFuture.completeExceptionally(e);
-                eHOST.logger.error("Error selecting project: " + e.getMessage(), e);
-            }
-        });
-
-        try {
-            // Wait for and return the response from the EDT operation
-            return responseFuture.get();
-        } catch (InterruptedException | ExecutionException e) {
-            eHOST.logger.error("Error waiting for project selection: " + e.getMessage(), e);
-            Thread.currentThread().interrupt(); // Restore interrupted status
-            return "Error selecting project: " + e.getMessage();
-        }
-
-    }
-
-    public void selectProject(int projectId, String fileName) {
-        // ##1## empty the corpus list for current project
-//        env.Parameters.corpus.RemoveAll();
-//        adjudication.data.AdjudicationDepot.clear();
-//
-//        Paras.__adjudicated = false;
-//        Paras.removeAll();
-//        Paras.removeParas();
-//        saveProjectCurrentViewingFileId();
-//        env.Parameters.currentMarkables_to_createAnnotation_by1Click = null;
-        Object o = jList_NAV_projects.getModel().getElementAt(projectId);
-        if (o == null)
-            return;
-
-        navigatorContainer.ListEntry_Project entry = (navigatorContainer.ListEntry_Project) o;
-
-        if (entry == null) {
-            log.LoggingToFile
-                    .log(Level.SEVERE,
-                            "#### ERROR #### 1106091554::fail to get a selected item from the list of project!!!");
-            return;
-        }
-
-        File p = entry.getFolder();
-        if (p == null) {
-            log.LoggingToFile
-                    .log(Level.SEVERE,
-                            "#### ERROR #### 1102110353:: current project we got from you selected item in the list of project is NULL");
-            return;
-        }
-
-        setFlag_allowToAddSpan(false); // cancel possible operation of
-        // adding new span
-
-        // move code to a separate function
-        selectProject(p, fileName);
-    }
-
-    public void selectProject(File f, String fileName) {
-        try {
-            if (status > 1) {
-                eHOST.logger.debug("Reset gui status to 0.");
-                status = 0;
-            }
-
-            // check if project is used by another eHOST instance
-
-            ProjectLock lock = new ProjectLock(f);
-
-            if (!lock.acquireLock()) {
-                eHOST.logger.warn("The project is already in use by another user.");
-                return;
-            }
-
-
-            eHOST.logger.debug("Selecting project: " + f.getName() + "...\t Current status" + status);
-            this.setReviewMode(reviewmode.ANNOTATION_MODE);
-            // ##3## set current project
-            env.Parameters.WorkSpace.CurrentProject = f;
-            env.Parameters.previousProjectPath = f.getAbsolutePath();
-
-            this.modified = false;
-
-            // #### load configure settings of this project
-            config.project.ProjectConf projectconf = new config.project.ProjectConf(f);
-            infoBarTarget=f.getAbsolutePath();
-            if (projectconf.foundOldConfigureFile()) {
-                Object[] options = {"Yes, please", "No"};
-                final JOptionPane optionPane = new JOptionPane();
-                int xp = NavigationPanel1.getWidth();
-                int yp = ToolBar.getHeight();
-                optionPane.setSize(500, 300);
-
-                optionPane.setLocation(this.getX() + xp + (int) ((this.getWidth() - xp - 500) / 2),
-                        this.getY() + yp + (int) ((this.getHeight() - yp - 300) / 2));
-                int answer = optionPane
-                        .showOptionDialog(
-                                this,
-                                "<html>We find an old version of eHOST configure file under<p> your "
-                                        + "current project. Do you want to load and convert it into new format?<html>",
-                                "Older Configure File:", JOptionPane.YES_NO_OPTION,
-                                JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-
-                if (answer == JOptionPane.YES_OPTION) {
-                    projectconf.loadConfigure();
-                    projectconf.rename();
-                } else {
-                    projectconf.loadXmlConfigure();
-                }
-
-            } else {
-                projectconf.loadXmlConfigure();
-            }
-
-            // open this folder
-            setNAVCurrentTab(2);
-            showStatusButtons();
-            ActivedNVATAB = 2;
-
-            // loading saved annotation classanmes from oonfigure file
-
-            /*
-             * new Thread(){ @Override public void run(){
-             * System.out.println("#eHOST# Reading saved annotation classnames
-             * ..."); resultEditor.annotationClasses.Depot depot = new
-             * resultEditor.annotationClasses.Depot(); // load save annotation
-             * classnames depot.loadAnnotationClassnamesFromConfigureFile();
-             * System.out.println("#eHOST# Reading saved annotation classnames
-             * --- end "); } }.start();
-             */
-
-            // env.ClinicalNoteList.CorpusLib.RemoveAll();
-            // list txt files under corpus
-            File[] corpus = listCorpus_inProjectFolder(f);
-
-            listCorpus(corpus);
-            status = 1;
-            // add into memory
-            if (corpus != null) {
-                env.Parameters.corpus.LIST_ClinicalNotes.clear();
-                for (File txtfile : corpus) {
-                    if (txtfile == null) {
-                        continue;
-                    }
-                    // env.clinicalNoteList.CorpusLib.addTextFile(txtfile);
-                    env.clinicalNoteList.CorpusStructure cs = new env.clinicalNoteList.CorpusStructure();
-                    cs.file = txtfile;
-
-                    env.Parameters.corpus.LIST_ClinicalNotes.add(cs);
-
-                }
-
-                showTextFiles_inComboBox();
-
-                showFirstFile_of_corpus(fileName, false);
-            }
-
-            // update screen
-            jCardcontainer_interactive.setVisible(true);
-
-            this.updateScreen_for_variables();
-
-            // load saved annotations from "saved" folder
-            resultEditor.reloadSavedAnnotations.Reload.load(this);
-
-            this.showAnnotationCategoriesInTreeView_CurrentArticle();
-            this.reavtiveMainPanel();
-
-            // display the editor panel as default
-            if (!((resultEditor.customComponents.ExpandablePanel_editor) NavigationPanel_editor)
-                    .isExtended()) {
-                ((resultEditor.customComponents.ExpandablePanel_editor) NavigationPanel_editor)
-                        .afterMousePressed();
-                ((resultEditor.customComponents.ExpandablePanel_editor) NavigationPanel_editor)
-                        .setNormalColor();
-            }
-
-            // Update several status buttons on screen by these project
-            // parameters.
-            // There are several status buttons on the status bar at the button
-            // of
-            // eHOST window, such as Oracle status button, Diff status button,
-            // etc.
-            updateGUI_byProjectParameters();
-
-            this.setReviewMode(reviewmode.ANNOTATION_MODE);
-
-            ((navigatorContainer.TabPanel) NavigationPanel1).setTab_All();
-
-            String annotator_name = resultEditor.annotator.Manager.getAnnotatorName_OutputOnly();
-            assignmentsScreen = getAssignmentsScreen(annotator_name);
-            // String annotator_id =
-            // resultEditor.annotator.Manager.getAnnotatorID_outputOnly(); NOT
-            // SAME AS AA USER ID
-            // assignmentsScreen.updateAssignments(); THIS DISPLAYS THE ASGS,
-            // but then asg selects do not show correctly in the results editor
-
-            if ((env.Parameters.OracleStatus.visible == false)
-                    || (env.Parameters.OracleStatus.sysvisible == false)) {
-
-                if ((env.Parameters.OracleStatus.sysvisible == false)) {
-                    env.Parameters.oracleFunctionEnabled = false;
-                }
-
-                jLabel_infobar_FlagOfOracle.setVisible(false);
-            } else {
-                jLabel_infobar_FlagOfOracle.setVisible(true);
-            }
-            infoBarManager.setInfoBarTarget(infoBarTarget);
-            infoBarManager.updateInfoBar("<html><b>Current Project:</b>  <font color=blue> <a  href=''>"
-                    + f.getAbsolutePath() + "</a></font>.</html>");
-
-        } catch (Exception ex) {
-            System.out.println("error 1204031721");
-            ex.printStackTrace();
-        }
-        status = 3;
-    }
-
-    /**
-     * read file list from
-     */
-    public void refreshFileList() {
-        eHOST.logger.debug("Starting refreshFileList...");
-        File[] corpus = listCorpus_inProjectFolder(env.Parameters.WorkSpace.CurrentProject);
-        if (corpus != null)
-            Arrays.sort(corpus, NameFileComparator.NAME_COMPARATOR);
-        listCorpus(corpus);
-
-        // add into memory
-        env.Parameters.corpus.RemoveAll();
-        if (corpus != null) {
-            for (File txtfile : corpus) {
-                if (txtfile == null)
-                    continue;
-                env.Parameters.corpus.addTextFile(txtfile);
-            }
-        }
-
-        showTextFiles_inComboBox();
-        goUserDesignated();
-    }
-
-    private void listCorpus(File[] corpus) {
-        // empty the list
-        this.jList_corpus.setListData(new Vector());
-        fileIdMap.clear();
-        if (corpus != null)
-            Arrays.sort(corpus, NameFileComparator.NAME_COMPARATOR);
-
-        try {
-
-            Vector<userInterface.structure.FileObj> entries = new Vector<userInterface.structure.FileObj>();
-            for (File file : corpus) {
-                userInterface.structure.FileObj fileobj = new userInterface.structure.FileObj(
-                        file.getName(), this.icon_note2);
-                fileIdMap.put(file.getName(), entries.size());
-                entries.add(fileobj);
-            }
-            this.jList_corpus.setListData(entries);
-            this.jList_corpus.setCellRenderer(new userInterface.structure.FileRenderer());
-
-        } catch (Exception ex) {
-            log.LoggingToFile.log(Level.SEVERE, "error 1101211147:: fail to list corpus on screen"
-                    + ex.getMessage());
-        }
-    }
-
-    /**
-     * List all txt files under the give project folder.
-     */
-    private File[] listCorpus_inProjectFolder(File project) {
-        File[] txtfiles = null;
-
-        try {
-            // get corpus folder
-            File corpusfolder = null;
-            File[] files = project.listFiles();
-            if (files == null)
-                return null;
-            for (File file : files) {
-                if (file.getName().toLowerCase().compareTo(env.CONSTANTS.corpus) == 0) {
-                    corpusfolder = file;
-                    break;
-                }
-            }
-
-            if (corpusfolder == null)
-                return null;
-
-            File[] allcorpusfiles = corpusfolder.listFiles();
-            if (allcorpusfiles == null)
-                return null;
-            int countfiles = 0;
-            for (File file : allcorpusfiles) {
-                if (file.isFile() && (!file.isHidden())) {
-                    // if(file.getName().toString().contains(".txt"))
-                    countfiles++;
-                }
-            }
-
-            int point = 0;
-            txtfiles = new File[countfiles];
-            for (File file : allcorpusfiles) {
-                if (file.isFile() && (!file.isHidden())) {
-                    // if(file.getName().toString().contains(".txt")) {
-                    txtfiles[point] = file;
-                    point++;
-                    // }
-                }
-            }
-
-        } catch (Exception ex) {
-            log.LoggingToFile.log(Level.SEVERE, "error 1101211133::");
-        }
-
-        return txtfiles;
-    }
 
     /**
      * ask user whether to save modification of current document.
@@ -5019,48 +4594,12 @@ public class GUI extends JFrame {
         }
     }
 
-    private boolean popDialog_Asking_ChangeSaving() {
+    protected boolean popDialog_Asking_ChangeSaving() {
         return this.popDialog_Asking_YesNo("<html>Do you want to save your modifications?<html>", "Save Changes:");
     }
 
     private void jLabel21MouseClicked(MouseEvent evt) {// GEN-FIRST:event_jLabel21MouseClicked
-        setFlag_allowToAddSpan(false); // cancel possible operation of adding
-        // new span
-        // if user modified something of this current, ask user whether they
-        // want to save changes or not.
-        if (this.modified) {
-            // get user's decision
-            boolean yes_no = popDialog_Asking_ChangeSaving();
-
-            // call saving function if needed.
-            if (yes_no) {
-                this.saveto_originalxml();
-            }
-        }
-
-//        release project lock
-        ProjectLock lock = new ProjectLock(env.Parameters.WorkSpace.CurrentProject.getAbsolutePath());
-        lock.releaseLock();
-
-        hideStatusButtons();
-
-        // close protential consensus mode
-        this.setReviewMode(reviewmode.OTHERS);
-
-        ((navigatorContainer.TabPanel) NavigationPanel1).setTab_onlyProject();
-
-        // go to tab which has the list of project
-        setNAVCurrentTab(1);
-        jCardcontainer_interactive.setVisible(false);
-
-        // save configure setting for current project which you just left
-        config_saveProjectSetting();
-
-        // set current project as NULL to indicate that you go back to
-        // workspace level and there is no project got selected
-        env.Parameters.WorkSpace.CurrentProject = null;
-        this.infoBarManager.showDefaultInfo();
-
+        navigationManager.goBackToProjectList();
     }// GEN-LAST:event_jLabel21MouseClicked
 
     /**
@@ -5113,7 +4652,7 @@ public class GUI extends JFrame {
         // new span
 
         if (evt.getClickCount() == 2 && evt.getButton() == MouseEvent.BUTTON1) {
-            goUserDesignatedTable();
+            contentRenderer.goUserDesignatedTable();
         }
     }// GEN-LAST:event_jList_corpusMouseClicked
 
@@ -5376,7 +4915,7 @@ public class GUI extends JFrame {
         jRadioButton_adjudicationMode.setSelected(true);
 
         // enter consensus mode from other modes
-        this.setReviewMode(ReviewMode.adjudicationMode);
+        contentRenderer.setReviewMode(ReviewMode.adjudicationMode);
 
         disableAnnotationDisplay();
         disable_AnnotationEditButtons();
@@ -5427,11 +4966,11 @@ public class GUI extends JFrame {
         }
 
         jRadioButton_adjudicationMode.setSelected(false);
-        this.setReviewMode(reviewmode.ANNOTATION_MODE);
+        this.contentRenderer.setReviewMode(reviewmode.ANNOTATION_MODE);
 
         disableAnnotationDisplay();
         disable_AnnotationEditButtons();
-        refreshInfo();
+        contentRenderer.refreshInfo();
 
         resultEditor.conflicts.DifferentMatching diff = new resultEditor.conflicts.DifferentMatching(
                 textPaneforClinicalNotes);
@@ -5495,7 +5034,7 @@ public class GUI extends JFrame {
 
     boolean WANT_NEW_SPAN = false;
 
-    private void addSpan(MouseEvent evt, boolean requiringFromButton) {
+    protected void addSpan(MouseEvent evt, boolean requiringFromButton) {
         try {
 
             // check: make sure we get a current annotation.
@@ -6432,7 +5971,7 @@ public class GUI extends JFrame {
         this.showAnnotationCategoriesInTreeView_refresh();
 
         currentScreen = infoScreens.NONE;
-        refreshInfo();
+        contentRenderer.refreshInfo();
 
         display_showSymbolIndicators();
         showValidPositionIndicators();
@@ -6567,45 +6106,7 @@ public class GUI extends JFrame {
      * pervious operation
      */
     public void disableAnnotationDisplay() {
-        try {
-            display_RelationshipPath_Remove();
-
-            Vector v = new Vector();
-            v.clear();
-            jList_selectedAnnotations.setListData(v);
-            jList_normalrelationship.setListData(v);
-            jList_complexrelationships.setListData(v);
-            // jLabel_typeOfRelationship.setText("Attributes: ");
-            jTextPane_explanations.setText(null);
-            jList3.setListData(v);
-            jScrollPane_Spans.setBorder(BorderFactory
-                    .createLineBorder(new Color(153, 153, 153)));
-            jTextArea_comment.setText("");
-            jList3.setBorder(null);
-            jList3.setListData(v);
-            jTextField_annotationClassnames.setText(null);
-
-            jTextField_annotator.setText(null);
-            jTextField_annotator.setBorder(STANDARD_TEXTFIELD_BOARD);
-
-            jTextField_creationdate.setText(null);
-            jTextField_creationdate.setBorder(STANDARD_TEXTFIELD_BOARD);
-
-            jButton_SelectClass.setEnabled(false);
-
-            // refresh screen only if the text pane is visiable go user;
-            // otherwise, do nothing.
-            if (textPaneforClinicalNotes.isVisible()) {
-                resultEditor.underlinePainting.SelectionHighlighter painter = new resultEditor.underlinePainting.SelectionHighlighter(
-                        this.textPaneforClinicalNotes);
-                painter.RemoveAllUnderlineHighlight();
-            }
-        } catch (Exception ex) {
-            log.LoggingToFile.log(
-                    Level.SEVERE,
-                    "\n==== ERROR ====:: 1106101243:: fail to clear screen for new document"
-                            + ex.toString());
-        }
+        contentRenderer.disableAnnotationDisplay();
     }
 
     public void remove_all_underline_highlighter() {
@@ -6881,7 +6382,7 @@ public class GUI extends JFrame {
     public void display_showAnnotationDetail_onEditorPanel(
             Annotation annotation, boolean _onlyshowDetails) {
 
-        this.display_RelationshipPath_Remove();
+        contentRenderer.display_RelationshipPath_Remove();
 
         // System.out.println("show details: annotation:"+annotation.toString());
         if (!_onlyshowDetails)
@@ -7025,7 +6526,7 @@ public class GUI extends JFrame {
                 File f = WorkSet.getAllTextFile()[i];
                 WorkSet.setCurrentFile(f);
 
-                goUserDesignated();
+                contentRenderer.goUserDesignated();
                 return;
             }
         }
@@ -7062,36 +6563,6 @@ public class GUI extends JFrame {
             this.jpositionIndicator = positionindicator;
     }
 
-    /**
-     * by users' click, dicide which navigator menu item got selected and then
-     * active related panel.
-     *
-     * @param i 0 means first panel, 1 means second panel
-     */
-    public void setNAVCurrentTab(int i) {
-
-        CardLayout card = (CardLayout) jPanel_NAV_CardContainer.getLayout();
-        switch (i) {
-            case 2:
-                // ((ResultEditor.CustomComponents.NagivationMenuItem)jPanel_SelectFiles).setSelected();
-                // ((ResultEditor.CustomComponents.NagivationMenuItem)jPanel_AnnotationsAndMarkables).setNormal();
-                card.show(jPanel_NAV_CardContainer, "card3");
-                this.ActivedNVATAB = 2;
-                break;
-            case 3:
-                // ((ResultEditor.CustomComponents.NagivationMenuItem)jPanel_SelectFiles).setNormal();
-                // ((ResultEditor.CustomComponents.NagivationMenuItem)jPanel_AnnotationsAndMarkables).setSelected();
-
-                card.show(jPanel_NAV_CardContainer, "card2");
-                ((navigatorContainer.TabPanel) NavigationPanel1).setTabActived("Navigator");
-                break;
-            case 1:
-                card.show(jPanel_NAV_CardContainer, "card4");
-                this.ActivedNVATAB = 1;
-                display_refreshNAV_WorkSpace();
-                break;
-        }
-    }
 
     // static int etdsei=0;
 
@@ -7169,11 +6640,10 @@ public class GUI extends JFrame {
     }
 
     public void refreshNAVProjects() {
-        refreshFileList();
+        navigationManager.refreshFileList();
         display_refreshNAV_WorkSpace();
         // if( env.Parameters.WorkSpace.CurrentProject != null )
         config.system.SysConf.saveSystemConfigure();
-
     }
 
     public void reavtiveMainPanel() {
@@ -7216,7 +6686,7 @@ public class GUI extends JFrame {
 
             // no review mode while we just loaded eHOST, components will be
             // hided
-            setReviewMode(reviewmode.OTHERS);
+            contentRenderer.setReviewMode(reviewmode.OTHERS);
 
             // seting the tab panel
             ((navigatorContainer.TabPanel) NavigationPanel1).expand();
@@ -7470,12 +6940,12 @@ public class GUI extends JFrame {
                 uniqueindex = Depot.SelectedAnnotationSet.getSelectedAnnotationSet().get(0);
 
             Depot.SelectedAnnotationSet.uniqueIndex_of_annotationOnEditor = uniqueindex;
-            display_RelationshipPath_Remove();
+            contentRenderer.display_RelationshipPath_Remove();
             // remove_all_underline_highlighter();
 
             // recheck difference and display on screen
             ((userInterface.annotationCompare.ExpandButton) jPanel60).recheckUnMatches();
-            display_RelationshipPath_Remove();
+            contentRenderer.display_RelationshipPath_Remove();
             remove_all_underline_highlighter();
 
             // relist current annotation
@@ -7553,7 +7023,7 @@ public class GUI extends JFrame {
         // jToggleButton1.setSelected(false);
         File current_raw_document = WorkSet.getCurrentFile();
         if (current_raw_document == null)
-            showFileContextInTextPane(loadProjectPreviousViewedFileId());
+            showFileContextInTextPane(contentRenderer.loadProjectPreviousViewedFileId());
         else
             showFileContextInTextPane(current_raw_document);
         disableAnnotationDisplay();
@@ -7574,7 +7044,7 @@ public class GUI extends JFrame {
      * The difference between "save" and "save as" is that user are allowed to
      * save annotations belongs to designated files and assigned directionary.
      */
-    private void saveto_originalxml() {
+    protected void saveto_originalxml() {
 
 
         // add safety checking
@@ -7888,28 +7358,6 @@ public class GUI extends JFrame {
     /**
      * Clean the table and reload file list into the table.
      */
-    /*
-     * private void cleanAndReload_ListOfFileCollection() { // empty the table
-     * for list of selected clinical notes Vector<String> listdata = new
-     * Vector<String>(); jList_corpus.setListData(listdata);
-     *
-     * // show clinical note textsourceFilename and amount of words in rows int
-     * size = env.Parameters.LIST_ClinicalNotes.size(); for (int i = 0; i <
-     * size; i++) { // buld row listdata =
-     * env.Parameters.LIST_ClinicalNotes.get(i).filename,
-     * (Object)env.Parameters.LIST_ClinicalNotes.get(i).amountOfWords }; // add
-     * row data into table ((DefaultTableModel)
-     * jTable_SelectedClinicalFiles.getModel()).addRow(row);
-     *
-     * } ((DefaultTableModel)
-     * jTable_SelectedClinicalFiles.getModel()).fireTableDataChanged();
-     *
-     *
-     * // show information on GUI: amount of selected clinical notes
-     * jLabel_filecollection.setText(" FILE COLLECTION ("+size+")");
-     *
-     * }
-     */
     private void smallerFontSize() {
 
         setFlag_allowToAddSpan(false); // cancel possible operation of adding
@@ -8116,19 +7564,7 @@ public class GUI extends JFrame {
      * Display: remove all graph path from text panel. These graph paths were
      * used to show links between annotations who have complex relationships.
      */
-    public void display_RelationshipPath_Remove() {
-        if (!jCardcontainer_interactive.isVisible())
-            return;
 
-        try {
-            ((userInterface.txtScreen.TextScreen) this.textPaneforClinicalNotes)
-                    .clearComplexRelationshipCoordinates();
-
-        } catch (Exception ex) {
-            log.LoggingToFile.log(Level.SEVERE, "\n==== ERROR ====::1106101301::" + ex.toString());
-        }
-
-    }
 
     public void display_removeSymbolIndicators() {
         ((userInterface.txtScreen.TextScreen) this.textPaneforClinicalNotes).clearAttRels();
@@ -8188,7 +7624,7 @@ public class GUI extends JFrame {
      * @param annotation The annotation which we will draw out graph path of its
      *                   complex relationships if it has.
      */
-    private void display_relationshipPath_setPath(Annotation annotation) {
+    protected void display_relationshipPath_setPath(Annotation annotation) {
 
         // The annotation at the start point can NOT be null or w/o
         // relationships
@@ -8414,27 +7850,7 @@ public class GUI extends JFrame {
 
     }
 
-    /**
-     * Redraw the highlighting and only draw the passed in annotations
-     *
-     * @param currentlyViewing - the annotations to highlight.
-     */
-    private void repaintNewAnnotations(Vector<Annotation> currentlyViewing) {
-        Depot depot = new Depot();
-        Article article = depot.getArticleByFilename(WorkSet.getCurrentFile().getName());
-        depot.setAnnotationsVisible(currentlyViewing, article);
 
-        // repaint
-        jpositionIndicator.removeAllIndicators();
-        jpositionIndicator.paintArticle(WorkSet.getCurrentFile().getName().trim());
-        jpositionIndicator.forcepaint();
-        jpositionIndicator.repaint();
-
-        // go to file viewer to view newly painted annotations
-        int selected = jComboBox_InputFileList.getSelectedIndex();
-        showFileContextInTextPane(selected);
-        jTabbedPane3.setSelectedIndex(0);
-    }
 
     /**
      * Move the focus from the selected annotation to the annotation that is
@@ -8579,24 +7995,8 @@ public class GUI extends JFrame {
         jLabel29.setText(selectedClass);
     }
 
-    private void disable_AnnotationEditButtons() {
-        // disable buttons for span and class edit
-        jButton_SelectClass.setEnabled(false);
-        jButton_spaneditor_lefttToLeft.setEnabled(false);
-        jButton_spaneditor_leftToRight.setEnabled(false);
-        jButton_span_rightToLeft.setEnabled(false);
-        jButton_spaneditor_delete.setEnabled(false);
-        jButton4_spanEditor_rightToRight.setEnabled(false);
-        // jButton11.setEnabled(false);
-        jButton_SelectClass.setEnabled(false);
-        jButton_relationships.setEnabled(false);
-        delete_Relationships.setEnabled(false);
-        jButton_attribute.setEnabled(false);
-
-        Vector v = new Vector();
-        jList3.setListData(v);
-        jList3.setBorder(null);
-
+    protected void disable_AnnotationEditButtons() {
+        contentRenderer.disable_AnnotationEditButtons();
     }
 
     private void setRedBorder(JTextField textfield) {
@@ -8672,7 +8072,7 @@ public class GUI extends JFrame {
         disable_AnnotationEditButtons();
 
         // currentScreen = infoScreens.NONE;
-        refreshInfo();
+        contentRenderer.refreshInfo();
 
         if (this.reviewmode == ReviewMode.adjudicationMode) {
             DiffCounter diffcounter = new DiffCounter(
@@ -8712,7 +8112,7 @@ public class GUI extends JFrame {
         disable_AnnotationEditButtons();
 
         currentScreen = infoScreens.NONE;
-        refreshInfo();
+        contentRenderer.refreshInfo();
 
         if (this.reviewmode == ReviewMode.adjudicationMode) {
             DiffCounter diffcounter = new DiffCounter(
@@ -8726,23 +8126,6 @@ public class GUI extends JFrame {
      */
     private ArrayList loadFileContents(File _rawTextDocument) {
         return commons.Filesys.ReadFileContents(_rawTextDocument);
-    }
-
-    private int getFileIdByName(String fileName) {
-        int selectFileId = -1;
-        if (fileName == null || fileName.trim().length() == 0)
-            return selectFileId;
-        if (fileIdMap.containsKey(fileName)) {
-            selectFileId = fileIdMap.get(fileName);
-        } else {
-            for (String loadedFileName : fileIdMap.keySet()) {
-                if (loadedFileName.contains(fileName)) {
-                    selectFileId = fileIdMap.get(loadedFileName);
-                    break;
-                }
-            }
-        }
-        return selectFileId;
     }
 
 
@@ -8777,7 +8160,7 @@ public class GUI extends JFrame {
 
 //        setFlag_allowToAddSpan(false);
 
-        goUserDesignatedTable();
+        contentRenderer.goUserDesignatedTable();
         return response;
     }
 
@@ -8883,123 +8266,12 @@ public class GUI extends JFrame {
      *
      * @param tp object of jtextpane that a span just got selected on.
      */
-    private void operation_checkBorder_whileNeeded(JTextPane tp) {
+    protected void operation_checkBorder_whileNeeded(JTextPane tp) {
         userInterface.correctSpanBorder.SpanChecker checker = new userInterface.correctSpanBorder.SpanChecker(
                 tp);
         checker.checkAndCorrect_ifHave();
     }
 
-    /**
-     * By the user disignated textsourceFilename, show its text contents in text
-     * area
-     */
-    public void goUserDesignated() {
-        this.display_removeSymbolIndicators();
-        // ##1##
-        // exit from annotation comparison mode if editor panel and comparator
-        // panel are showed for comparing annotation conflits
-        try {
-            textPaneforClinicalNotes.setText(null);
-            ((userInterface.annotationCompare.ExpandButton) jPanel60).setStatusInvisible();
-        } catch (Exception ex) {
-            log.LoggingToFile.log(Level.SEVERE,
-                    "error 1012011313:: fail to leave annotations compaison mode!!!");
-        }
-
-        resetVerifier();
-
-        try {
-            ((userInterface.annotationCompare.ExpandButton) jPanel60).setStatusInvisible();
-            ((userInterface.annotationCompare.ExpandButton) jPanel60).noDiff();
-
-            // numbers of items in the filelist
-            int size = jComboBox_InputFileList.getItemCount();
-            if (size < 1)
-                return;
-            int fileListSize = env.Parameters.corpus.getSize();
-
-            // use this to avoid the initial loading side effect
-            if (size != fileListSize)
-                return;
-
-            int selected = jComboBox_InputFileList.getSelectedIndex();
-
-            if (selected <= (size - 1)) {
-                WorkSet.latestScrollBarValue = 0;
-                // jComboBox_InputFileList.setSelectedIndex(selected + 1);
-                showFileContextInTextPane(selected);
-                this.showAnnotationCategoriesInTreeView_CurrentArticle();
-                this.showValidPositionIndicators_setAll();
-                this.showValidPositionIndicators();
-
-                this.display_showSymbolIndicators();
-            } else {
-                Toolkit.getDefaultToolkit().beep();
-            }
-        } catch (Exception ex) {
-            log.LoggingToFile.log(Level.SEVERE,
-                    "error 1012011314:: fail to switch to another document!!!");
-        }
-
-        try {
-            // reset details display
-            disableAnnotationDisplay();
-            disable_AnnotationEditButtons();
-            // currentScreen = infoScreens.NONE;
-            refreshInfo();
-        } catch (Exception ex) {
-            log.LoggingToFile
-                    .log(Level.SEVERE,
-                            "error 1012011312:: fail to update screen after switched to another document!!!");
-        }
-
-        if (this.reviewmode == ReviewMode.adjudicationMode) {
-            DiffCounter diffcounter = new DiffCounter(
-                    this.jLabel23, WorkSet.getCurrentFile().getName(), this);
-            diffcounter.reset();
-        }
-    }
-
-    public void showFirstFile_of_corpus(String fileName, boolean refresh) {
-
-        textPaneforClinicalNotes.setText(null);
-        // ##1##
-        // exit from annotation comparison mode if editor panel and comparator
-        // panel are showed for comparing annotation conflits
-        try {
-            ((userInterface.annotationCompare.ExpandButton) jPanel60).setStatusInvisible();
-            resetVerifier();
-        } catch (Exception ex) {
-            log.LoggingToFile.log(Level.SEVERE,
-                    "error 1012011313-2:: fail to leave annotations compaison mode!!!");
-        }
-
-        try {
-            // numbers of items in the filelist
-            int size = jComboBox_InputFileList.getItemCount();
-            if (size < 1) {
-                return;
-            }
-
-            WorkSet.latestScrollBarValue = 0;
-            int fileId = getFileIdByName(fileName);
-            if (fileId == -1)
-                fileId = loadProjectPreviousViewedFileId();
-            showFileContextInTextPane(fileId);
-
-
-        } catch (Exception ex) {
-            log.LoggingToFile.log(Level.SEVERE,
-                    "error 1012011314:: fail to switch to another document!!!");
-        }
-
-        // reset details display
-        disableAnnotationDisplay();
-        disable_AnnotationEditButtons();
-        // currentScreen = infoScreens.NONE;
-        if (refresh)
-            refreshInfo();
-    }
 
     private void restoreDeleted() {
         if (WorkSet.getLastDeleted() != null
@@ -9015,50 +8287,6 @@ public class GUI extends JFrame {
 
     }
 
-
-    public void goUserDesignatedTable() {
-        // resetVerifier();
-        selectedFromComobox = false;
-        ((userInterface.annotationCompare.ExpandButton) jPanel60).setStatusInvisible();
-        ((userInterface.annotationCompare.ExpandButton) jPanel60).noDiff();
-
-        // numbers of items in the filelist
-        int size = this.jList_corpus.getModel().getSize();
-        if (size < 1)
-            return;
-        int fileListSize = env.Parameters.corpus.getSize();
-
-        // use this to avoid the initial loading side effect
-        if (size != fileListSize)
-            return;
-
-
-        int selected = this.jList_corpus.getSelectedIndex();
-
-        if (selected <= (size - 1)) {
-            jComboBox_InputFileList.setSelectedIndex(selected);
-            WorkSet.latestScrollBarValue = 0;
-            // jComboBox_InputFileList.setSelectedIndex(selected + 1);
-            showFileContextInTextPane(selected);
-            this.showAnnotationCategoriesInTreeView_CurrentArticle();
-            this.showValidPositionIndicators_setAll();
-            this.showValidPositionIndicators();
-        } else {
-            Toolkit.getDefaultToolkit().beep();
-        }
-
-        // reset details display
-        disableAnnotationDisplay();
-        disable_AnnotationEditButtons();
-        // currentScreen = infoScreens.NONE;
-        refreshInfo();
-
-        if (this.reviewmode == ReviewMode.adjudicationMode) {
-            DiffCounter diffcounter = new DiffCounter(
-                    this.jLabel23, WorkSet.getCurrentFile().getName(), this);
-            diffcounter.reset();
-        }
-    }
 
     /**
      * Load report system form into current tab while user click tab button on
@@ -9120,7 +8348,7 @@ public class GUI extends JFrame {
      *
      * @param position The position of the right clicking that user just made.
      */
-    private void addRelationship(int position) {
+    protected void addRelationship(int position) {
         try {
             if (env.Parameters.CreateRelationship.where == 0) {
                 return;
@@ -9417,7 +8645,7 @@ public class GUI extends JFrame {
             // showSelectedAnnotations_inList(0);
             // WorkSet.currentAnnotation = annotation_left;
 
-            this.display_RelationshipPath_Remove();
+            contentRenderer.display_RelationshipPath_Remove();
 
             // update these small dots (indicators)
             this.display_removeSymbolIndicators();
@@ -9754,7 +8982,7 @@ public class GUI extends JFrame {
      * already set to visible, bring it into the front of the GUI, so user can
      * see it.
      */
-    private void openAttributeEditor() {
+    protected void openAttributeEditor() {
         // quit if we didn't allocate an annotation for this attribute editor.
         if (WorkSet.currentAnnotation == null)
             return;
@@ -9841,16 +9069,12 @@ public class GUI extends JFrame {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Private Methods - Verifier">
-    private void setToVerifier() {
+    protected void setToVerifier() {
         infoList.setListData(verifierAnnotations);
         jLabel29.setText("Verifier");
         currentScreen = infoScreens.VERIFIER;
     }
 
-    private void resetVerifier() {
-        WorkSet.currentlyViewing = new ArrayList<Integer>();
-        WorkSet.filteredViewing = false;
-    }
 
     /**
      * This method will fill member variables with the potential problems as
@@ -9987,7 +9211,7 @@ public class GUI extends JFrame {
 
     // <editor-fold defaultstate="collapsed"
     // desc="Private Methods - Information Tab">
-    private void setToClassConflict() {
+    protected void setToClassConflict() {
         Vector<classConflict> conflicts = new Vector<classConflict>();
         conflicts.addAll(conflictWithWorking);
         infoList.setListData(conflicts);
@@ -9995,7 +9219,7 @@ public class GUI extends JFrame {
         currentScreen = infoScreens.CLASSCONFLICT;
     }
 
-    private void setToAnnotators() {
+    protected void setToAnnotators() {
         // Set to Annotators
         Vector<String> theAnnotators = new Vector<String>();
         theAnnotators.addAll(annotatorsList);
@@ -10118,7 +9342,7 @@ public class GUI extends JFrame {
      * This function should be called when the classes should be displayed in
      * the list of information in the Annotation information tab.
      */
-    private void setToClasses() {
+    protected void setToClasses() {
         // To store the classes in.
         Vector<String> theClasses = new Vector<String>();
 
@@ -10166,7 +9390,7 @@ public class GUI extends JFrame {
      * This function should be called to set the info list in the annotations
      * tab to the list of all annotations.
      */
-    private void setToAnnotations() {
+    protected void setToAnnotations() {
         // Will contain all of the anotations
         Vector<Annotation> v = new Vector<Annotation>();
 
@@ -10185,124 +9409,11 @@ public class GUI extends JFrame {
         currentScreen = infoScreens.ANNOTATIONS;
     }
 
-    public void refreshInfo() {
-
-        reDrawInfoList();
-
-        new Thread() {
-
-            @Override
-            public void run() {
-                try {
-                    // jLabel29.setText("");
-                    classesList = new HashSet<String>();
-                    annotatorsList = new HashSet<String>();
-                    annotationsList = new Vector<Annotation>();
-                    conflictWithWorking = new Vector<classConflict>();
-                    verifierAnnotations = new Vector<Annotation>();
-                    Depot depot = new Depot();
-                    WorkSet.getCurrentFileIndex();
-                    File current = WorkSet.getCurrentFile();
-                    if (current != null) {
-                        Article article = depot.getArticleByFilename(current.getName());
-                        if (article == null) {
-                            // If article is null then just clear out the
-                            // results
-                            annotations.setText("<html>" + annotationsText + "</html>");
-                            classes.setText("<html>" + classesText + "</html>");
-                            annotators.setText("<html>" + annotatorsText + "</html>");
-                            workingConflicts.setText("<html>" + conflictsText + "</html>");
-                            overlapping.setText("<html>" + overlappingText + "</html>");
-                            verifierFlagged.setText("<html>" + verifierText + "</html>");
-                            currentScreen = infoScreens.NONE;
-                            reDrawInfoList();
-                            return;
-                        }
-
-                        // Get all of the annotations
-                        annotationsList = article.annotations;
-                        // Loop through all annotations to get data
-                        for (Annotation annotation : annotationsList) {
-                            // Capture all classes and annotators
-                            classesList.add(annotation.annotationclass);
-                            annotatorsList.add(annotation.getAnnotator());
-
-                            // If the annotation has Verifier information then
-                            // capture that as well
-                            if ((annotation.verifierFound != null && annotation.verifierFound
-                                    .size() > 0)
-                                    || (annotation.verifierSuggestion != null && annotation.verifierSuggestion
-                                    .size() > 0) || annotation.isVerified()) {
-                                verifierAnnotations.add(annotation);
-                            }
-                        }
-
-                        // Update tab with new information
-                        overlappingAnnotations = tmp_Conflicts.getSpanConflicts(current.getName());
-                        conflictWithWorking = tmp_Conflicts.getClassConflicts(current.getName());
-                        annotations.setText("<html>" + annotationsText + "<font color = \"blue\">"
-                                + annotationsList.size() + "</font></html>");
-                        classes.setText("<html>" + classesText + "<font color = \"blue\">"
-                                + classesList.size() + "</font></html>");
-                        annotators.setText("<html>" + annotatorsText + "<font color = \"blue\">"
-                                + annotatorsList.size() + "</font></html>");
-                        workingConflicts.setText("<html>" + conflictsText
-                                + "<font color = \"blue\">" + conflictWithWorking.size()
-                                + "</font></html>");
-                        overlapping.setText("<html>" + overlappingText + "<font color = \"blue\">"
-                                + overlappingAnnotations.size() + "</font></html>");
-                        verifierFlagged.setText("<html>" + verifierText + "<font color = \"blue\">"
-                                + verifierAnnotations.size() + "</font></html>");
-                    }
-                    GUI.status++;
-                    if (GUI.status > GUI.readyThreshold)
-                        GUI.selectedFromComobox = true;
-                    eHOST.logger.debug("refreshInfo finished.\t Current status: " + status);
-                } catch (Exception ex) {
-                    eHOST.logger.debug("refreshInfo throw exceptions");
-                    GUI.status = 4;
-                }
-            }
-
-        }.start();
-
-    }
-
-    /**
-     * Should be called whenever the infoList needs to be redrawn. currentScreen
-     * variable must be set correctly for this to work.
-     */
-    private void reDrawInfoList() {
-
-        switch (currentScreen) {
-            case ANNOTATIONS:
-                setToAnnotations();
-                break;
-            case ANNOTATORS:
-                setToAnnotators();
-                break;
-            case CLASSCONFLICT:
-                setToClassConflict();
-                break;
-            case NONE:
-                infoList.setListData(new Vector());
-                break;
-            case SPANCONFLICT:
-                setToSpanConflict();
-                break;
-            case CLASSES:
-                setToClasses();
-                break;
-            case VERIFIER:
-                setToVerifier();
-                break;
-        }
-    }
 
     /**
      * Set annotation information list to view spanConflicts.
      */
-    private void setToSpanConflict() {
+    protected void setToSpanConflict() {
         Vector<spanOverlaps> conflicts = new Vector<spanOverlaps>();
         conflicts.addAll(this.overlappingAnnotations);
         infoList.setListData(conflicts);
@@ -10663,7 +9774,7 @@ public class GUI extends JFrame {
                 this.saveto_originalxml();
             }
         }
-        if (env.Parameters.WorkSpace.CurrentProject!=null) {
+        if (env.Parameters.WorkSpace.CurrentProject != null) {
 //          After switch out of(close) a project this is set to null
             ProjectLock lock = new ProjectLock(env.Parameters.WorkSpace.CurrentProject.getAbsolutePath());
             lock.releaseLock();
@@ -10681,21 +9792,6 @@ public class GUI extends JFrame {
         }
     }
 
-    private int loadProjectPreviousViewedFileId() {
-        File log = new File(Parameters.previousProjectPath, ".log");
-        int id = 0;
-        if (log.exists()) {
-            try {
-                String content = FileUtils.readFileToString(log, StandardCharsets.UTF_8).trim();
-                if (content != null && content.length() > 0) {
-                    id = Integer.parseInt(content);
-                }
-            } catch (Exception e) {
-
-            }
-        }
-        return id;
-    }
 
     // selected button matched to previous tab
     private void setTabButton(TabGuard.tabs _tab) {
@@ -10790,7 +9886,7 @@ public class GUI extends JFrame {
         card.show(GUIContainer, "converter");
     }
 
-    private AssignmentsScreen getAssignmentsScreen(String username) {
+    protected AssignmentsScreen getAssignmentsScreen(String username) {
         if (!assignmentsScreenExist()) {
             if (assignmentsScreen == null) {
                 try {
@@ -10820,7 +9916,7 @@ public class GUI extends JFrame {
 
     public void switchTo(String project, String file) {
         File projectFile = new File(project);
-        selectProject(projectFile, null);
+        navigationManager.selectProject(projectFile, null);
         enterTab_ResultEditor();
         int n = jComboBox_InputFileList.getItemCount();
         for (int i = 0; i < n; i++) {
@@ -11080,313 +10176,9 @@ public class GUI extends JFrame {
         jToolBar_editopanel_comparison.setVisible(isVisible);
     }
 
-    private Annotation attributeAnnotation = null;
+    protected Annotation attributeAnnotation = null;
 
-    /**
-     * Handling mouse clicked event: mouse click on the text area and it may
-     * (1)select one annotation or (2)select some text that we can build new
-     * annotation.
-     *
-     * @param evt Caught system mouse event.
-     */
-    private void mouseClickOnTextPane(MouseEvent evt) {
 
-        try {
-
-            // validity checking
-            if ((!this.isEnabled()) || (!this.isVisible()) || (!this.isActive()))
-                return;
-
-            // remove previous selection highlighters
-            final resultEditor.underlinePainting.SelectionHighlighter highlighter = new resultEditor.underlinePainting.SelectionHighlighter(
-                    textPaneforClinicalNotes);
-            highlighter.RemoveAllUnderlineHighlight();
-
-            Annotation previousAnnotation = null;
-            if (WorkSet.currentAnnotation != null) {
-                previousAnnotation = WorkSet.currentAnnotation;
-            }
-
-            int clicks = evt.getClickCount();
-
-            // #### 0.1 #### clicked by left key or right key
-            boolean leftClick = evt.getButton() == MouseEvent.BUTTON1;
-            boolean rightClick = evt.getButton() == MouseEvent.BUTTON3;
-
-            if (!rightClick) {
-                // #### 0.4 #### preset: leave from comparision mode if it
-                // was in a potential compraision status
-                ((userInterface.annotationCompare.ExpandButton) jPanel60).setStatusInvisible();
-                ((userInterface.annotationCompare.ExpandButton) jPanel60).noDiff();
-            }
-
-            // cancel any possible flag of "create new dis-joint span"
-            // after any right click.
-            if (rightClick)
-                setFlag_allowToAddSpan(false);
-
-            // ---------------------------------------------- //
-            // function: add dis-joint span if wanted
-            if (this.WANT_NEW_SPAN) {
-
-                // if the indicator is "ON"(false), check and correct span
-                // border
-                // by space or symbols, o.w. use exact span that user just
-                // selected
-                operation_checkBorder_whileNeeded(textPaneforClinicalNotes);
-
-                addSpan(evt, false);
-                setFlag_allowToAddSpan(false);
-                return;
-            }
-            // ---------------------------------------------- //
-
-            // #### 0.2 #### get filename of current document
-            String textsourceFilename = WorkSet.getCurrentFile().getName();
-
-            // get position of mouse
-            int position = textPaneforClinicalNotes.viewToModel(evt.getPoint());
-
-            // #### 0.3 #### try to use current mouse carpet position to select
-            // annotations
-            ArrayList<Annotation> selectedAnnotaions = Depot.SelectedAnnotationSet
-                    .selectAnnotations_ByPosition(textsourceFilename, position, false);
-
-            // Catch all Left-Click Mouse Events. If we are creating a
-            // relatinoship this
-            // will signal the end of relationship creation. The Currently
-            // active relationship
-            // chain will be stopped and this method will return(to avoid
-            // activating other
-            // mouse events).
-            //
-            if (WorkSet.makingRelationships && leftClick) {
-                if (stopRelationshiping())
-                    return;
-            }
-
-            // ##1## right key to popup Dialog popmenu for select text to
-            // build a new annotation
-            // ##2## caught similar annotations in all documents
-            if (textPaneforClinicalNotes.getSelectedText() != null) {
-
-                this.setFlag_allowToAddSpan(true);
-
-                // if the indicator is "ON"(false), check and correct span
-                // border
-                // by space or symbols, o.w. use exact span that user just
-                // selected
-                operation_checkBorder_whileNeeded(textPaneforClinicalNotes);
-
-                if (popmenu == null || !popmenu.isGood()) {
-                    popmenu = new resultEditor.annotationBuilder.Popmenu(textPaneforClinicalNotes,
-                            this, evt);
-                }
-
-                // do not want to build a annotation by method of
-                // "ONE-CLICK-TO-BUILD-ANNOTATION"
-                if (env.Parameters.currentMarkables_to_createAnnotation_by1Click == null)
-                    popmenu.pop(evt.getX(), evt.getY(), this.getX(), this.getY(), this.getWidth(),
-                            this.getHeight());
-                else
-                // "ONE-CLICK-TO-BUILD-ANNOTATION", no popmenu will be pop out
-                // in following process
-                {
-                    if (popmenu != null) {
-                        popmenu.setVisible(false);
-                        popmenu = new resultEditor.annotationBuilder.Popmenu(
-                                textPaneforClinicalNotes, this, evt);
-                    } else
-                        popmenu = new resultEditor.annotationBuilder.Popmenu(
-                                textPaneforClinicalNotes, this, evt);
-
-                    String thismarkablename = env.Parameters.currentMarkables_to_createAnnotation_by1Click;
-                    popmenu.oneClicktoCreateAnnotation(thismarkablename);
-                }
-
-                return;
-            }
-
-            // #============================================================#
-            // ##3## build complex relationships between annotaions
-            // This occurs when Relationship button is toggled and a right
-            // click occurs. This allows users to add Annotations to a
-            // relationship and create new relationships.
-            // #============================================================#
-            else if ((clicks == 1) && WorkSet.makingRelationships && rightClick) {
-                // Simply return if no annotation is currently selected
-                if (WorkSet.currentAnnotation == null)
-                    return;
-
-                addRelationship(position);
-
-                // reset the flag everytime after adding a relationship
-                // WorkSet.makingRelationships = false;
-
-                return;
-            }
-
-            Depot.SelectedAnnotationSet.selectAnnotations_ByPosition(
-                    textsourceFilename, position, true);
-            // ##2## left key to get a current position and show found
-            // annotations
-            // in this position
-
-            // Record for current workset: latest position in text panel
-            WorkSet.latestClickPosition = position;
-
-            // if no annotation caught
-            if ((selectedAnnotaions == null) || (selectedAnnotaions.size() < 1)) {
-                // disable all operation buttons
-                // if these is no annotation catched by current cursor position
-                WorkSet.currentAnnotation = null;
-                disableAnnotationDisplay();
-                disable_AnnotationEditButtons();
-
-                ((userInterface.annotationCompare.ExpandButton) jPanel60).setStatusInvisible();
-                ((userInterface.annotationCompare.ExpandButton) jPanel60).noDiff();
-
-                return;
-            }
-
-            // if got result in this cursor position
-            int amount = selectedAnnotaions.size();
-            if (amount > 0) {
-                if (reviewmode == ReviewMode.adjudicationMode) {
-                    // jPanel60.setVisible( true );
-                    DiffCounter diffposition = new DiffCounter(jLabel23, WorkSet.getCurrentFile()
-                            .getName(), this);
-                    // int cursorPosition = textPaneforClinicalNotes.(
-                    // evt.getPoint() );
-                    diffposition.setSelected(position);
-
-                }
-
-                // record mouse position
-                WorkSet.latestValidClickPosition = position;
-
-                // show found annotations in list
-                showSelectedAnnotations_inList(0);
-
-                // if multiple annotations got selected, we will use diff panel
-                // to manage them
-                if (amount == 1) {
-
-                    // if (reviewmode == GUI.ReviewMode.ANNOTATION_MODE) {
-
-                    // If same annotation Clicked open Attribute Editor
-                    if ((!rightClick) && (previousAnnotation != null)
-                            && (selectedAnnotaions != null))//
-                    {
-                        boolean contained = false;
-                        for (Annotation anno : selectedAnnotaions) {
-                            if (anno == null) {
-                                continue;
-                            }
-
-                            if (anno.isDuplicate(previousAnnotation, WorkSet.getCurrentFile()
-                                    .getName())) {
-
-                                if ((attributeAnnotation != null)
-                                        && (attributeAnnotation.isDuplicate(previousAnnotation,
-                                        WorkSet.getCurrentFile().getName()))) {
-                                    attributeAnnotation = null;
-                                    contained = false;
-                                    break;
-                                } else {
-                                    attributeAnnotation = previousAnnotation;
-                                    contained = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (contained && env.Parameters.enabled_displayAttributeEditor) {
-                            // && (previousAnnotation.attributes != null)
-                            // && (previousAnnotation.attributes.size()>0) ) {
-                            openAttributeEditor();
-                            return;
-                        }
-                    }
-
-                    if (reviewmode == ReviewMode.adjudicationMode) {
-
-                        boolean showbutton = false;
-                        if (checkAnnotator_ADJUDICATION(selectedAnnotaions))
-                            showbutton = false;
-                        else
-                            showbutton = true;
-
-                        this.setVisible_EditorAdjuducation(showbutton);
-
-                        if (showbutton) {
-                            Depot.setSingleAnnotation(selectedAnnotaions
-                                    .get(0));
-                        }
-
-                        this.display_relationshipPath_setPath(selectedAnnotaions.get(0));
-
-                    }
-                } else if (amount > 1) {
-                    // set the diff button to visible
-                    ((userInterface.annotationCompare.ExpandButton) jPanel60).setStatusVisible();
-
-                    // if these annotations are same
-                    // if( isAllSelectedAnnotationSame() ){
-                    // right diff panel available if flag is true
-                    // ((userInterface.annotationCompare.ExpandButton)jPanel60).setStatusInvisible();
-                    // start diff if flag is true
-                    ((userInterface.annotationCompare.ExpandButton) jPanel60).noDiff();
-
-                    // show all annotations
-                    // showAnnotatorsOfAllSelectedAnnotations();
-                    // }
-                    // else
-                    // {
-                    // start diff if flag is true
-                    ((userInterface.annotationCompare.ExpandButton) jPanel60).startDiff();
-                    // }
-
-                } else {
-                    // right diff panel available if flag is true
-                    ((userInterface.annotationCompare.ExpandButton) jPanel60).setStatusInvisible();
-                    // start diff if flag is true
-                    ((userInterface.annotationCompare.ExpandButton) jPanel60).noDiff();
-                }
-
-                enable_AnnotationEditButtons();
-
-                // Check for right click
-                if (evt.getModifiers() == InputEvent.BUTTON3_MASK) {
-                    Annotation toPopFor = WorkSet.currentAnnotation;
-                    resultEditor.PopUp.rightClickOnAnnotPopUp annotPopUp = new resultEditor.PopUp.rightClickOnAnnotPopUp(
-                            this.textPaneforClinicalNotes, selectedAnnotaions, this);
-                    annotPopUp.pop(toPopFor, evt.getX(), evt.getY());
-                }
-
-            } else // if no annotation is selected
-            {
-                // set the diff button to visible
-                ((userInterface.annotationCompare.ExpandButton) jPanel60).setStatusVisible();
-                // start diff if flag is true
-                ((userInterface.annotationCompare.ExpandButton) jPanel60).startDiff();
-
-                // right diff panel available if flag is true
-                ((userInterface.annotationCompare.ExpandButton) jPanel60).setStatusInvisible();
-                // start diff if flag is true
-                ((userInterface.annotationCompare.ExpandButton) jPanel60).noDiff();
-                // disable all operation buttons
-                // if these is no annotation catched by current cursor position
-                disableAnnotationDisplay();
-                disable_AnnotationEditButtons();
-            }
-
-        } catch (Exception ex) {
-            log.LoggingToFile.log(Level.SEVERE, "error 1106081501::" + ex.getMessage());
-            ex.printStackTrace();
-        }
-
-    }
 
     public void diffjumper(int start, int end) {
 
@@ -11567,7 +10359,7 @@ public class GUI extends JFrame {
      * @param evt - button pressed
      */
     private void refreshActionPerformed(ActionEvent evt) {
-        refreshInfo();
+        contentRenderer.refreshInfo();
     }
 
     /**
@@ -11588,7 +10380,7 @@ public class GUI extends JFrame {
      * Hint: Annotator maybe be showed as "ADJUDICATION" while its adjudication
      * status is "Annotation.AdjudicationStatus.MATCHES_OK"
      */
-    private boolean checkAnnotator_ADJUDICATION(ArrayList<Annotation> selectedAnnotaions) {
+    protected boolean checkAnnotator_ADJUDICATION(ArrayList<Annotation> selectedAnnotaions) {
 
         final String annotator = "ADJUDICATION";
 
@@ -11729,120 +10521,12 @@ public class GUI extends JFrame {
      */
     adjudication.Adjudication dialog_adjudication = null;
 
-    /**
-     * Tell system which review mode eHOST will be working in, are set the
-     * button status. There are two review modes: annotation mode, and consensus
-     * mode.
-     */
-    public void setReviewMode(ReviewMode thismode) {
 
-        reviewmode = thismode; // set current review mode
-
-        // by given current review mode, select matched togglebutton
-        switch (thismode) {
-
-            // annotation mode
-            case ANNOTATION_MODE:
-
-                env.Parameters.enabled_Diff_Display = true;
-
-                jRadioButton_annotationMode.setSelected(true);
-                jRadioButton_adjudicationMode.setSelected(false);
-                jRadioButton_annotationMode.setVisible(true);
-                jRadioButton_adjudicationMode.setVisible(true);
-                jButton9.setVisible(false);
-
-                // if( )
-                // jPanel60.setVisible( env.Parameters.EnableDiffButton );
-
-                setComponentsVisibleForConsensusMode(true); // show top function
-                // buttons
-
-                this.display_adjudication_setOperationBarStatus(this.HIDEN);
-
-                break;
-
-            // consensus mode
-            case adjudicationMode:
-
-                // jPanel60.setVisible( true );
-                this.display_adjudication_setOperationBarStatus(this.DISABLED);
-
-                env.Parameters.enabled_Diff_Display = true; // enable diff flag to
-                // show diff
-                display_repaintHighlighter();
-
-                jRadioButton_annotationMode.setVisible(true);
-                jRadioButton_adjudicationMode.setVisible(true);
-                jRadioButton_annotationMode.setSelected(false);
-                jRadioButton_adjudicationMode.setSelected(true);
-                jButton9.setVisible(true);
-
-                setComponentsVisibleForConsensusMode(false); // hide buttons which
-                // are not related
-                // to consensus mode
-                this.repaint();
-
-                Paras.__adjudicated = adjudication.data.AdjudicationDepot.isReady();
-
-                // let user select what they want
-                if ((Paras.__adjudicated) && (Paras.isReadyForAdjudication())) {
-                    Object[] options = {"Yes, please", "No, Start a new adjudication", "Cancel"};
-                    int i = JOptionPane.showOptionDialog(this,
-                            "Would you like to continue your previous adjudication work?", "yes",
-                            JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null,
-                            options, options[0]);
-
-                    // ---- 2.1 ----
-                    if (i == 0) { // yes, continue latest adjudication work
-                        mode_continuePreviousAdjudicationWork();
-                        return;
-                    } else if (i == 2) { // cancel
-                        // ---- 2.2 ----
-                        mode_enterAnnotationMode(true);
-                    }
-
-                    if (i != 1)
-                        break;
-                }
-
-                // ---- 2.3 ----
-                // enable the dialog to let user select conditions and enter the
-                // adjudication mode
-
-                // enable the dialog to ask user setting what is difference
-                if (dialog_adjudication == null) {
-
-                    dialog_adjudication = new adjudication.Adjudication(this);
-                    dialog_adjudication.setVisible(true);
-                } else {
-                    dialog_adjudication.dispose();
-                    dialog_adjudication = new adjudication.Adjudication(this);
-                    dialog_adjudication.setVisible(true);
-                }
-
-                /**/
-                break;
-
-            case OTHERS:
-                // jPanel60.setVisible( false );
-                jRadioButton_annotationMode.setSelected(true);
-                jRadioButton_adjudicationMode.setSelected(false);
-                jRadioButton_annotationMode.setVisible(false);
-                jRadioButton_adjudicationMode.setVisible(false);
-                jButton9.setVisible(false);
-
-                setComponentsVisibleForConsensusMode(true); // show top function
-                // buttons while out of
-                // consense mode
-                break;
-        }
-    }
 
     /**
      * go back to previous adjudication work as user's request.
      */
-    private void mode_continuePreviousAdjudicationWork() {
+    protected void mode_continuePreviousAdjudicationWork() {
         try {
             adjudication.Adjudication dialog_adjudication = new adjudication.Adjudication(this);
             dialog_adjudication.checkAnnotations(false);
@@ -11868,58 +10552,7 @@ public class GUI extends JFrame {
         }
     }
 
-    /**
-     * set components, such as buttons, visible or invisible for the consensus
-     * review mode.
-     *
-     * @param isVisible false: hide non-relavent components for consensus review mode;
-     *                  true: set these components visible to user.
-     */
-    private void setComponentsVisibleForConsensusMode(boolean isVisible) {
 
-        // jToggle_AssignmentsScreen.setVisible( isVisible );
-
-        if (env.Parameters.Sysini.functions[1] == '1')
-            jToggleButton_CreateAnnotaion.setVisible(isVisible);
-        else
-            jToggleButton_CreateAnnotaion.setVisible(false);
-
-        if (env.Parameters.Sysini.functions[2] == '1')
-            jToggleButton_PinExtractor.setVisible(isVisible);
-        else
-            jToggleButton_PinExtractor.setVisible(false);
-
-        if (env.Parameters.Sysini.functions[3] == '1')
-            jToggleButton_DictionaryManager.setVisible(isVisible);
-        else
-            jToggleButton_DictionaryManager.setVisible(false);
-
-        if (env.Parameters.Sysini.functions[5] == '1')
-            jToggleButton_DictionarySetting.setVisible(isVisible);
-        else
-            jToggleButton_DictionarySetting.setVisible(false);
-
-        jToggle_AssignmentsScreen.setVisible(isVisible);
-
-        jToggleButton_Converter.setVisible(false);
-
-        // display or hide the button of "import annotations"
-        jButton_importAnnotations.setVisible(isVisible);
-
-        // display or hide the button of
-        // "remove all current annotations from memory"
-        jButton_removeAllAnnotations.setVisible(isVisible);
-
-        // display or hide the separator after above two buttons
-        // jLabel_separator02_onViewer.setVisible( isVisible );
-
-        jLabel_infobar_FlagOfDiff.setVisible(isVisible);
-
-        // jLabel11.setVisible(isVisible);
-
-        jButton20.setVisible(isVisible);
-
-    }
 
     /**
      * while we left the tab of editor, we hide all status buttons and icons
@@ -11958,6 +10591,11 @@ public class GUI extends JFrame {
         this.projectIdMap = projectIdMap;
     }
 
+    public NavigationManager getFileNavigationManager() {
+        return navigationManager;
+    }
 
-
+    public ContentRenderer getContentRenderer() {
+        return contentRenderer;
+    }
 }

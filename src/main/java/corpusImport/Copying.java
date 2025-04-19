@@ -188,7 +188,7 @@ public class Copying extends javax.swing.JFrame {
             Logger.getLogger(Copying.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        __gui.refreshFileList();
+        __gui.getFileNavigationManager().refreshFileList();
 
 
         if(jCheckBox1.isSelected())

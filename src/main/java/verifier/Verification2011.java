@@ -189,7 +189,7 @@ public class Verification2011 extends javax.swing.JFrame {
             VerifyMain.main(args);
             Depot depot = new Depot();
             //mCaller.refreshResultEditor();
-            mCaller.refreshInfo();
+            mCaller.getContentRenderer().refreshInfo();
         }
         catch(FileNotFoundException e)
         {

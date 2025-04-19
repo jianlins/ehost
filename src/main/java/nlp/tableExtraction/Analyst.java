@@ -457,7 +457,7 @@ public class Analyst {
             
             //this.textfile = copy;
             
-            gui.refreshFileList();
+            gui.getFileNavigationManager().refreshFileList();
             
         }catch(Exception ex){
         }

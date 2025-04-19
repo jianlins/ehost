@@ -168,7 +168,7 @@ public class ImportSettings extends javax.swing.JFrame {
                 __gui.showValidPositionIndicators_setAll();
                 __gui.showValidPositionIndicators();
 
-                __gui.setNAVCurrentTab(3);
+                __gui.getFileNavigationManager().setNAVCurrentTab(3);
 
                 __gui.totalRefresh();
                 

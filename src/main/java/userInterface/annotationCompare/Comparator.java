@@ -1191,7 +1191,7 @@ public class Comparator extends javax.swing.JPanel {
   
             display_listAttributes( annotaiton );
             gui.setModified();            
-            gui.display_RelationshipPath_Remove();                       
+            gui.getContentRenderer().display_RelationshipPath_Remove();
             recheckDifference();
             
         }catch(Exception ex){
@@ -1900,14 +1900,14 @@ public class Comparator extends javax.swing.JPanel {
 
             int uniqueindex = Depot.SelectedAnnotationSet.getSelectedAnnotationSet().get(0);
             Depot.SelectedAnnotationSet.uniqueIndex_of_annotationOnEditor = uniqueindex;
-            gui.display_RelationshipPath_Remove();
+            gui.getContentRenderer().display_RelationshipPath_Remove();
             // remove_all_underline_highlighter();
             
             
             
             // recheck difference and display on screen            
             this.recheckDifference();
-            gui.display_RelationshipPath_Remove();
+            gui.getContentRenderer().display_RelationshipPath_Remove();
             gui.remove_all_underline_highlighter();
             
             

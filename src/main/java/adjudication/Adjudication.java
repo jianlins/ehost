@@ -2053,7 +2053,7 @@ public class Adjudication extends javax.swing.JFrame {
 
         this.dispose();
 
-        __gui.setReviewMode(ReviewMode.ANNOTATION_MODE);
+        __gui.getContentRenderer().setReviewMode(ReviewMode.ANNOTATION_MODE);
         __gui.setReviewChangeButtonEnabled(true);
 
         if (jButton_cancel.getText().compareTo("Exit") == 0) {

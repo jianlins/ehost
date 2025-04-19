@@ -541,7 +541,7 @@ public class ClickedListener {
         gui.display_repaintHighlighter();
         
         // reset screen
-        gui.display_RelationshipPath_Remove();
+        gui.getContentRenderer().display_RelationshipPath_Remove();
         gui.remove_all_underline_highlighter();
 
         String annotationtext = annotation.annotationText;

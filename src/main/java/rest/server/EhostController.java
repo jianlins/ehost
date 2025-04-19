@@ -83,7 +83,7 @@ public class EhostController {
         eHOST.logger.debug("GUI status: "+GUI.status);
         if (projectName != null && GUI.status >GUI.readyThreshold) {
             GUI.status = 0;
-            response= GUI.gui.selectProject(projectName,fileName);
+            response= GUI.gui.getFileNavigationManager().selectProject(projectName,fileName);
             GUI.status = 3;
         }
         return response;
@@ -95,7 +95,7 @@ public class EhostController {
         String response="";
         if (projectName != null && GUI.status >GUI.readyThreshold) {
             GUI.status = 0;
-            response= GUI.gui.selectProject(projectName,null);
+            response= GUI.gui.getFileNavigationManager().selectProject(projectName,null);
             GUI.status = 3;
             return response;
         }
@@ -109,7 +109,7 @@ public class EhostController {
         String response="";
         if (pathElements != null && pathElements.projectpath != null && GUI.status >GUI.readyThreshold) {
             GUI.status = 0;
-            GUI.gui.selectProject(new File(pathElements.projectpath),pathElements.file);
+            GUI.gui.getFileNavigationManager().selectProject(new File(pathElements.projectpath),pathElements.file);
             GUI.status = 3;
         }
         return response;
