@@ -53,6 +53,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import rest.server.EhostServerApp;
+import rest.server.PropertiesUtil;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -112,6 +113,7 @@ public class eHOST {
      */
     public static void main(String[] args) {
         VersionInfo.printVersionInfo();
+        PropertiesUtil.init(args);
         splash = new CustomSplash("/splash.png", VersionInfo.getVersion());
         splash.show();
 
@@ -163,7 +165,7 @@ public class eHOST {
                     "\tjava -Dspring.config.location=file:/path/to/config/dir/application.properties -jar ehost-xxxx.jar");
             Path localRestConfig=Paths.get("application.properties");
             if(Files.exists(localRestConfig)){
-                logger.info("Find rest controller configuration in your local directory: "+localRestConfig.toString());
+                logger.info("Find rest controller configuration in your local directory: "+localRestConfig.toUri());
                 restConfig=localRestConfig.toString();
             }else{
                 logger.info("No application.properties file is found in your current directory: "+Paths.get(".").toAbsolutePath());
@@ -331,7 +333,7 @@ public class eHOST {
                 try {
                     SpringApplication app = new SpringApplication(EhostServerApp.class);
                     Properties properties = new Properties();
-                    String configLocation = Paths.get(restConfig).toAbsolutePath().toUri().toString();
+                    String configLocation = Paths.get(PropertiesUtil.getPropertiesPath()).toAbsolutePath().toUri().toString();
                     properties.setProperty("spring.config.location", configLocation);
                     app.setDefaultProperties(properties);
                     ConfigurableApplicationContext context = app.run(args);

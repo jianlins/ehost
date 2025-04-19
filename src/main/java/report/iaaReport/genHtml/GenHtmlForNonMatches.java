@@ -106,7 +106,7 @@ public class GenHtmlForNonMatches
         p.append("</font><hr>");
         p.append("<div id='statusMessage' style='position: fixed; bottom: 20px; left: 0; right: 0; " +
                 "padding: 5px 10px; background: #f5f5f5; border-top: 1px solid #ddd; " +
-                "font-size: 12px; display: none; color: #006400;'></div>");
+                "font-size: 12px; display: none; color: #006400; text-align: right;'></div>");
 
 
         return p;

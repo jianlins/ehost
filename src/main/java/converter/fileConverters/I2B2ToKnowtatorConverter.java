@@ -1,3 +1,4 @@
+
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -6,10 +7,15 @@ package converter.fileConverters;
 
 import converter.params.iParameterSet;
 import converter.params.I2B2ToXMLParams;
-import com.sun.org.apache.xml.internal.serialize.OutputFormat;
-import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 import converter.params.ParamList;
 import converter.iGUI;
+
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -34,13 +40,13 @@ public class I2B2ToKnowtatorConverter implements iConversion
     //<editor-fold defaultstate="collapsed" desc="Private Strings for Allowable Extensions">
     //Allowable extensions
     private static String[] allowableSourceExts = new String[]
-    {
-        "txt"
-    };
+            {
+                    "txt"
+            };
     private static String[] allowableConvertExts = new String[]
-    {
-        "rel", "con", "ast"
-    };
+            {
+                    "rel", "con", "ast"
+            };
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Member Variables">
@@ -140,7 +146,6 @@ public class I2B2ToKnowtatorConverter implements iConversion
      * This method will do the conversion from i2b2 format to knowtator xml format.
      * @param files - the parameters to do the extraction.  Each Entry in the top
      * level ArrayList contains the parameters for a single run.
-     * @see #getI2B2Params(Vector, Vector)
      */
     private void i2b2ToKnowtator(ArrayList<I2B2ToXMLParams> files, String output)
     {
@@ -173,13 +178,23 @@ public class I2B2ToKnowtatorConverter implements iConversion
             {
                 org.w3c.dom.Document xmlDoc = knowtator.convertI2B2toXML(text, concept, relation, assertion);
 
-                //Save XML file
-                FileOutputStream fos = new FileOutputStream(output + "/" + params.getName() + ".txt.knowtator.xml");
-                OutputFormat of = new OutputFormat("XML", "ISO-8859-1", true);
-                of.setIndenting(true);
-                XMLSerializer ser = new XMLSerializer(fos, of);
-                ser.serialize(xmlDoc.getDocumentElement());
-                fos.close();
+                // Create output file
+                File outputFile = new File(output + "/" + params.getName() + ".txt.knowtator.xml");
+
+                // Use standard Java XML APIs for serialization
+                TransformerFactory transformerFactory = TransformerFactory.newInstance();
+                Transformer transformer = transformerFactory.newTransformer();
+
+                // Configure the transformer for pretty printing
+                transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+                transformer.setOutputProperty(OutputKeys.ENCODING, "ISO-8859-1");
+                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+
+                // Perform the transformation
+                DOMSource source = new DOMSource(xmlDoc);
+                StreamResult result = new StreamResult(outputFile);
+                transformer.transform(source, result);
 
                 //Output the text
                 father.Output(params.getName() + " converted successfully!\n");

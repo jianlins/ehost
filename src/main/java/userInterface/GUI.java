@@ -46,8 +46,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Timer;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.ToolTipManager;
+
 
 /**
  * main GUI of eHOST
@@ -66,6 +70,9 @@ public class GUI extends JFrame {
     private String title;
     public static boolean selectedFromComobox;
     private String restfulServerURL="";
+    public String infoBarTarget="server";
+    private javax.swing.Timer hoverTimer;
+    private InfoBarManager infoBarManager;
 
     // <editor-fold defaultstate="collapsed" desc="Member Variables">
     protected enum fileInputType {
@@ -221,37 +228,9 @@ public class GUI extends JFrame {
 
         // reload panels into the cardlayout
         resetCardLayout();
-        // jPanelDesktop.removeAll();
-        if (restfulServerURL=="")
-            jLabel_infobar.setText("Welcome to eHOST!");
-        else{
-            jLabel_infobar.setText("<html>Welcome to eHOST!&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n<a href=''><span style=\"color:rgb(58,95,147)\">Goto the eHOST Control Server</span></a></html>");
-            // Make the label opaque to ensure proper rendering of the HTML
-            jLabel_infobar.setOpaque(false);
-            // Add mouse listener to handle click events
-            jLabel_infobar.setCursor(new Cursor(Cursor.HAND_CURSOR));
-            jLabel_infobar.addMouseListener(new MouseAdapter() {
-                private boolean clicked = false;
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    if (!clicked) {
-                        try {
-                            Desktop.getDesktop().browse(new URI(restfulServerURL));
-                            // Disable the link after clicking
-                            jLabel_infobar.setText("<html>Welcome to eHOST!</html>");
-                            jLabel_infobar.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-                            clicked = true;
-                        } catch (IOException | URISyntaxException ex) {
-                            JOptionPane.showMessageDialog(null,
-                                    "Could not open browser: " + ex.getMessage(),
-                                    "Error", JOptionPane.ERROR_MESSAGE);
-                        }
-                    }
-                }
-            });
 
 
-        }
+
         // set the width of first column of the table
 
         // **** end of setting the location of gui window
@@ -1017,17 +996,20 @@ public class GUI extends JFrame {
         jPanel_infobar_center.setPreferredSize(new Dimension(525, 24));
         jPanel_infobar_center.setLayout(new BorderLayout());
 
-        jLabel_infobar.setBackground(new Color(183, 183, 183));
-        jLabel_infobar.setFont(new Font("Calibri", 0, 11)); // NOI18N
-        jLabel_infobar.setText("jLabel1");
-        jLabel_infobar.setMinimumSize(new Dimension(400, 16));
-        jLabel_infobar.setPreferredSize(new Dimension(400, 16));
-        jLabel_infobar.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent evt) {
-                jLabel_infobarMouseClicked(evt);
-            }
-        });
-        jPanel_infobar_center.add(jLabel_infobar, BorderLayout.CENTER);
+//        refactorized to InfoBarManager
+//        jLabel_infobar.setBackground(new Color(183, 183, 183));
+//        jLabel_infobar.setFont(new Font("Calibri", 0, 11)); // NOI18N
+//        showText_OnBottomInfoBar("jLabel1");
+//        jLabel_infobar.setMinimumSize(new Dimension(400, 16));
+//        jLabel_infobar.setPreferredSize(new Dimension(400, 16));
+//        jLabel_infobar.addMouseListener(new MouseAdapter() {
+//            public void mouseClicked(MouseEvent evt) {
+//                jLabel_infobarMouseClicked(evt);
+//            }
+//        });
+
+        infoBarManager=new InfoBarManager(restfulServerURL);
+        jPanel_infobar_center.add(infoBarManager.getjLabel_infobar(), BorderLayout.CENTER);
 
         jPanel58.setBackground(new Color(183, 183, 183));
         jPanel58.setLayout(new BorderLayout());
@@ -4675,32 +4657,54 @@ public class GUI extends JFrame {
     }// GEN-LAST:event_jList_NAV_projectsMouseClicked
 
     public String selectProject(String projectName, String fileName) {
-        String response = "Project: " + projectName + " not found";
-        if (projectIdMap.containsKey(projectName)) {
-            if (Parameters.previousProjectPath == null || !Parameters.previousProjectPath.endsWith(projectName)) {
-                selectProject(projectIdMap.get(projectName), fileName);
-                response = "success";
-            } else {
-                showFileContextInTextPane(fileName);
-                status = 1;
-                response = projectName + " / " +fileName+ " loaded";
+        CompletableFuture<String> responseFuture = new CompletableFuture<>();
+        SwingUtilities.invokeLater(() -> {
+            String response = "Project: " + projectName + " not found";
+            try {
+                if (projectIdMap.containsKey(projectName)) {
+                    if (Parameters.previousProjectPath == null || !Parameters.previousProjectPath.endsWith(projectName)) {
+                        selectProject(projectIdMap.get(projectName), fileName);
+                        response = "success";
+                    } else {
+                        showFileContextInTextPane(fileName);
+                        response = projectName + " / " + fileName + " loaded";
+                    }
+                    status = 3;
+                } else {
+                    status = 4;
+                }
+                eHOST.logger.debug(response);
+
+                // Complete the future with the response value
+                responseFuture.complete(response);
+            } catch (Exception e) {
+                // Handle any exceptions during the operation
+                responseFuture.completeExceptionally(e);
+                eHOST.logger.error("Error selecting project: " + e.getMessage(), e);
             }
-        } else
-            status = 4;
-        eHOST.logger.debug(response);
-        return response;
+        });
+
+        try {
+            // Wait for and return the response from the EDT operation
+            return responseFuture.get();
+        } catch (InterruptedException | ExecutionException e) {
+            eHOST.logger.error("Error waiting for project selection: " + e.getMessage(), e);
+            Thread.currentThread().interrupt(); // Restore interrupted status
+            return "Error selecting project: " + e.getMessage();
+        }
+
     }
 
     public void selectProject(int projectId, String fileName) {
         // ##1## empty the corpus list for current project
-        env.Parameters.corpus.RemoveAll();
-        adjudication.data.AdjudicationDepot.clear();
-
-        Paras.__adjudicated = false;
-        Paras.removeAll();
-        Paras.removeParas();
-        saveProjectCurrentViewingFileId();
-        env.Parameters.currentMarkables_to_createAnnotation_by1Click = null;
+//        env.Parameters.corpus.RemoveAll();
+//        adjudication.data.AdjudicationDepot.clear();
+//
+//        Paras.__adjudicated = false;
+//        Paras.removeAll();
+//        Paras.removeParas();
+//        saveProjectCurrentViewingFileId();
+//        env.Parameters.currentMarkables_to_createAnnotation_by1Click = null;
         Object o = jList_NAV_projects.getModel().getElementAt(projectId);
         if (o == null)
             return;
@@ -4756,6 +4760,7 @@ public class GUI extends JFrame {
 
             // #### load configure settings of this project
             config.project.ProjectConf projectconf = new config.project.ProjectConf(f);
+            infoBarTarget=f.getAbsolutePath();
             if (projectconf.foundOldConfigureFile()) {
                 Object[] options = {"Yes, please", "No"};
                 final JOptionPane optionPane = new JOptionPane();
@@ -4878,16 +4883,15 @@ public class GUI extends JFrame {
             } else {
                 jLabel_infobar_FlagOfOracle.setVisible(true);
             }
-
-            jLabel_infobar.setText("<html><b>Current Project:</b> <font color=blue>"
-                    + f.getAbsolutePath() + "</font>.</html>");
-//            status = true;
+            infoBarManager.setInfoBarTarget(infoBarTarget);
+            infoBarManager.updateInfoBar("<html><b>Current Project:</b>  <font color=blue> <a  href=''>"
+                    + f.getAbsolutePath() + "</a></font>.</html>");
 
         } catch (Exception ex) {
             System.out.println("error 1204031721");
             ex.printStackTrace();
         }
-
+        status = 3;
     }
 
     /**
@@ -5055,6 +5059,7 @@ public class GUI extends JFrame {
         // set current project as NULL to indicate that you go back to
         // workspace level and there is no project got selected
         env.Parameters.WorkSpace.CurrentProject = null;
+        this.infoBarManager.showDefaultInfo();
 
     }// GEN-LAST:event_jLabel21MouseClicked
 
@@ -5259,7 +5264,9 @@ public class GUI extends JFrame {
      */
     private void jLabel_infobarMouseClicked(MouseEvent evt) {// GEN-FIRST:event_jLabel_infobarMouseClicked
 
-        /** ONLYONLY TESTTEST */
+        /** ONLYONLY TESTTEST
+         * setFlag_of_DifferenceMatching_Display & display_repaintHighlighter
+         * Doesn't seem to be functionally useful during use.*/
 
         setFlag_of_DifferenceMatching_Display(env.Parameters.enabled_Diff_Display); // update
         // differences
@@ -6015,7 +6022,7 @@ public class GUI extends JFrame {
      *                 the GUI.
      */
     public void showText_OnBottomInfoBar(String textinfo) {
-        this.jLabel_infobar.setText(textinfo);
+        this.infoBarManager.updateInfoBar(textinfo);
     }
 
     /**
@@ -7585,7 +7592,7 @@ public class GUI extends JFrame {
         String return_msg = saver.quickXMLSaving();
 
         // show return msg on buttom bar
-        this.showText_OnBottomInfoBar("<html>" + return_msg + " <font color=blue><b>"
+        this.infoBarManager.updateInfoBar("<html>" + return_msg + " <font color=blue><b>"
                 + env.Parameters.WorkSpace.CurrentProject.getAbsolutePath() + "</b></font></html>");
     }
 
@@ -11950,4 +11957,7 @@ public class GUI extends JFrame {
     public void setProjectIdMap(HashMap<String, Integer> projectIdMap) {
         this.projectIdMap = projectIdMap;
     }
+
+
+
 }

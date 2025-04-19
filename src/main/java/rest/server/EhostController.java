@@ -84,6 +84,7 @@ public class EhostController {
         if (projectName != null && GUI.status >GUI.readyThreshold) {
             GUI.status = 0;
             response= GUI.gui.selectProject(projectName,fileName);
+            GUI.status = 3;
         }
         return response;
     }
@@ -95,6 +96,7 @@ public class EhostController {
         if (projectName != null && GUI.status >GUI.readyThreshold) {
             GUI.status = 0;
             response= GUI.gui.selectProject(projectName,null);
+            GUI.status = 3;
             return response;
         }
         return "Ehost is busy. Try again later.";
@@ -108,6 +110,7 @@ public class EhostController {
         if (pathElements != null && pathElements.projectpath != null && GUI.status >GUI.readyThreshold) {
             GUI.status = 0;
             GUI.gui.selectProject(new File(pathElements.projectpath),pathElements.file);
+            GUI.status = 3;
         }
         return response;
     }

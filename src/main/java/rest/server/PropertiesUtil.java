@@ -7,7 +7,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class PropertiesUtil {
+    private static final Logger logger = LoggerFactory.getLogger(PropertiesUtil.class);
     private static String propertiesPath = "application.properties";
     private static boolean initialized = false;
     private static Properties cachedProperties = new Properties();
@@ -27,6 +31,7 @@ public class PropertiesUtil {
         if (propertiesPath.equals("application.properties")) {
             ApplicationHome home = new ApplicationHome(EhostServerApp.class);
             File jarDir = home.getDir();
+            logger.info("JAR directory: {}", jarDir.getAbsolutePath());
             propertiesPath = new File(jarDir, "application.properties").getAbsolutePath();
         }
 
@@ -87,7 +92,7 @@ public class PropertiesUtil {
             initDefault();
         }
         // Always read from file to get the latest value
-        try (FileInputStream fis = new FileInputStream(propertiesPath)) {
+        try (FileInputStream fis = new FileInputStream(new File(propertiesPath))) {
             Properties props = new Properties();
             props.load(fis);
             return props.getProperty("server.port", "8001");

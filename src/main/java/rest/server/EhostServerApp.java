@@ -14,7 +14,7 @@ public class EhostServerApp extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(EhostServerApp.class);
-        PropertiesUtil.init(args);
+
         int port = findAvailablePort();
 
         if (port != -1) {
