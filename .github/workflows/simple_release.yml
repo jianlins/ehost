@@ -21,10 +21,17 @@ jobs:
 
       - name: install custom jars
         run: bash script/mvn_install_jar.sh
-
+        
       - name: Get the version
         id: get_version
         run: echo "MAVEN_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+
+      - name: Set up Xvfb
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+          echo "DISPLAY=:99" >> $GITHUB_ENV
 
       - name: Build with Maven
         run: mvn clean package
