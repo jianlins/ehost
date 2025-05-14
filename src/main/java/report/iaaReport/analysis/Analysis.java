@@ -545,7 +545,21 @@ public class Analysis {
     }
 
     /**
-     * check for matched annotations
+     * Performs multi-way comparison of annotations across all annotators.
+     *
+     * This method is a core component of the IAA (Inter-Annotator Agreement) reporting system
+     * that identifies annotations that match across all selected annotators. The method:
+     *
+     * 1. Resets all annotations' 3-way IAA flags to false
+     * 2. For each annotation, finds matching annotations from other annotators
+     * 3. Marks annotations as matched (setting is3WayMatched=true) only when a match
+     *    is found for every selected annotator (N of N are the same)
+     *
+     * Annotations are considered matches when they meet criteria defined in IAA settings
+     * (span equality/overlap, class equality, attribute equality, and relationship equality).
+     *
+     * @param _selectedAnnotators List of annotators whose annotations should be compared
+     * @param _selectedClasses List of annotation classes that should be considered in the comparison
      */
     private void compareAnnotations_multipleWay(ArrayList<String> _selectedAnnotators, ArrayList<String> _selectedClasses) {
         try {
@@ -664,11 +678,18 @@ public class Analysis {
     }
 
     /**
-     * Find matched annotations for the given annotation.
+     * Finds annotations that match the given annotation based on specified criteria.
+     * This method searches through all annotations in the article to find those that match
+     * the given annotation according to the IAA settings (span overlaps, class equality,
+     * attribute equality, and relationship equality).
      *
-     * @param annotation The given annotation
+     * @param _leftAnnotation     The reference annotation to find matches for
+     * @param _selectedAnnotators List of annotators whose annotations should be considered
+     * @param _selectedClasses    List of annotation classes that should be considered
+     * @param _article           The article containing all annotations to be searched
      *
-     * @return A list of matched annotations.
+     * @return A list of annotations that match the reference annotation based on current IAA settings.
+     *         Returns null if input parameters are invalid.
      */
     private ArrayList<Annotation> getMatches(
             Annotation _leftAnnotation,

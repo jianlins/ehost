@@ -3,6 +3,8 @@ package userInterface;
 import env.Parameters;
 import main.eHOST;
 import org.apache.commons.io.comparator.NameFileComparator;
+
+import userInterface.GUI.ReviewMode;
 import userInterface.structure.FileObj;
 import userInterface.structure.FileRenderer;
 import webservices.AssignmentsScreen;
@@ -154,9 +156,9 @@ public class NavigationManager {
                         gui.showFileContextInTextPane(fileName);
                         response = projectName + " / " + fileName + " loaded";
                     }
-                    gui.status = 3;
+                    GUI.status = 3;
                 } else {
-                    gui.status = 4;
+                    GUI.status = 4;
                 }
                 eHOST.logger.debug(response);
 
@@ -221,9 +223,9 @@ public class NavigationManager {
         JPanel NavigationPanel_editor = gui.NavigationPanel_editor;
         JPanel NavigationPanel1 = gui.NavigationPanel1;
         try {
-            if (gui.status > 1) {
+            if (GUI.status > 1) {
                 eHOST.logger.debug("Reset gui status to 0.");
-                gui.status = 0;
+                GUI.status = 0;
             }
 
             // check if project is used by another eHOST instance
@@ -236,9 +238,15 @@ public class NavigationManager {
             }
 
 
-            eHOST.logger.debug("Selecting project: " + projectFolder.getName() + "...\t Current status" + gui.status);
-            gui.getContentRenderer().setReviewMode(reviewmode.ANNOTATION_MODE);
+            eHOST.logger.debug("Selecting project: " + projectFolder.getName() + "...\t Current status" + GUI.status);
+            gui.getContentRenderer().setReviewMode(ReviewMode.ANNOTATION_MODE);
+
+            //release current lock
+            if (env.Parameters.WorkSpace.CurrentProject!=null && env.Parameters.WorkSpace.CurrentProject!=projectFolder){
+                new ProjectLock(Parameters.WorkSpace.CurrentProject).releaseLock();
+            }
             // ##3## set current project
+
             env.Parameters.WorkSpace.CurrentProject = projectFolder;
             env.Parameters.previousProjectPath = projectFolder.getAbsolutePath();
 
@@ -284,7 +292,7 @@ public class NavigationManager {
             File[] corpus = listCorpus_inProjectFolder(projectFolder);
 
             listCorpus(corpus);
-            gui.status = 1;
+            GUI.status = 1;
             // add into memory
             if (corpus != null) {
                 env.Parameters.corpus.LIST_ClinicalNotes.clear();
@@ -364,7 +372,7 @@ public class NavigationManager {
             System.out.println("error 1204031721");
             ex.printStackTrace();
         }
-        gui.status = 3;
+        GUI.status = 3;
 
     }
 

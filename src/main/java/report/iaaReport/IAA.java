@@ -46,7 +46,7 @@ public class IAA extends javax.swing.JFrame {
 
     /** Creates new form for IAA */
     public IAA(userInterface.GUI _gui) {
-        
+
         // get pointer of parents
         this.__gui = _gui;
         this.__gui.setEnabled(false);
@@ -67,7 +67,7 @@ public class IAA extends javax.swing.JFrame {
             }
         }.start();
 
-        
+
     }
 
     /**Collect and record all annotators  found in saved annotations, and then
@@ -79,7 +79,7 @@ public class IAA extends javax.swing.JFrame {
         annotatorNames = getAnnotatorNames.getAnnotators();               
         log.LoggingToFile.log(Level.INFO, "1108251401:: collecting data for IAA report: found " + annotatorNames.size() + " annotators.");
     }
-    
+
     /**Collect and record all annotators  found in saved annotations, and then
      * send all found annotators to a public variable "annotatorNames".
      */
@@ -96,7 +96,7 @@ public class IAA extends javax.swing.JFrame {
         jPanel_PaperLook.validate();
         jPanel_PaperLook.updateUI();
         jPanel_PaperLook.setLayout( new java.awt.BorderLayout() );
-        
+
         SelectAnnotators selector = new SelectAnnotators(annotators, annotationClasses, this);
         jPanel_PaperLook.add(selector, java.awt.BorderLayout.CENTER);
         jPanel_PaperLook.validate();
@@ -116,7 +116,7 @@ public class IAA extends javax.swing.JFrame {
                 " user that the thread is running.");
 
         IAA.setClasses(selectedClasses);
-        
+
         if((_selectedAnnotators==null)||(_selectedAnnotators.size()<1))
         {
             commons.Tools.beep();
@@ -135,35 +135,38 @@ public class IAA extends javax.swing.JFrame {
             }
         }.start();        
     }
-    
+
     /**names of selected classes in the IAA system.*/
     public static ArrayList<String> __selected_classes = new ArrayList<String>();
-    
+
     /**record what are names of selected classes.*/
     public static void setClasses(ArrayList<String> _classNames){
         if(__selected_classes==null)
             __selected_classes = new ArrayList<String>();
-        
+
         __selected_classes.clear();
-        
+
         if( _classNames != null ){
             for(String classname : _classNames ){
                 if( ( classname == null ) || ( classname.trim().length() < 1 ) )
                     continue;
-                
+
                 IAA.__selected_classes.add(classname);
             }
         }
     }
-    
+
     /**check whether a class is selected in IAA reported system.*/
     public static boolean isClassSelected (String _classname) {
+        if( _classname == null )
+            return false;
+
         if( IAA.__selected_classes==null)
             return false;
-        
+
         if((IAA.__selected_classes==null)||(IAA.__selected_classes.size()<1))
             return false;
-        
+
 
         for(String classname : IAA.__selected_classes)
         {
@@ -189,7 +192,7 @@ public class IAA extends javax.swing.JFrame {
     public static void setwarningtext(String warningcontent){
         textcomment.setText(warningcontent);
     }
-    
+
     /**this method displays and flashing the text indicator on the screen which
      * looks like a real paper.
      */
@@ -244,7 +247,7 @@ public class IAA extends javax.swing.JFrame {
                     // #### calculate the f-measure and something else after analysis
                     ClassAgreementDepot.completeForms();
 
-                    
+
                     // check for matches and unmatches
                     report.iaaReport.analysis.detailsNonMatches.Do doDetailedAnalysis
                             = new report.iaaReport.analysis.detailsNonMatches.Do(selectedAnnotators, selectedClasses);
@@ -273,13 +276,13 @@ public class IAA extends javax.swing.JFrame {
 
             }
         }.start();
-         
+
 
 
         try {
 
             __count2 = 0;
-            
+
             final String text = "Extracting and Generating Reports";
 
             int i = 0;
@@ -331,17 +334,17 @@ public class IAA extends javax.swing.JFrame {
     private void addIndicateText(){
 
         jPanel_PaperLook.setLayout( new java.awt.BorderLayout() );
-        
+
         JPanel pane = new JPanel();
         pane.setBackground( new Color(255,255, 254) );
         org.jdesktop.layout.GroupLayout paneLayout = new org.jdesktop.layout.GroupLayout(pane);
         pane.setLayout(paneLayout);
-        
+
         jPanel_PaperLook.add(pane, java.awt.BorderLayout.CENTER );
         jPanel_PaperLook.validate();
         jPanel_PaperLook.updateUI();
 
-        
+
         JLabel indicatorText = new JLabel("Extracting information");
         indicatorText.setForeground(Color.black);
         indicatorText.setSize( new Dimension(326, 39));
@@ -353,9 +356,9 @@ public class IAA extends javax.swing.JFrame {
 
         //System.out.println("To label of \"Extracting information\", its width = " + indicatorText.getWidth() +", height = "+indicatorText.getHeight());
         //System.out.println("    It locates on (" + indicatorText.getX() + ", "+ indicatorText.getY() +" ) ");
-        
+
         JLabel comments = new JLabel("check available annotators from current data set");
-        
+
         comments.setBackground(new Color(255,255,254));
         comments.setLocation( (jPanel_PaperLook.getWidth()-277)/2,
                 (jPanel_PaperLook.getHeight() - 18)/2 );
@@ -365,9 +368,9 @@ public class IAA extends javax.swing.JFrame {
         jPanel_PaperLook.add(pane, java.awt.BorderLayout.CENTER );
         jPanel_PaperLook.validate();
         jPanel_PaperLook.updateUI();
-        
+
         __FLAG1 = true;
-        
+
         new Thread(){
             @Override
             public void run(){
@@ -376,17 +379,17 @@ public class IAA extends javax.swing.JFrame {
                 __FLAG1 = false; 
             }
         }.start();
-        
+
         try {
 
             final String text = "Extracting information";
-            
+
             int i = 0;
             int length = text.length();
-            
+
 
             while( (__FLAG1) || (__count1<(1*(length-1)) )){
-                
+
                 Thread.sleep(40);
                 if( i >= (length-1) )
                     i=0;
@@ -412,8 +415,8 @@ public class IAA extends javax.swing.JFrame {
         // So user can decide which of them can join following processing 
         // to calculate and generate IAA report.        
         listAnnotatorsAndClasses( this.annotatorNames, this.classNames );
-         
-         
+
+
 
 
     }
@@ -443,7 +446,7 @@ public class IAA extends javax.swing.JFrame {
         // get the location of parent window
         int parentX = __gui==null? 0 : __gui.getX();
         int parentY = __gui==null? 0 : __gui.getY();
-        
+
         log.LoggingToFile.log(Level.INFO, "Set visible of the frame of IAA "
                 + "report on location ( "
                 + parentX

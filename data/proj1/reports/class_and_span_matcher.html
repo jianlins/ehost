@@ -1,0 +1,59 @@
+<html>
+<head><title>Class and span matcher</title></head>
+<body style="margin: 2 5 5 5; font-family: Candara;">
+<div><a href="index.html"><b> [Back to the index.html]</b></a><br></div>
+<h1>Class and span matcher</h1>
+Annotations match if they have exact same spans, with same classes.
+<hr>
+<p>
+<h2>2-way IAA Results</h2>
+IAA calculated on 2 documents.
+<div>all annotations = matches + non-matches
+<br> IAA = matches / all annotations
+</div>
+<p>For annotations between Annotator[test1] and Annotator[sjl]:</p>
+<table border=1><tr><td><b>Type</b></td><td><b>IAA</b></td>
+<td><b>matches</b></td>
+<td><b>non-matches</b></td>
+</tr>
+<tr><td><b>All selected classes</b></td><td>40.0%</td><td>2</td><td>3</td></tr>
+<tr><td><b>CONCEPT</b></td><td>40.0%</td><td>2</td><td>3</td></tr>
+</table>
+<p>For annotations between Annotator[test1] and Annotator[ADJ]:</p>
+<table border=1><tr><td><b>Type</b></td><td><b>IAA</b></td>
+<td><b>matches</b></td>
+<td><b>non-matches</b></td>
+</tr>
+<tr><td><b>All selected classes</b></td><td>0.0%</td><td>0</td><td>3</td></tr>
+<tr><td><b>CONCEPT</b></td><td>0.0%</td><td>0</td><td>3</td></tr>
+</table>
+<p>For annotations between Annotator[sjl] and Annotator[ADJ]:</p>
+<table border=1><tr><td><b>Type</b></td><td><b>IAA</b></td>
+<td><b>matches</b></td>
+<td><b>non-matches</b></td>
+</tr>
+<tr><td><b>All selected classes</b></td><td>0.0%</td><td>0</td><td>4</td></tr>
+<tr><td><b>CONCEPT</b></td><td>0.0%</td><td>0</td><td>4</td></tr>
+</table>
+<br>
+<p>
+<h2>3-way IAA Results ( 3 Annotators)</h2>
+<p>For annotations among all Annotators in current dataset:</p>
+<table border=1><tr><td><b>Type</b></td><td><b>IAA</b></td>
+<td><b>matches</b></td>
+<td><b>non-matches</b></td>
+</tr>
+<tr><td><b>All selected classes</b></td><td>0.0%</td><td>0</td><td>6</td></tr>
+<tr><td><b>CONCEPT</b></td><td>0.0%</td><td>0</td><td>6</td></tr>
+</table>
+<br><h2>Pair-wise agreement</h2>
+<table border=1><tr><td><b>Gold standard set</b></td><td><b>compared set</b></td><td><b>true positives</b></td><td><b>false positives</b></td><td><b>false negatives</b></td><td><b>recall</b></td><td><b>precision</b></td><td><b>F-measure</b></td></tr>
+<tr><td>test1</td><td>sjl</td><td>1</td><td>2</td><td>1</td><td>50.0%</td><td>33.3%</td><td>40.0%</td></tr>
+<tr><td>test1</td><td>ADJ</td><td>0</td><td>1</td><td>2</td><td>0.0%</td><td>0.0%</td><td>NaN</td></tr>
+<tr><td>sjl</td><td>test1</td><td>1</td><td>1</td><td>2</td><td>33.3%</td><td>50.0%</td><td>40.0%</td></tr>
+<tr><td>sjl</td><td>ADJ</td><td>0</td><td>1</td><td>3</td><td>0.0%</td><td>0.0%</td><td>NaN</td></tr>
+<tr><td>ADJ</td><td>test1</td><td>0</td><td>2</td><td>1</td><td>0.0%</td><td>0.0%</td><td>NaN</td></tr>
+<tr><td>ADJ</td><td>sjl</td><td>0</td><td>3</td><td>1</td><td>0.0%</td><td>0.0%</td><td>NaN</td></tr>
+</table>
+Precision and recall are given equal weight for the F-score.
+<div><a href="index.html"><b><br>[Back to the index.html]</b></a><br></div>
