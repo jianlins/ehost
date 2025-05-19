@@ -74,7 +74,7 @@ public class eHOST {
     public static Logger logger = LoggerFactory.getLogger(eHOST.class);
     public static String ehostconfighome;
     public static String workspace;
-    public static String restConfig;
+    public static String restConfig="";
     private static CustomSplash splash;
 
     /**
@@ -127,6 +127,7 @@ public class eHOST {
         Options options = new Options();
         options.addOption("c", "ehostconfighome", true, "The directory that contains eHOST configuration files");
         options.addOption("w", "workspace", true, "eHOST workspace-- the directory where your eHOST projects are hosted.");
+        options.addOption("s", "spring.config.location", true, "spring application configuration file location.");
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
@@ -160,26 +161,34 @@ public class eHOST {
 //        now check rest controller server configurations
         String restConfigLocation = System.getProperty("spring.config.location");
         if (restConfigLocation==null || !Files.exists(Paths.get(restConfigLocation))){
-            logger.info(" -Dspring.config.location has not been set in command or does not exists. Try to find it in current directory and then USER_HOME/.ehost.\n" +
-                    "\tIf you do want to set a specific application.properties to use, you can try command like: \n" +
-                    "\tjava -Dspring.config.location=file:/path/to/config/dir/application.properties -jar ehost-xxxx.jar");
-            Path localRestConfig=Paths.get("application.properties");
-            if(Files.exists(localRestConfig)){
-                logger.info("Find rest controller configuration in your local directory: "+localRestConfig.toUri());
-                restConfig=localRestConfig.toString();
+            if (cmd.getOptionValue("spring.config.location")!=null && Files.exists(Paths.get(cmd.getOptionValue("spring.config.location")))) {
+                restConfig = cmd.getOptionValue("spring.config.location");
+                logger.info(" --spring.config.location has been set as a program argument: "+Paths.get(cmd.getOptionValue("spring.config.location")).toUri());
             }else{
-                logger.info("No application.properties file is found in your current directory: "+Paths.get(".").toAbsolutePath());
-                Path userHomeRestConfig=Paths.get(ehostconfighome, "application.properties");
-                if(Files.exists(userHomeRestConfig)){
-                    logger.info("Find rest controller configuration in your USER_HOME directory: "+userHomeRestConfig.toAbsolutePath());
-                }else{
-                    logger.info("No application.properties file is found in your USER_HOME directory: "+userHomeRestConfig.toAbsolutePath());
-                    logger.info("Try to create one there using default settings...");
-                    copyDefaultFileFromResources("application.properties", userHomeRestConfig);
+                logger.info(" -Dspring.config.location has not been set in command or does not exists. Try to find it in current directory and then USER_HOME/.ehost.\n" +
+                        "\tIf you do want to set a specific application.properties to use, you can try command like: \n" +
+                        "\tjava -Dspring.config.location=file:/path/to/config/dir/application.properties -jar ehost-xxxx.jar");
+                logger.info("Or you can set spring.config.location as a program argument: java -jar ehost-xxxx.jar --spring.config.location=/path/to/config/dir/application.properties");
+                Path localRestConfig = Paths.get(ehostconfighome, "application.properties");
+                if (Files.exists(localRestConfig)) {
+                    logger.info("Find rest controller configuration in your local directory: " + localRestConfig.toUri());
+                    restConfig = localRestConfig.toString();
+                } else {
+                    logger.info("No application.properties file is found in your current directory: " + Paths.get(".").toAbsolutePath());
+                    Path userHomeRestConfig = Paths.get(ehostconfighome, "application.properties");
+                    if (Files.exists(userHomeRestConfig)) {
+                        logger.info("Find rest controller configuration in your USER_HOME directory: " + userHomeRestConfig.toAbsolutePath());
+                    } else {
+                        logger.info("No application.properties file is found in your USER_HOME directory: " + userHomeRestConfig.toAbsolutePath());
+                        logger.info("Try to create one there using default settings...");
+                        copyDefaultFileFromResources("application.properties", userHomeRestConfig);
+                    }
+                    restConfig = userHomeRestConfig.toString();
                 }
-                restConfig=userHomeRestConfig.toString();
             }
+            System.setProperty("spring.config.location", restConfig);
         }else{
+            logger.info(" --Dspring.config.location has been set in command as VM argument: "+Paths.get(restConfigLocation).toUri());
             restConfig=restConfigLocation;
         }
 

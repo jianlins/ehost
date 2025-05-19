@@ -20,10 +20,15 @@ public class PropertiesUtil {
         if (initialized) return;
 
         // Check command line arguments for custom properties file
-        for (int i = 0; i < args.length; i++) {
-            if (args[i].startsWith("--spring.config.location=")) {
-                propertiesPath = args[i].substring("--spring.config.location=".length());
-                break;
+        if (System.getProperty("spring.config.location") != null) {
+            propertiesPath = System.getProperty("spring.config.location");
+            logger.info("Custom properties file: {}", propertiesPath);
+        }else {
+            for (int i = 0; i < args.length; i++) {
+                if (args[i].startsWith("--spring.config.location=")) {
+                    propertiesPath = args[i].substring("--spring.config.location=".length());
+                    break;
+                }
             }
         }
 
