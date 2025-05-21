@@ -2,105 +2,97 @@
 
 This is an imported and polished version of [eHOST: The Extensible Human Oracle Suite of Tools an open source annotation tool](https://code.google.com/archive/p/ehost/).
 
-Compiled jars can be downloaded from the [Releases](https://github.com/jianlins/ehost/releases)
-## Version 1.38:
-- **Improved Configuration Management**:
-    - Comprehensive refactoring of `PropertiesUtil` class to centralize configuration handling
-    - Added caching mechanism for configuration properties to improve performance
-    - Implemented dynamic loading of configuration from multiple sources with proper fallbacks
-    - Added functionality to update configuration parameters at runtime
+The improvement made over original eHOST is summarized here: [ImprovementSummary.md](ImprovementSummary.md)
 
-- **Enhanced RESTful Server Capabilities**:
-    - Added intelligent port selection with automatic retry on port conflicts
-    - Implemented configuration updates when port changes occur
-    - Improved server startup with better error handling and logging
-    - Added detailed server status information in terminal output
+The change log can be found in [CHANGELOG.md](CHANGELOG.md)
 
-- **Optimized Application Initialization**:
-    - Implemented a structured initialization sequence with progress feedback
-    - Created class to handle the startup process `InitializationManager`
-    - Added visual progress indication during startup with customizable durations
-    - Separated configuration, settings, and GUI loading for better organization
+### Support file navigation/search through browser
+The original eHOST doesn't support file search on names, which can be cumbersome to use when adjudicating, where adjudicator 
+often needs to locate the disagreed files,especially when file names are long. 
 
-## Version 1.37
-- **Improved Multithreaded Support**:
-    - Refactored application to better handle concurrent operations
-    - Added heartbeat control mechanism for monitoring system health
-    - Implemented thread-safe operations for critical components
+The RESTful server is a core component of eHOST's latest versions that allows for external application (e.g. browser) control:
+1. **Automatic Startup**:
+  - The RESTful server starts automatically if enabled in your configuration
+  - Check the `Parameters.RESTFulServer` setting in your configuration
 
-- **GUI Architecture Improvements**:
-    - Separated rendering and navigation functions into distinct classes
-    - Reduced GUI component size and complexity for better maintainability
-    - Fixed threading issues in UI loading mechanism
-    - Improved interaction between RESTful server and GUI components
+2. **Enable in eHOST.sys configuration file**:
+  Set [RESTFUL_SERVER] to true in the eHOST.sys file. By default, the RESTful server will read and use the configuration of [application.properties](application.properties).
 
-## Version 1.36
-- **Splash Screen and Startup Improvements**:
-    - Reimplemented splash screen with more reliable display mechanism
-    - Added dynamic version information display from Maven project properties
-    - Created smooth progress animation during startup
-    - Added detailed status messages during initialization
+3. **Port Configuration**:
+  - Default port: 8010
+  - The server will automatically find an available port if the configured one is in use
+  - Port configuration persists between sessions in the application.properties file
 
-- **RESTful API Enhancements**:
-    - Added comprehensive URL information in the terminal
-    - Improved status page with additional user instructions
-    - Created clickable URL integration on the main GUI status panel
-    - Enhanced CORS configuration for better web client compatibility
+### Server Status Information
+When the RESTful server starts, you will see information in:
+- The terminal console window showing the server URL
+- System logs recording server status and port information
 
-## Version 1.35
-- **Web Integration Improvements**:
-    - Fixed CORS issues when loading AJAX responses from local HTML reports
-    - Implemented dynamic version information loading from version.properties
-    - Created synchronized version management with Maven project properties
-
-## Version 1.34
-- **IAA (Inter-Annotator Agreement) Report Improvements**:
-    - Enhanced the analysis process for better performance
-    - Implemented more accurate comparison of annotations between annotators
-    - Added memory optimization for processing large annotation sets
-
-## Version 1.33
-- **Configuration Management Enhancements**:
-    - Implemented standardized configuration loading mechanism
-    - Added support for user-specific configuration directories
-    - Created default configuration file creation with sensible defaults
-
-
-## Version 1.32:
-1. Fix comments not saved issue
-2. Fix opening a new project, the main application window will automatically hide.
-3. If not local configuration files (from where the command is executed) are not available, try to read from USER_HOME/.ehost/ folder. If still empty, set the default configuration files under USER_HOME/.ehost. So that multiple users can share a single copy of eHOST software without making multiple copies.
-4. To customize the ehost configuration folder, use add --ehostconfighome=/path/to/config/folder. For example: 
-```bash
-java -jar eHOST-xxx.jar --ehostconfighome=/home/ehost_config/
-#or
-java -jar eHOST-xxx.jar -c /home/ehost_config/
+Example terminal output:
+``` 
+--------------------------------------------------------------
+eHOST RESTful Server is running at:
+ - Local URL: http://localhost:8010
+--------------------------------------------------------------
 ```
-5. Similarly, you can also use command argument to set workspace when open eHOST, using --workspace=/path/to/workspace. For example:
-```bash
-java -jar eHOST-xxx.jar --workspace=/home/ehost_workspace/
-#or
-java -jar eHOST-xxx.jar -w /home/ehost_workspace/
-```
-6. Add a project lock to prevent multiple users (or single user open mutliple instances of eHOST) from working on the same project at the same time. Because in that situation, the saving will be competition with each other and result in annotation lost.
-7. In the unmatched report, file names are clickable---will navigate to the corresponding file in eHOST after click.
+## Working with IAA Reports
+### Generating IAA Reports
+1. In the eHOST application, navigate to the "Reports" panel:
+  - Click on "Annotator Performance," eHOST will generate reports in html format.
 
-## Version in 1.3.1:
+2. In the IAA Report dialog:
+  - Select annotators to compare from the list
+  - Choose annotation classes to include in the comparison
+  - Set comparison parameters (span matching, class matching, attribute matching, etc.)
+  - Click "Generate Report"
+  - Once the report is generated, you can open the report in browser by either clicking the button "Open Existing Reports ni Browser" on the same panel, or clicking the left side of the status bar at the bottom of eHOST app window (displaying the project location).
 
-A few highglighted updates: 
-1. Rearrange the code under maven framework
-2. Allows to delete annotation with single press "Delete" key
-3. Allows hot key navigation among documents (Ctrl+PageUp, Ctrl+PageDown)
-4. Sort projects on names
-5. Sort files on names
-6. Allows to export annotations to excel (Developed by [Chris Leng](https://github.com/chrisleng/ehost))
-7. Sync the highlighter of file navigation panel when selecting file from other places (e.g. dropdown list)
-8. Save last view file within each project, so that annotators can be easily resumed to that file when open a project next time.
-9. Allows remote control through RESTful API.
-10. Optimize GUI rendering. Previous version has several redundant refreshing and rendering.
+
+### Viewing Generated Reports
+After generation, HTML reports are saved to your project directory and displayed in the IAA viewer:
+1. **Main Index**: The provides links to all report sections `index.html`
+2. **Class and Span Matcher**: Shows agreement statistics for annotation spans and classes
+3. **Detailed UnMatched**: Lists annotations that differ between annotators. In the unmatched summaries, if RESTful server is enabled, each mismatched file name will be added a hyperlink. These hyperlinks can be used to navigate to the corresponding files inside eHOST.
+
+### Using HTML Reports for Adjudication
+One of the most powerful features of the IAA reports is the ability to navigate directly to annotations from the reports:
+1. **Direct Navigation**:
+  - In the "UnMatched Details" report, file names are clickable
+  - Clicking a file name opens that exact document in eHOST
+
+2. **Report Structure**:
+  - Reports are organized by annotator pairs
+  - Each section shows specific disagreements between annotators
+  - Color coding indicates different types of disagreements (span mismatches, class mismatches, etc.)
+
+3. **Adjudication Workflow**:
+  - Keep the HTML report open while reviewing annotations
+  - Click on disagreements to navigate to them in eHOST
+  - Make adjudication decisions in the main eHOST interface
+  - Save changes and continue to the next disagreement
+
+### Using eHOST from Multiple Locations
+eHOST now supports user-specific configuration:
+1. **Configuration Directory**:
+  - Default: Current working directory or USER_HOME/.ehost/
+  - Specify custom location: `--ehostconfighome=/path/to/config/folder` or simply use `-c=`
+
+2. **Workspace Directory**:
+  - Specify on startup: `--workspace=/path/to/workspace/` or simply use `-w=`
+  - All projects are located within the workspace
+
+3. **Project Locking**:
+  - Prevents multiple users or instances from accessing the same project. This is helpful when project is stored on network drive, and users are accessing the project through difference machines.
+  - Automatically locks projects when opened
+  - Releases locks when projects are closed
+
+## Troubleshooting
+- **Navigation Issues**: If clicking a file in the report doesn't navigate to the correct location, ensure you're using the latest version of eHOST
+- **Server Port Conflicts**: If the configured port is in use, eHOST will automatically try the next available port
+- **Configuration Problems**: Check the log files in your configuration directory for error messages
 
 ******
-To enable RESTful server for outside app controls:
+### RESTful API for outside app controls:
 
 Add following to the *eHOST.sys* file before running eHOST:
 > [RESTFUL_SERVER]
@@ -108,17 +100,17 @@ Add following to the *eHOST.sys* file before running eHOST:
 > true
 
 To check the server status:
-http://127.0.0.1:8009/status
+http://127.0.0.1:8010/status
 
 To shutdown the server from outside:
-http://127.0.0.1:8009/shutdown
+http://127.0.0.1:8010/shutdown
 
 To navigate to a project:
-http://127.0.0.1:8009/ehost/xxx
+http://127.0.0.1:8010/ehost/xxx
 * xxx is the project directory name (not absolute path)
 
 To navigate to a project and display a specific file:
-http://127.0.0.1:8009/ehost/xxx/yyy
+http://127.0.0.1:8010/ehost/xxx/yyy
 * xxx is the project directory name (not absolute path)
 * yyy is the file name or partial file name (if multiple file matched, only first one will be displayed)
 
