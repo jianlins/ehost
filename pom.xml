@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>edu.utah.bmi.nlp</groupId>
-    <artifactId>ehost</artifactId>
+    <artifactId>eHOST</artifactId>
     <version>1.38</version>
     <properties>
         <project.java.version>1.8</project.java.version>
@@ -150,6 +150,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>2.7.18</version>
                 <configuration>
+                    <finalName>${project.artifactId}</finalName>
                     <mainClass>main.eHOST</mainClass>
                     <outputDirectory>
                         target/deploy

@@ -44,25 +44,19 @@ package main;
 
 import env.Parameters;
 import log.LogCleaner;
-import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.Environment;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import rest.server.EhostServerApp;
 import rest.server.PropertiesUtil;
 
 import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.Properties;
-
 
 /**
  * The entrance class to load the GUI of eHOST and display the splash dialog
@@ -72,39 +66,29 @@ import java.util.Properties;
  */
 public class eHOST {
     public static Logger logger = LoggerFactory.getLogger(eHOST.class);
-    public static String ehostconfighome;
-    public static String workspace;
-    public static String restConfig="";
     private static CustomSplash splash;
 
     /**
      * Initial works, before finishing loading the GUI.
      */
     private static void initial() {
-
         // check whether current OS is a Mac OS
         // and switchpool.iniMSP.isUnixOS = true if its a Mac OS / Unix;
         // we use '/' as the path separator
         Parameters.isUnixOS = commons.OS.isMacOS();
 
+        // Get config paths from PropertiesUtil
+        String ehostconfighome = PropertiesUtil.getEhostConfighome();
         config.system.SysConf.loadSystemConfigure(ehostconfighome);
+        logger.info("Now workspace=\t" + PropertiesUtil.getWorkspace());
 
-        if (workspace!=null && Files.exists(Paths.get(workspace))){
-            logger.info("'workspace' has been set in command, it will overwrite the WORKSPACE_PATH in the configuration file "+Paths.get(ehostconfighome, "eHOST.sys"));
-            env.Parameters.WorkSpace.WorkSpace_AbsolutelyPath=Paths.get(workspace).toAbsolutePath().toString();
-        }else{
-            logger.info("'workspace' has been set in command, it will be set from the WORKSPACE_PATH in the configuration file "+Paths.get(ehostconfighome, "eHOST.sys"));
-            workspace=env.Parameters.WorkSpace.WorkSpace_AbsolutelyPath;
-            logger.info("Now workspace=\t"+workspace);
-        }
 
         // set the flag, after loading configure information
         Parameters.isFirstTimeLoadingConfigureFile = false;
 
         // set the latest mention id to the module if XML output
         int latest_used_metion_id = Parameters.getLatestUsedMentionID();
-        algorithmNegex.XMLMaker
-                .set_mention_id_startpoint(latest_used_metion_id);
+        algorithmNegex.XMLMaker.set_mention_id_startpoint(latest_used_metion_id);
     }
 
     /**
@@ -113,7 +97,6 @@ public class eHOST {
      */
     public static void main(String[] args) {
         VersionInfo.printVersionInfo();
-        PropertiesUtil.init(args);
         splash = new CustomSplash("/splash.png", VersionInfo.getVersion());
         splash.show();
 
@@ -121,105 +104,6 @@ public class eHOST {
             InitializationManager initManager = new InitializationManager(splash, args);
             initManager.performInitializationSequence();
         }).start();
-    }
-
-    private static void initConfigsFromArgs(String[] args) {
-        Options options = new Options();
-        options.addOption("c", "ehostconfighome", true, "The directory that contains eHOST configuration files");
-        options.addOption("w", "workspace", true, "eHOST workspace-- the directory where your eHOST projects are hosted.");
-        options.addOption("s", "spring.config.location", true, "spring application configuration file location.");
-
-        CommandLineParser parser = new DefaultParser();
-        HelpFormatter formatter = new HelpFormatter();
-        CommandLine cmd;
-
-        try {
-            cmd = parser.parse(options, args);
-        } catch (ParseException e) {
-            logger.warn(e.getMessage());
-            formatter.printHelp("utility-name", options);
-            System.exit(1);
-            return;
-        }
-
-        if (cmd.hasOption("h")) {
-            formatter.printHelp("utility-name", options);
-            return;
-        }
-
-        ehostconfighome = cmd.getOptionValue("c");
-        if (ehostconfighome==null){
-            logger.info("ehostconfighome is not set in command, try access the default directory 'USER_HOME/.ehost'");
-            ehostconfighome=Paths.get(System.getProperty("user.home"),".ehost").toString();
-        }else{
-            logger.info("Try read configurations from " + ehostconfighome);
-        }
-        Path ehostConfigPath=Paths.get(ehostconfighome, "eHOST.sys");
-        if (!Files.exists(ehostConfigPath))
-            copyDefaultFileFromResources("eHOST.sys", ehostConfigPath);
-
-//        now check rest controller server configurations
-        String restConfigLocation = System.getProperty("spring.config.location");
-        if (restConfigLocation==null || !Files.exists(Paths.get(restConfigLocation))){
-            if (cmd.getOptionValue("spring.config.location")!=null && Files.exists(Paths.get(cmd.getOptionValue("spring.config.location")))) {
-                restConfig = cmd.getOptionValue("spring.config.location");
-                logger.info(" --spring.config.location has been set as a program argument: "+Paths.get(cmd.getOptionValue("spring.config.location")).toUri());
-            }else{
-                logger.info(" -Dspring.config.location has not been set in command or does not exists. Try to find it in current directory and then USER_HOME/.ehost.\n" +
-                        "\tIf you do want to set a specific application.properties to use, you can try command like: \n" +
-                        "\tjava -Dspring.config.location=file:/path/to/config/dir/application.properties -jar ehost-xxxx.jar");
-                logger.info("Or you can set spring.config.location as a program argument: java -jar ehost-xxxx.jar --spring.config.location=/path/to/config/dir/application.properties");
-                Path localRestConfig = Paths.get(ehostconfighome, "application.properties");
-                if (Files.exists(localRestConfig)) {
-                    logger.info("Find rest controller configuration in your local directory: " + localRestConfig.toUri());
-                    restConfig = localRestConfig.toString();
-                } else {
-                    logger.info("No application.properties file is found in your current directory: " + Paths.get(".").toAbsolutePath());
-                    Path userHomeRestConfig = Paths.get(ehostconfighome, "application.properties");
-                    if (Files.exists(userHomeRestConfig)) {
-                        logger.info("Find rest controller configuration in your USER_HOME directory: " + userHomeRestConfig.toAbsolutePath());
-                    } else {
-                        logger.info("No application.properties file is found in your USER_HOME directory: " + userHomeRestConfig.toAbsolutePath());
-                        logger.info("Try to create one there using default settings...");
-                        copyDefaultFileFromResources("application.properties", userHomeRestConfig);
-                    }
-                    restConfig = userHomeRestConfig.toString();
-                }
-            }
-            System.setProperty("spring.config.location", restConfig);
-        }else{
-            logger.info(" --Dspring.config.location has been set in command as VM argument: "+Paths.get(restConfigLocation).toUri());
-            restConfig=restConfigLocation;
-        }
-
-        workspace = cmd.getOptionValue("w");
-    }
-
-    private static void copyDefaultFileFromResources(String resourcePath, String targetFile){
-        Path target=Paths.get(targetFile);
-        copyDefaultFileFromResources(resourcePath, target);
-    }
-
-    private static void copyDefaultFileFromResources(String resourcePath, Path targetFilePath){
-        Path parentDir=targetFilePath.getParent();
-        Resource resource = new ClassPathResource(resourcePath);
-        try (InputStream inputStream = resource.getInputStream()) {
-            if (!Files.exists(parentDir)){
-                logger.info("Directory "+parentDir+ " does not exist. Try to create one.");
-                Files.createDirectories(parentDir);
-            }
-
-            if (inputStream == null) {
-                // Resource file not found
-                logger.warn("Resource file not found. Make sure the path is correct.");
-                return;
-            }
-            logger.info("Copy resource file '"+resourcePath+"' from jar to: "+targetFilePath);
-            Files.copy(inputStream, targetFilePath, StandardCopyOption.REPLACE_EXISTING);
-            logger.info("Copied successfully.");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -238,8 +122,8 @@ public class eHOST {
         public void performInitializationSequence() {
             try {
                 // Execute each step in sequence with specified minimum durations
-                executeStep("Initializing configurations...", this::initConfigurations, 5, 10,500);
-                executeStep("Initializing settings...", this::initSettings, 15,20, 500);
+                executeStep("Initializing configurations...", this::initConfigurations, 5, 10, 500);
+                executeStep("Initializing settings...", this::initSettings, 15, 20, 500);
 
                 if (Parameters.RESTFulServer) {
                     executeStep("Starting RESTful server in the background...", this::startRESTServer, 30, 50, 600);
@@ -247,7 +131,7 @@ public class eHOST {
 
                 executeStep("Loading GUI...", this::loadGUI, 70, 90, 1800);
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Error during initialization sequence", e);
             } finally {
                 splash.closeSplash();
             }
@@ -327,7 +211,8 @@ public class eHOST {
 
         // Individual initialization steps - now focused purely on their tasks without timing concerns
         private void initConfigurations() throws Exception {
-            initConfigsFromArgs(args);
+            // Use PropertiesUtil to handle all configuration initialization
+            PropertiesUtil.initConfigsFromArgs(args);
         }
 
         private void initSettings() throws Exception {
@@ -340,19 +225,82 @@ public class eHOST {
             // Start REST server in background thread
             new Thread(() -> {
                 try {
-                    SpringApplication app = new SpringApplication(EhostServerApp.class);
-                    Properties properties = new Properties();
-                    String configLocation = Paths.get(PropertiesUtil.getPropertiesPath()).toAbsolutePath().toUri().toString();
-                    properties.setProperty("spring.config.location", configLocation);
-                    app.setDefaultProperties(properties);
-                    ConfigurableApplicationContext context = app.run(args);
-                    showRESTfulInfo(context);
+                    String configPath = PropertiesUtil.getPropertiesPath();
+                    String configLocation = Paths.get(configPath).toAbsolutePath().toUri().toString();
+                    
+                    // Load current properties to get the configured port
+                    Properties currentProperties = new Properties();
+                    try (FileInputStream fis = new FileInputStream(configPath)) {
+                        currentProperties.load(fis);
+                    } catch (IOException e) {
+                        logger.error("Failed to load properties file", e);
+                    }
+                    
+                    // Get the currently configured port or default to 8080
+                    int configuredPort = Integer.parseInt(currentProperties.getProperty("server.port", "8080"));
+                    
+                    boolean serverStarted = false;
+                    int attempts = 0;
+                    int maxAttempts = 5;
+                    int port = configuredPort;
+                    
+                    while (!serverStarted && attempts < maxAttempts) {
+                        attempts++;
+                        try {
+                            SpringApplication app = new SpringApplication(EhostServerApp.class);
+                            Properties properties = new Properties();
+                            properties.setProperty("spring.config.location", configLocation);
+                            properties.setProperty("server.port", String.valueOf(port));
+                            app.setDefaultProperties(properties);
+                            
+                            ConfigurableApplicationContext context = app.run(args);
+                            showRESTfulInfo(context);
+                            serverStarted = true;
+
+                        } catch (Exception e) {
+                            if (e.getCause() != null && e.getCause().getMessage() != null && 
+                                    e.getCause().getMessage().contains("already in use")) {
+                                // Port is already in use, try the next port
+                                logger.warn("Port {} is already in use, trying next port", port);
+                                port++;
+                                // If we're using a different port than configured, update the properties file
+                                if (port != configuredPort) {
+                                    try {
+                                        // Load properties again to get all current settings
+                                        Properties updatedProperties = new Properties();
+                                        try (FileInputStream fis = new FileInputStream(configPath)) {
+                                            updatedProperties.load(fis);
+                                        }
+
+                                        // Update the port and save
+                                        updatedProperties.setProperty("server.port", String.valueOf(port));
+                                        try (java.io.FileOutputStream fos = new java.io.FileOutputStream(configPath)) {
+                                            updatedProperties.store(fos, "Updated port after finding available port");
+                                            logger.info("Updated configuration with new port: " + port);
+                                        }
+                                    } catch (IOException f) {
+                                        logger.error("Failed to update properties file with new port", f);
+                                    }
+                                }
+                            } else {
+                                logger.error("Failed to start RESTful server", e);
+                                Parameters.RESTFulServer = false;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (!serverStarted) {
+                        logger.error("Failed to start RESTful server after {} attempts", maxAttempts);
+                        Parameters.RESTFulServer = false;
+                    }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.error("Failed to start RESTful server", e);
                     Parameters.RESTFulServer = false;
                 }
+
             }).start();
-        }
+}
 
         private void showRESTfulInfo(ConfigurableApplicationContext context) {
             Environment env = context.getEnvironment();
@@ -370,21 +318,12 @@ public class eHOST {
         }
 
         private void loadGUI() throws Exception {
-            String baseUrl ="";
-            if (Parameters.RESTFulServer) {
-                // With static import for Paths.get
-                Properties properties = new Properties();
-                properties.load(new FileInputStream(restConfig));
-                String port = properties.getProperty("server.port");
-                String host = properties.getProperty("server.address");
-                baseUrl = "http://" + host + ":" + port;
+            String baseUrl = "";
+            if (PropertiesUtil.isRestfulServerEnabled()) {
+                baseUrl = PropertiesUtil.getRestServerBaseUrl();
             }
-
             userInterface.GUI gui;
-            if (workspace != null)
-                gui = new userInterface.GUI(workspace, baseUrl);
-            else
-                gui = new userInterface.GUI(env.Parameters.WorkSpace.WorkSpace_AbsolutelyPath, baseUrl);
+            gui = new userInterface.GUI(PropertiesUtil.getWorkspace(), baseUrl);
 
             gui.setVisible(true);
             resultEditor.loadingNotes.ShowNotes.setGUIHandler(gui);

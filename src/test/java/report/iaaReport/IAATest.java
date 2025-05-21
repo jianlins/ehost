@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.awt.Color;
@@ -208,8 +209,8 @@ public class IAATest {
         // For now, we'll just verify that the method exists and can be called
         try {
             // Get the method using reflection to verify it exists
-            IAA.class.getDeclaredMethod("generateIAAReportInBackground", 
-                ArrayList.class, ArrayList.class);
+            IAA.class.getDeclaredMethod("generateIAAReportInBackground",
+                    ArrayList.class, ArrayList.class);
             // If we get here, the method exists
             assertTrue(true, "generateIAAReportInBackground method exists");
         } catch (NoSuchMethodException e) {
@@ -252,7 +253,7 @@ public class IAATest {
 
             // Verify that the panel has been modified correctly
             assertEquals(1, mockPanel.getComponentCount(), "Panel should have one component added");
-            assertTrue(mockPanel.getComponent(0) instanceof report.iaaReport.HtmlViewer, 
+            assertTrue(mockPanel.getComponent(0) instanceof report.iaaReport.HtmlViewer,
                     "Component should be a HtmlViewer");
 
         } catch (Exception e) {
@@ -426,8 +427,8 @@ public class IAATest {
             selectedClasses.add("TestClass2");
 
             // Get the private addIndicatorofIAAGenerator method
-            Method addIndicatorMethod = IAA.class.getDeclaredMethod("addIndicatorofIAAGenerator", 
-                ArrayList.class, ArrayList.class);
+            Method addIndicatorMethod = IAA.class.getDeclaredMethod("addIndicatorofIAAGenerator",
+                    ArrayList.class, ArrayList.class);
             addIndicatorMethod.setAccessible(true);
 
             // Call the method with a timeout to prevent hanging if the thread doesn't exit
@@ -487,7 +488,6 @@ public class IAATest {
             Field textcommentField = IAA.class.getDeclaredField("textcomment");
             textcommentField.setAccessible(true);
             assertNotNull(textcommentField.get(null), "textcomment field should be set");
-
         } catch (Exception e) {
             System.out.println("[DEBUG_LOG] Exception in testAddIndicatorofIAAGenerator: " + e.getMessage());
             e.printStackTrace();
@@ -495,8 +495,8 @@ public class IAATest {
             // we'll consider it a pass if the method exists
             Method addIndicatorMethod;
             try {
-                addIndicatorMethod = IAA.class.getDeclaredMethod("addIndicatorofIAAGenerator", 
-                    ArrayList.class, ArrayList.class);
+                addIndicatorMethod = IAA.class.getDeclaredMethod("addIndicatorofIAAGenerator",
+                        ArrayList.class, ArrayList.class);
                 addIndicatorMethod.setAccessible(true);
                 assertTrue(true, "addIndicatorofIAAGenerator method exists with correct signature");
             } catch (NoSuchMethodException ex) {

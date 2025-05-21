@@ -24,6 +24,10 @@ public class ProjectLockTest {
     private ProjectLock projectLock;
     private static final DateTimeFormatter TEST_DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     
+    // Use much smaller values for testing to speed up test execution
+    private static final long TEST_HEARTBEAT_INTERVAL = 1000; // 1 second
+    private static final long TEST_STALE_THRESHOLD = 2000; // 2 seconds
+    
     /**
      * Setup method that runs before each test.
      * Creates a temporary directory for testing.
@@ -34,8 +38,8 @@ public class ProjectLockTest {
         tempDir = Files.createTempDirectory("projectLockTest").toFile();
         // Ensure the directory exists
         tempDir.mkdirs();
-        // Create a new ProjectLock instance
-        projectLock = new ProjectLock(tempDir);
+        // Create a new ProjectLock instance with shorter timeouts for testing
+        projectLock = new ProjectLock(tempDir, TEST_HEARTBEAT_INTERVAL, TEST_STALE_THRESHOLD);
     }
     
     /**
@@ -83,7 +87,7 @@ public class ProjectLockTest {
         assertTrue(firstResult, "First lock acquisition should succeed");
         
         // Create a new ProjectLock instance to simulate another process
-        ProjectLock secondLock = new ProjectLock(tempDir);
+        ProjectLock secondLock = new ProjectLock(tempDir, TEST_HEARTBEAT_INTERVAL, TEST_STALE_THRESHOLD);
         
         // Second acquisition should fail
         boolean secondResult = secondLock.acquireLock();
@@ -118,8 +122,9 @@ public class ProjectLockTest {
         File lockFile = new File(tempDir, ".lock");
         String userName = System.getProperty("user.name");
         String machineName = java.net.InetAddress.getLocalHost().getHostName();
-          // Create a timestamp from 6 minutes ago (beyond the 5-minute stale threshold)
-        LocalDateTime oldTime = LocalDateTime.now().minus(6, ChronoUnit.MINUTES);
+        
+        // Create a timestamp from 3 seconds ago (beyond the 2-second stale threshold for tests)
+        LocalDateTime oldTime = LocalDateTime.now().minus(3, ChronoUnit.SECONDS);
         // Use DateTimeFormatter directly since DATETIME_FORMAT is private in ProjectLock
         String formattedTime = oldTime.format(TEST_DATETIME_FORMAT);
         // Write the old timestamp to the lock file
@@ -128,9 +133,10 @@ public class ProjectLockTest {
             (userName + " on " + machineName + " at " + formattedTime).getBytes()
         );
         
-        // Create a new ProjectLock instance
-        ProjectLock newLock = new ProjectLock(tempDir);
-          // Check if the lock is detected as stale (timestamp is older than 5-minute threshold)
+        // Create a new ProjectLock instance with test timeouts
+        ProjectLock newLock = new ProjectLock(tempDir, TEST_HEARTBEAT_INTERVAL, TEST_STALE_THRESHOLD);
+        
+        // Check if the lock is detected as stale (timestamp is older than test stale threshold)
         assertTrue(newLock.isLockStale(), "Lock should be detected as stale");
         
         // Attempt to acquire the lock (should succeed due to stale detection)
@@ -140,8 +146,9 @@ public class ProjectLockTest {
     
     /**
      * Test that the heartbeat mechanism properly updates the timestamp.
-     */    @Test
-    @Timeout(value = 150, unit = TimeUnit.SECONDS)
+     */
+    @Test
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)  // Reduced from 150 seconds to 5 seconds
     public void testHeartbeatUpdatesTimestamp() throws IOException, InterruptedException {
         // Acquire the lock
         projectLock.acquireLock();
@@ -150,10 +157,10 @@ public class ProjectLockTest {
         LocalDateTime initialHeartbeat = projectLock.getLastHeartbeatTime();
         
         // Wait for the heartbeat to update (longer than the heartbeat interval)
-        Thread.sleep(130000); // 130 seconds (slightly longer than the 2-minute heartbeat interval)
+        Thread.sleep(TEST_HEARTBEAT_INTERVAL + 500); // Wait slightly longer than heartbeat interval
         
         // Create a new ProjectLock instance to read the updated file
-        ProjectLock newLock = new ProjectLock(tempDir);
+        ProjectLock newLock = new ProjectLock(tempDir, TEST_HEARTBEAT_INTERVAL, TEST_STALE_THRESHOLD);
         
         // Get the updated heartbeat time
         LocalDateTime updatedHeartbeat = newLock.getLastHeartbeatTime();
@@ -175,7 +182,7 @@ public class ProjectLockTest {
         LocalDateTime initialHeartbeat = projectLock.getLastHeartbeatTime();
         
         // Wait a bit
-        Thread.sleep(1000);
+        Thread.sleep(500);
         
         // Manually update the heartbeat
         boolean result = projectLock.updateHeartbeatNow();

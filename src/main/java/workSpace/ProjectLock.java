@@ -29,19 +29,39 @@ public class ProjectLock {
 
     private File lockFile;
     private Timer heartbeatTimer;
-    private static final long HEARTBEAT_INTERVAL = 120000; // 2 minutes
-    private static final long STALE_THRESHOLD = 300000; // 5 minutes
+    private long heartbeatInterval = 120000; // 2 minutes (default)
+    private long staleThreshold = 300000; // 5 minutes (default)
     private static final DateTimeFormatter DATETIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private String userName = "NA";
     private String machineName = "NA";
-    private LocalDateTime lastHeartbeat;    public ProjectLock(String directoryPath) {
+    private LocalDateTime lastHeartbeat;
+    
+    // Original constructors
+    public ProjectLock(String directoryPath) {
         this.init(new File(directoryPath));
     }
 
     public ProjectLock(File directoryPath) {
         this.init(directoryPath);
     }
+    
+    // New constructors with timing parameters
+    public ProjectLock(String directoryPath, long heartbeatInterval, long staleThreshold) {
+        this.heartbeatInterval = heartbeatInterval;
+        this.staleThreshold = staleThreshold;
+        this.init(new File(directoryPath));
+    }
+    
+    public ProjectLock(File directoryPath, long heartbeatInterval, long staleThreshold) {
+        this.heartbeatInterval = heartbeatInterval;
+        this.staleThreshold = staleThreshold;
+        this.init(directoryPath);
+    }
+    
+    // The rest of your existing code...
+    
+    
     private void init(File directoryPath) {
         this.lockFile = new File(directoryPath, ".lock");
         this.lastHeartbeat = LocalDateTime.now();
@@ -62,7 +82,7 @@ public class ProjectLock {
                         try {
                             lastHeartbeat = LocalDateTime.parse(mainParts[1].trim(), DATETIME_FORMAT);
                         } catch (Exception e) {
-                            lastHeartbeat = LocalDateTime.now().minus(STALE_THRESHOLD * 2, ChronoUnit.MILLIS); // Set as stale
+                            lastHeartbeat = LocalDateTime.now().minus(staleThreshold * 2, ChronoUnit.MILLIS); // Set as stale
                         }
                         
                         // Parse username and machine name
@@ -80,7 +100,7 @@ public class ProjectLock {
                         setMachineName(args[1]);
                     }
                     // Set a default timestamp for backward compatibility
-                    lastHeartbeat = LocalDateTime.now().minus(STALE_THRESHOLD / 2, ChronoUnit.MILLIS);
+                    lastHeartbeat = LocalDateTime.now().minus(staleThreshold / 2, ChronoUnit.MILLIS);
                 }
             } catch (IOException e) {
                 showMessage("An error occurred: " + e.getMessage());
@@ -133,6 +153,7 @@ public class ProjectLock {
         }
     }
     
+    // Update the isLockStale method to use the instance variable
     public boolean isLockStale() {
         if (!lockFile.exists()) {
             return false; // No lock to be stale
@@ -140,7 +161,7 @@ public class ProjectLock {
         
         LocalDateTime now = LocalDateTime.now();
         long millisSinceLastHeartbeat = ChronoUnit.MILLIS.between(lastHeartbeat, now);
-        return millisSinceLastHeartbeat > STALE_THRESHOLD;
+        return millisSinceLastHeartbeat > this.staleThreshold;
     }
       /**
      * Releases the lock on the project.
@@ -202,6 +223,7 @@ public class ProjectLock {
         this.machineName = machineName;
     }
 
+    // Update the startHeartbeat method to use the instance variable
     private void startHeartbeat() {
         // Cancel existing timer if it exists
         stopHeartbeat();
@@ -213,7 +235,7 @@ public class ProjectLock {
             public void run() {
                 updateHeartbeat();
             }
-        }, HEARTBEAT_INTERVAL, HEARTBEAT_INTERVAL);
+        }, heartbeatInterval, heartbeatInterval);
     }
     
     private void stopHeartbeat() {
@@ -260,9 +282,12 @@ public class ProjectLock {
      * @param interval the time in milliseconds between each update
      */
     public void setHeartbeatInterval(long interval) {
-        if (interval > 0 && heartbeatTimer != null) {
-            stopHeartbeat();
-            startHeartbeat();
+        if (interval > 0) {
+            this.heartbeatInterval = interval;
+            if (heartbeatTimer != null) {
+                stopHeartbeat();
+                startHeartbeat();
+            }
         }
     }
 
@@ -271,9 +296,9 @@ public class ProjectLock {
      * @param threshold the time in milliseconds after which a lock is considered stale
      */
     public void setStaleThreshold(long threshold) {
-        // This method would allow configuration of the stale threshold
-        // In the current implementation, the threshold is a constant
-        // This method is provided for future extensibility
+        if (threshold > 0) {
+            this.staleThreshold = threshold;
+        }
     }
 
     /**

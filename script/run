@@ -1,2 +1,2 @@
 cd "$( dirname "$0" )";
-java -jar ehost-${project.version}.jar
+java -jar eHOST.jar -c ./
