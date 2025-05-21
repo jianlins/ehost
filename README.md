@@ -13,18 +13,14 @@ often needs to locate the disagreed files,especially when file names are long.
 The RESTful server is a core component of eHOST's latest versions that allows for external application (e.g. browser) control:
 1. **Automatic Startup**:
   - The RESTful server starts automatically if enabled in your configuration
-  - Check the `Parameters.RESTFulServer` setting in your configuration
+  - Set [RESTFUL_SERVER] to true in the eHOST.sys file. By default, the RESTful server will read and use the configuration of [application.properties](application.properties).
 
-2. **Enable in eHOST.sys configuration file**:
-  Set [RESTFUL_SERVER] to true in the eHOST.sys file. By default, the RESTful server will read and use the configuration of [application.properties](application.properties).
-
-3. **Port Configuration**:
+2. **Port Configuration**:
   - Default port: 8010
   - The server will automatically find an available port if the configured one is in use
   - Port configuration persists between sessions in the application.properties file
 
-### Server Status Information
-When the RESTful server starts, you will see information in:
+**Server Status Information**:  When the RESTful server starts, you will see information in:
 - The terminal console window showing the server URL
 - System logs recording server status and port information
 
