@@ -688,7 +688,7 @@ public class Annotation implements Comparable {
             return null;
         }
 
-        String toString = "";
+        String toReturn = "";
 
         for (AnnotationAttributeDef nr : attributes) {
             if (nr == null) {
@@ -699,14 +699,20 @@ public class Annotation implements Comparable {
                 continue;
             }
 
-            toString = nr.name + " = " + nr.value;
+            String toString = nr.name + " = " + nr.value;
+            if (toString.trim().length() > 0) {
+                if (!toReturn.isEmpty()) {
+                    toReturn += "; ";
+                }
+                toReturn += toString;
+            }
         }
 
-        if (toString.trim().length() < 1) {
+        if (toReturn.trim().length() < 1) {
             return null;
         }
 
-        return toString;
+        return toReturn;
     }
     public Vector<suggestion> verifierFound = new Vector<suggestion>();
     /**mention id will be generated while output annotation to xml*/

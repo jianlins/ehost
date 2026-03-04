@@ -13,7 +13,7 @@ package report.iaaReport;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URLClassLoader;
+import java.net.URL;
 import java.util.logging.Level;
 import javax.swing.JEditorPane;
 import javax.swing.event.HyperlinkEvent;
@@ -39,12 +39,8 @@ public class HtmlViewer extends javax.swing.JPanel implements HyperlinkListener 
             this.jEditorPane1.setEditable(false);
             File file = new File( env.Parameters.WorkSpace.CurrentProject.getAbsolutePath() + File.separatorChar + "reports" + File.separatorChar + "index.html");
             log.LoggingToFile.log(Level.INFO, "trying to show index.html file on screen ["+file.getAbsolutePath() + "].");
-            String path = "file:"+file.getAbsolutePath();
             this.jEditorPane1.setContentType("text/html");
-
-            URLClassLoader urlLoader = (URLClassLoader)this.getClass().getClassLoader();
-            //URL url = urlLoader.;//可以用html格式文件做你的帮助系统了
-            jEditorPane1.setPage(path);
+            this.jEditorPane1.setPage(file.toURI().toURL());
             //this.jEditorPane1.setPage("file://localhost/Users/leng/Dropbox/eHOST/test/2_Partnerstest/reports/class_and_span_matcher.html");
 
             jEditorPane1.addHyperlinkListener(this);
