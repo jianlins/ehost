@@ -33,6 +33,7 @@
 - **Enhanced IAA Reports**: Improved Inter-Annotator Agreement reports with better visualization
 - **Interactive Elements**: Reports include interactive elements for easier navigation and exploration
 - **Performance Optimization**: Faster report generation for large annotation sets
+- **Improved Attribute Display**: Attributes in unmatched/matched reports now display as separate rows with clear value comparison across annotators (indented attribute names in first column, values in subsequent columns)
 
 ## Visual Refinements
 - **Cleaner Interface**: Streamlined interface components for a more focused annotation experience
