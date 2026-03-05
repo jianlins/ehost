@@ -4,19 +4,23 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import com.sun.org.apache.xml.internal.serialize.OutputFormat;
-import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 
 public class PipelineToKnowtator {
 
@@ -51,8 +55,9 @@ public class PipelineToKnowtator {
 	
 	/**
 	 * 
-	 * @param input
-	 * @param output
+	 * @param srcDir
+	 * @param i2b2FileDir
+	 * @param outputDirPath
 	 * @throws Exception
 	 */
 	public void conceptsToKnowtator(String srcDir, String i2b2FileDir, String outputDirPath) throws Exception
@@ -78,12 +83,16 @@ public class PipelineToKnowtator {
 			Document xmlDoc = convertI2B2toXML(srcFile, conceptFile, relationFile, assertionFile);
 			
 			//Save XML file
-			FileOutputStream fos = new FileOutputStream(outputDir.getPath() + "/" + srcFile.getName() + ".txt.knowtator.xml");
-			OutputFormat of = new OutputFormat("XML","ISO-8859-1",true);
-			of.setIndenting(true);
-			XMLSerializer ser = new XMLSerializer(fos, of);
-			ser.serialize(xmlDoc.getDocumentElement());
-			fos.close();
+			File outputFile = new File(outputDir.getPath() + "/" + srcFile.getName() + ".txt.knowtator.xml");
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+			transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+			transformer.setOutputProperty(OutputKeys.ENCODING, "ISO-8859-1");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+			DOMSource source = new DOMSource(xmlDoc);
+			StreamResult result = new StreamResult(outputFile);
+			transformer.transform(source, result);
 			
 		}//end for loop
 		System.out.println("Files successfully converted!");
@@ -370,8 +379,8 @@ public class PipelineToKnowtator {
 	
 	/**
 	 * Convert line from relationships file to XML nodes
-	 * @param line
-	 * @throws Exception 
+	 * @param lines
+	 * @throws Exception
 	 */
 	private void addRelationLineToXml(ArrayList<String> lines, Node root, Document doc, String text) throws Exception
 	{

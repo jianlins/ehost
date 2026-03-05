@@ -8,6 +8,7 @@ import report.iaaReport.IAA;
 import report.iaaReport.analysis.detailsNonMatches.*;
 import rest.server.PropertiesUtil;
 import resultEditor.annotations.Annotation;
+import resultEditor.annotations.AnnotationAttributeDef;
 
 import java.io.*;
 import java.util.Vector;
@@ -536,49 +537,106 @@ public class GenHtmlForNonMatches
                         }
 
 
-                        //#### get annotation attributes
+                        //#### get annotation attributes - one attribute per row
                         if(IAA.CHECK_ATTRIBUTES)
                         {
-                            Onerecord.add("<tr>");
-                            Onerecord.add("<td>Attributes</td>");
-
-                            if(mainAnnotation!=null){
-                                String attributeStr = mainAnnotation.getAttributeString();
-                                if(attributeStr!=null)
-                                    Onerecord.add("<td>"+ attributeStr + "</td>");
-                                else
-                                    Onerecord.add("<td BGCOLOR=\"#E0E0E0\"></td>");
-
-                            }else{
-                                Onerecord.add("<td BGCOLOR=\"#E0E0E0\"></td>");
-                            }
-
-
-                            for(int j=0; j<size_other; j++)
-                            {
-                                Vector<AnalyzedAnnotationDifference> diffs = analyzedAnnotation.othersAnnotations[j].annotationsDiffs;
-                                AnalyzedAnnotationDifference diff = getOtherAnnotation(i, diffs);
-                                if(diff!=null)
-                                {
-                                    String attributeStr = diff.annotation.getAttributeString();
-                                    if(attributeStr!=null)
-                                        if(diff.diffInAttribute){
-                                            Onerecord.add("<td BGCOLOR=\"#FFD0D0\">"+ attributeStr + "</td>");
-                                            foundDifference = true;
-                                        }else
-                                            Onerecord.add("<td>"+ attributeStr + "</td>");
-                                    else{
-                                        if(diff.diffInAttribute){
-                                            Onerecord.add("<td BGCOLOR=\"#FFD0D0\"></td>");
-                                            foundDifference = true;
-                                        }else
-                                            Onerecord.add("<td BGCOLOR=\"#E0E0E0\"></td>");
+                            Vector<AnnotationAttributeDef> mainAttrs = mainAnnotation != null ? mainAnnotation.attributes : null;
+                            
+                            Vector<AnnotationAttributeDef> allUniqueAttrs = new Vector<AnnotationAttributeDef>();
+                            if(mainAttrs != null) {
+                                for(AnnotationAttributeDef attr : mainAttrs) {
+                                    if(attr != null && attr.name != null) {
+                                        allUniqueAttrs.add(attr);
                                     }
                                 }
-                                else
-                                {
-                                    Onerecord.add("<td BGCOLOR=\"#E0E0E0\"></td>");
+                            }
+                            for(int j = 0; j < size_other; j++) {
+                                Vector<AnalyzedAnnotationDifference> diffs = analyzedAnnotation.othersAnnotations[j].annotationsDiffs;
+                                AnalyzedAnnotationDifference diff = getOtherAnnotation(i, diffs);
+                                if(diff != null && diff.annotation != null && diff.annotation.attributes != null) {
+                                    for(AnnotationAttributeDef attr : diff.annotation.attributes) {
+                                        if(attr != null && attr.name != null) {
+                                            boolean found = false;
+                                            for(AnnotationAttributeDef existing : allUniqueAttrs) {
+                                                if(existing.name.equals(attr.name)) {
+                                                    found = true;
+                                                    break;
+                                                }
+                                            }
+                                            if(!found) {
+                                                allUniqueAttrs.add(attr);
+                                            }
+                                        }
+                                    }
                                 }
+                            }
+                            
+                            for(AnnotationAttributeDef uniqueAttr : allUniqueAttrs) {
+                                Onerecord.add("<tr>");
+                                Onerecord.add("<td>Attribute</td>");
+                                
+                                for(int colIdx = 0; colIdx <= size_other; colIdx++) {
+                                    String cellValue = "";
+                                    boolean isDiff = false;
+                                    
+                                    if(colIdx == 0) {
+                                        if(mainAttrs != null) {
+                                            for(AnnotationAttributeDef ma : mainAttrs) {
+                                                if(ma != null && ma.name != null && ma.name.equals(uniqueAttr.name)) {
+                                                    cellValue = ma.name + " = " + ma.value;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        AnalyzedAnnotationDifference otherDiff = getOtherAnnotation(i, analyzedAnnotation.othersAnnotations[colIdx - 1].annotationsDiffs);
+                                        if(otherDiff != null && otherDiff.annotation != null && otherDiff.annotation.attributes != null) {
+                                            for(AnnotationAttributeDef oa : otherDiff.annotation.attributes) {
+                                                if(oa != null && oa.name != null && oa.name.equals(uniqueAttr.name)) {
+                                                    cellValue = oa.name + " = " + oa.value;
+                                                    
+                                                    if(mainAttrs != null) {
+                                                        for(AnnotationAttributeDef ma : mainAttrs) {
+                                                            if(ma != null && ma.name != null && ma.name.equals(uniqueAttr.name)) {
+                                                                if(!ma.value.equals(oa.value)) {
+                                                                    isDiff = true;
+                                                                }
+                                                                break;
+                                                            }
+                                                        }
+                                                        if(mainAttrs.isEmpty() || (mainAttrs.size() == 1 && mainAttrs.get(0).name.equals(uniqueAttr.name) == false)) {
+                                                            isDiff = true;
+                                                        }
+                                                    } else {
+                                                        isDiff = true;
+                                                    }
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        
+                                        if(cellValue.isEmpty() && mainAttrs != null && !mainAttrs.isEmpty()) {
+                                            for(AnnotationAttributeDef ma : mainAttrs) {
+                                                if(ma != null && ma.name != null && ma.name.equals(uniqueAttr.name)) {
+                                                    isDiff = true;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                    if(cellValue.isEmpty()) {
+                                        cellValue = "";
+                                    }
+                                    
+                                    if(isDiff) {
+                                        Onerecord.add("<td BGCOLOR=\"#FFD0D0\">" + cellValue + "</td>");
+                                        foundDifference = true;
+                                    } else {
+                                        Onerecord.add("<td>" + cellValue + "</td>");
+                                    }
+                                }
+                                Onerecord.add("</tr>");
                             }
                         }
 
