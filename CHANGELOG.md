@@ -1,3 +1,11 @@
+## Version 1.39 (Unreleased):
+
+### Fixed
+- **Duplicate adjudication elements bug**: Fixed issue where annotations could be saved twice to knowtator.xml when exiting project in adjudication mode (EHOST-001)
+  - Root cause: `OutputToXML.java` was saving annotations from both regular Depot and AdjudicationDepot
+  - Fix: Removed duplicate save logic in `buildxml()` method
+  - Added test cases in `OutputToXMLTest.java`
+
 ## Version 1.38:
 - **Improved Configuration Management**:
     - Comprehensive refactoring of `PropertiesUtil` class to centralize configuration handling
