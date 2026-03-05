@@ -131,6 +131,12 @@ public class AnnotationClassChooser{
 
         resultEditor.workSpace.WorkSet.currentAnnotation.annotationclass = annotationclass;
         resultEditor.workSpace.WorkSet.currentAnnotation.creationDate = commons.OS.getCurrentDate();
+
+        resultEditor.workSpace.WorkSet.currentAnnotation.setAnnotator(
+                resultEditor.annotator.Manager.getAnnotatorName_OutputOnly());
+        resultEditor.workSpace.WorkSet.currentAnnotation.annotatorid =
+                resultEditor.annotator.Manager.getAnnotatorID_outputOnly();
+       
         
         if( resultEditor.workSpace.WorkSet.currentAnnotation.hasAttribute()){
             resultEditor.workSpace.WorkSet.currentAnnotation.removeInvalidAttributes();
