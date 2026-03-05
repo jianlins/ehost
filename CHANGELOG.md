@@ -1,5 +1,14 @@
 ## Version 1.39 (Unreleased):
 
+### Enhanced
+- **IAA Report HTML Output**: Improved attribute display in unmatched/matched HTML reports
+  - Each attribute now displays as a separate row for better readability
+  - First column shows attribute name with indentation (`&nbsp;&nbsp;AttributeName`)
+  - Each annotator column shows only the attribute value (not `Name=Value` format)
+  - Empty cells shown with gray background when annotator is missing an attribute
+  - Differences highlighted in red when values differ between annotators
+  - Updated files: `GenHtmlForMatches.java`, `GenHtmlForNonMatches.java`, `GenHtmlForNonMatches2.java`
+
 ### Fixed
 - **Duplicate adjudication elements bug**: Fixed issue where annotations could be saved twice to knowtator.xml when exiting project in adjudication mode (EHOST-001)
   - Root cause: `OutputToXML.java` was saving annotations from both regular Depot and AdjudicationDepot

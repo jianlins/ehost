@@ -573,7 +573,7 @@ public class GenHtmlForNonMatches
                             
                             for(AnnotationAttributeDef uniqueAttr : allUniqueAttrs) {
                                 Onerecord.add("<tr>");
-                                Onerecord.add("<td>Attribute</td>");
+                                Onerecord.add("<td>&nbsp;&nbsp;" + uniqueAttr.name + "</td>");
                                 
                                 for(int colIdx = 0; colIdx <= size_other; colIdx++) {
                                     String cellValue = "";
@@ -583,7 +583,7 @@ public class GenHtmlForNonMatches
                                         if(mainAttrs != null) {
                                             for(AnnotationAttributeDef ma : mainAttrs) {
                                                 if(ma != null && ma.name != null && ma.name.equals(uniqueAttr.name)) {
-                                                    cellValue = ma.name + " = " + ma.value;
+                                                    cellValue = ma.value;
                                                     break;
                                                 }
                                             }
@@ -593,12 +593,12 @@ public class GenHtmlForNonMatches
                                         if(otherDiff != null && otherDiff.annotation != null && otherDiff.annotation.attributes != null) {
                                             for(AnnotationAttributeDef oa : otherDiff.annotation.attributes) {
                                                 if(oa != null && oa.name != null && oa.name.equals(uniqueAttr.name)) {
-                                                    cellValue = oa.name + " = " + oa.value;
+                                                    cellValue = oa.value;
                                                     
                                                     if(mainAttrs != null) {
                                                         for(AnnotationAttributeDef ma : mainAttrs) {
                                                             if(ma != null && ma.name != null && ma.name.equals(uniqueAttr.name)) {
-                                                                if(!ma.value.equals(oa.value)) {
+                                                                if(ma.value != null && !ma.value.equals(oa.value)) {
                                                                     isDiff = true;
                                                                 }
                                                                 break;
@@ -632,6 +632,8 @@ public class GenHtmlForNonMatches
                                     if(isDiff) {
                                         Onerecord.add("<td BGCOLOR=\"#FFD0D0\">" + cellValue + "</td>");
                                         foundDifference = true;
+                                    } else if(cellValue.isEmpty() && colIdx > 0) {
+                                        Onerecord.add("<td BGCOLOR=\"#E0E0E0\"></td>");
                                     } else {
                                         Onerecord.add("<td>" + cellValue + "</td>");
                                     }

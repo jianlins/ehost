@@ -49,6 +49,7 @@ After generation, HTML reports are saved to your project directory and displayed
 1. **Main Index**: The provides links to all report sections `index.html`
 2. **Class and Span Matcher**: Shows agreement statistics for annotation spans and classes
 3. **Detailed UnMatched**: Lists annotations that differ between annotators. In the unmatched summaries, if RESTful server is enabled, each mismatched file name will be added a hyperlink. These hyperlinks can be used to navigate to the corresponding files inside eHOST.
+   - **Attribute Display**: Attributes are displayed as separate rows with the attribute name in the first column (indented with `&nbsp;&nbsp;`) and each annotator's value in subsequent columns. Missing attributes show as empty cells.
 
 ### Using HTML Reports for Adjudication
 One of the most powerful features of the IAA reports is the ability to navigate directly to annotations from the reports:

@@ -436,48 +436,83 @@ public class GenHtmlForMatches {
                         //#### get annotation attributes
                         if(IAA.CHECK_ATTRIBUTES)
                         {
-                            strs.add("<tr>");
-                            strs.add("<td>Attributes</td>");
+                            Vector<String> allAttributeNames = new Vector<String>();
 
-                            if(mainAnnotation!=null){
-                                String attributeStr = mainAnnotation.getAttributeString();
-                                if(attributeStr!=null)
-                                    strs.add("<td>"+ attributeStr + "</td>");
-                                else
-                                    strs.add("<td BGCOLOR=\"#E0E0E0\"></td>");
-
-                            }else{
-                                strs.add("<td BGCOLOR=\"#E0E0E0\"></td>");
-                            }
-
-
-                            for(int j=0; j<size_other; j++)
-                            {
-                                Vector<AnalyzedAnnotationDifference> diffs = analyzedAnnotation.othersAnnotations[j].annotationsDiffs;
-                                AnalyzedAnnotationDifference diff = getOtherAnnotation(i, diffs);
-                                if(diff!=null)
-                                {
-                                    String attributeStr = diff.annotation.getAttributeString();
-                                    if(attributeStr!=null)
-                                        if(diff.diffInAttribute){
-                                            strs.add("<td BGCOLOR=\"#FFD0D0\">"+ attributeStr + "</td>");
-                                            allSame = false;
-                                        }
-                                        else
-                                            strs.add("<td>"+ attributeStr + "</td>");
-                                    else{
-                                        if(diff.diffInAttribute){
-                                            strs.add("<td BGCOLOR=\"#FFD0D0\"></td>");
-                                            allSame = false;
-                                        }
-                                        else
-                                            strs.add("<td BGCOLOR=\"#E0E0E0\"></td>");
+                            if(mainAnnotation != null && mainAnnotation.attributes != null){
+                                for(resultEditor.annotations.AnnotationAttributeDef attr : mainAnnotation.attributes){
+                                    if(attr != null && attr.name != null && !allAttributeNames.contains(attr.name)){
+                                        allAttributeNames.add(attr.name);
                                     }
                                 }
-                                else
-                                {
-                                        strs.add("<td BGCOLOR=\"#E0E0E0\"></td>");
+                            }
+
+                            for(int j=0; j<size_other; j++){
+                                Vector<AnalyzedAnnotationDifference> diffs = analyzedAnnotation.othersAnnotations[j].annotationsDiffs;
+                                AnalyzedAnnotationDifference diff = getOtherAnnotation(i, diffs);
+                                if(diff != null && diff.annotation != null && diff.annotation.attributes != null){
+                                    for(resultEditor.annotations.AnnotationAttributeDef attr : diff.annotation.attributes){
+                                        if(attr != null && attr.name != null && !allAttributeNames.contains(attr.name)){
+                                            allAttributeNames.add(attr.name);
+                                        }
+                                    }
                                 }
+                            }
+
+                            for(String attrName : allAttributeNames){
+                                strs.add("<tr>");
+                                strs.add("<td>&nbsp;&nbsp;" + attrName + "</td>");
+
+                                String mainValue = null;
+                                if(mainAnnotation != null && mainAnnotation.attributes != null){
+                                    for(resultEditor.annotations.AnnotationAttributeDef attr : mainAnnotation.attributes){
+                                        if(attr != null && attr.name != null && attr.name.equals(attrName)){
+                                            mainValue = attr.value;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if(mainValue != null){
+                                    strs.add("<td>" + mainValue + "</td>");
+                                }else{
+                                    strs.add("<td BGCOLOR=\"#E0E0E0\"></td>");
+                                }
+
+                                for(int j=0; j<size_other; j++)
+                                {
+                                    Vector<AnalyzedAnnotationDifference> diffs = analyzedAnnotation.othersAnnotations[j].annotationsDiffs;
+                                    AnalyzedAnnotationDifference diff = getOtherAnnotation(i, diffs);
+
+                                    String otherValue = null;
+                                    boolean hasDiff = false;
+
+                                    if(diff != null && diff.annotation != null && diff.annotation.attributes != null){
+                                        for(resultEditor.annotations.AnnotationAttributeDef attr : diff.annotation.attributes){
+                                            if(attr != null && attr.name != null && attr.name.equals(attrName)){
+                                                otherValue = attr.value;
+                                                break;
+                                            }
+                                        }
+                                        hasDiff = diff.diffInAttribute;
+                                    }
+
+                                    if(otherValue != null){
+                                        if(hasDiff || (mainValue != null && !mainValue.equals(otherValue))){
+                                            strs.add("<td BGCOLOR=\"#FFD0D0\">" + otherValue + "</td>");
+                                            allSame = false;
+                                        }else{
+                                            strs.add("<td>" + otherValue + "</td>");
+                                        }
+                                    }else{
+                                        if(hasDiff || mainValue != null){
+                                            strs.add("<td BGCOLOR=\"#FFD0D0\"></td>");
+                                            allSame = false;
+                                        }else{
+                                            strs.add("<td BGCOLOR=\"#E0E0E0\"></td>");
+                                        }
+                                    }
+                                }
+                                strs.add("</tr>");
                             }
                         }
                         
