@@ -626,8 +626,7 @@ public class GenHtmlForNonMatches2
                                     }
                                     
                                     if(cellValue.isEmpty()) {
-                                        cellValue = uniqueAttr.name + " = (none)";
-                                        isDiff = true;
+                                        cellValue = "";
                                     }
                                     
                                     if(isDiff) {
