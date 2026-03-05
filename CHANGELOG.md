@@ -1,4 +1,4 @@
-## Version 1.39 (Unreleased):
+## Version 1.39b1 (2026-03-04):
 
 ### Enhanced
 - **IAA Report HTML Output**: Improved attribute display in unmatched/matched HTML reports
@@ -10,6 +10,11 @@
   - Updated files: `GenHtmlForMatches.java`, `GenHtmlForNonMatches.java`, `GenHtmlForNonMatches2.java`
 
 ### Fixed
+- **Missing annotator info on class change**: Fixed issue where annotator name and ID were not being set when changing annotation class via AnnotationClassChooser (EHOST-002)
+  - Root cause: `AnnotationClassChooser.java` was only setting annotation class and creation date
+  - Fix: Added code to set annotator name and ID from the current annotator manager
+  - Affected file: `AnnotationClassChooser.java`
+
 - **Duplicate adjudication elements bug**: Fixed issue where annotations could be saved twice to knowtator.xml when exiting project in adjudication mode (EHOST-001)
   - Root cause: `OutputToXML.java` was saving annotations from both regular Depot and AdjudicationDepot
   - Fix: Removed duplicate save logic in `buildxml()` method
