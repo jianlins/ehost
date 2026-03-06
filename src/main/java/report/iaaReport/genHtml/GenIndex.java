@@ -11,6 +11,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Vector;
 import java.util.logging.Level;
+import report.iaaReport.AdjudicationLoader;
 import report.iaaReport.analysis.detailsNonMatches.AnalyzedAnnotator;
 import report.iaaReport.analysis.detailsNonMatches.AnalyzedResult;
 
@@ -133,10 +134,90 @@ public class GenIndex {
 
         }
 
+        // Add a dedicated Adjudication Comparison section if adjudication data was loaded
+        boolean hasAdjudicationAnnotator = false;
+        for (AnalyzedAnnotator aa : analyzedAnnotators) {
+            if (aa != null && AdjudicationLoader.ADJUDICATION_ANNOTATOR_NAME.equals(aa.mainAnnotator.trim())) {
+                hasAdjudicationAnnotator = true;
+                break;
+            }
+        }
+
+        if (hasAdjudicationAnnotator) {
+            p.println("<br>");
+            p.println("<h2 style=\"color: #2E6DA4;\">Adjudication Comparison</h2>");
+            p.println("<p>Comparisons between annotator annotations and adjudicated (gold standard) annotations.</p>");
+
+            for (AnalyzedAnnotator analyzedAnnotator : analyzedAnnotators) {
+                if (analyzedAnnotator == null) continue;
+                String rawName = analyzedAnnotator.mainAnnotator.trim();
+                if (AdjudicationLoader.ADJUDICATION_ANNOTATOR_NAME.equals(rawName)) continue;
+
+                String safeName = sanitizeName(rawName);
+                p.println("<li><a href=\""
+                        + safeName
+                        + "-UNMATCHED-SUMMARY"
+                        + ".html\"><b>Annotator ( " + rawName
+                        + " ) vs Adjudication - Unmatched SUMMARY</b></a></li>");
+
+                for (String originalclassname : classes) {
+                    if (originalclassname == null || originalclassname.trim().length() < 1)
+                        continue;
+                    if (SeparatedDetailsByClass.isNoData_ToNonMatches(rawName, originalclassname.trim()))
+                        continue;
+
+                    String classname = sanitizeName(originalclassname.trim());
+                    p.println("<li><a href=\""
+                            + safeName
+                            + "-UNMATCHED-by-class-"
+                            + classname
+                            + ".html\">Annotator ( " + rawName
+                            + " ) vs Adjudication - class( " + originalclassname.trim()
+                            + " )</a></li>");
+                }
+            }
+
+            // Also link to the Adjudication unmatched page
+            p.println("<br>");
+            String adjSafeName = sanitizeName(AdjudicationLoader.ADJUDICATION_ANNOTATOR_NAME);
+            p.println("<li><a href=\""
+                    + adjSafeName
+                    + "-UNMATCHED-SUMMARY"
+                    + ".html\"><b>Adjudication vs All Annotators - Unmatched SUMMARY</b></a></li>");
+
+            for (String originalclassname : classes) {
+                if (originalclassname == null || originalclassname.trim().length() < 1)
+                    continue;
+                if (SeparatedDetailsByClass.isNoData_ToNonMatches(
+                        AdjudicationLoader.ADJUDICATION_ANNOTATOR_NAME, originalclassname.trim()))
+                    continue;
+
+                String classname = sanitizeName(originalclassname.trim());
+                p.println("<li><a href=\""
+                        + adjSafeName
+                        + "-UNMATCHED-by-class-"
+                        + classname
+                        + ".html\">Adjudication vs All Annotators - class( "
+                        + originalclassname.trim()
+                        + " )</a></li>");
+            }
+        }
+
 
         
                 
         return p;
+    }
+
+    private String sanitizeName(String name) {
+        return name.replaceAll(" ", "_")
+                .replaceAll(",", "_")
+                .replaceAll("=", "_")
+                .replaceAll("&", "_")
+                .replaceAll("!", "_")
+                .replaceAll("\\*", "_")
+                .replaceAll("@", "_")
+                .replaceAll("\\+", "_");
     }
 
     public void genHtml(File reportfolder, ArrayList<String> classes) throws Exception{
