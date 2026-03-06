@@ -6,7 +6,7 @@ package report.iaaReport.genHtml;
 
 import report.iaaReport.IAA;
 import report.iaaReport.analysis.detailsNonMatches.*;
-import rest.server.PropertiesUtil;
+
 import resultEditor.annotations.Annotation;
 import resultEditor.annotations.AnnotationAttributeDef;
 
@@ -240,10 +240,10 @@ public class GenHtmlForNonMatches2
                     String fileStemName=article.filename.substring(0, article.filename.lastIndexOf("."));
                     Onerecord.add(String.format(
                             "<div><a href=\"#\" class=\"load-content\" " +
-                                    "data-url=\"http://localhost:%s/ehost/%s/%s\" " +
+                                    "data-url=\"/ehost/%s/%s\" " +
                                     "onclick=\"return showStatus(this, '%s');\">"+
                                     "File: ",
-                            PropertiesUtil.getPort(), projectName, fileStemName, fileStemName)
+                            projectName, fileStemName, fileStemName)
                             + article.filename + "</a></div>");
 
                     Annotation mainAnnotation0 = getMainAnnotation(0, analyzedAnnotation);

@@ -5,22 +5,27 @@
 
 package graphicsReport;
 
+import rest.server.PropertiesUtil;
+import rest.server.ReportController;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.logging.Level;
 
 /**
  * This is the panel that we named "report pane". It's the panel that lists all
  * report function as buttons.
  *
- * Currently, we have three report functions:
+ * Currently, we have four report functions:
  * 1. Graph Reports of Position Indicators
  * 2. Annotator Performance
  * 3. Open Existing Reports in Browser
+ * 4. Open Report Folder from file system
  *
  * @author  Jianwei Chris Leng
  * @since   Created on Mar 25, 2011, 1:00:40 AM, Refactored on Apr 18, 2025 by jianlins
@@ -38,9 +43,11 @@ public class Manager extends JPanel {
     private JButton jButton1;
     private JButton jButton2;
     private JButton jButton3;
+    private JButton jButton4;
     private JLabel jLabel1;
     private JLabel jLabel2;
     private JLabel jLabel3;
+    private JLabel jLabel4;
 
     // Colors and styling
     private static final Color BACKGROUND_COLOR = new Color(240, 240, 241);
@@ -71,11 +78,13 @@ public class Manager extends JPanel {
         jButton1 = new JButton("Graph Reports of Position Indicators");
         jButton2 = new JButton("Annotator Performance");
         jButton3 = new JButton("Open Existing Reports in Browser.");
+        jButton4 = new JButton("Open Report Folder...");
 
         // Labels
         jLabel1 = new JLabel("Graph report of position indicators to multiple documents.");
         jLabel2 = new JLabel("Generate IAA Reports for Annotator Performance");
         jLabel3 = new JLabel("Open previously generated IAA reports in a browser window.");
+        jLabel4 = new JLabel("Browse for a report folder and open it in the browser.");
     }
 
     /**
@@ -99,6 +108,10 @@ public class Manager extends JPanel {
         jButton3.setPreferredSize(buttonSize);
         jButton3.setMaximumSize(buttonSize);
         jButton3.setMinimumSize(buttonSize);
+        
+        jButton4.setPreferredSize(buttonSize);
+        jButton4.setMaximumSize(buttonSize);
+        jButton4.setMinimumSize(buttonSize);
     }
 
     /**
@@ -116,6 +129,9 @@ public class Manager extends JPanel {
         add(Box.createRigidArea(new Dimension(0, VERTICAL_GAP)));
         
         add(createReportItem(jButton3, jLabel3));
+        add(Box.createRigidArea(new Dimension(0, VERTICAL_GAP)));
+        
+        add(createReportItem(jButton4, jLabel4));
         
         // Add some glue at the bottom to push everything to the top
         add(Box.createVerticalGlue());
@@ -177,6 +193,13 @@ public class Manager extends JPanel {
                 openExistingReportsInBrowser();
             }
         });
+
+        jButton4.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                openReportFolderFromFileSystem();
+            }
+        });
     }
 
     /**
@@ -216,13 +239,14 @@ public class Manager extends JPanel {
     }
 
     /**
-     * Opens existing reports in the browser
+     * Opens existing reports in the browser via eHOST's HTTP server
      */
     private void openExistingReportsInBrowser() {
         if (!gui.infoBarTarget.isEmpty()) {
-            File reportFile = new File(new File(gui.infoBarTarget, "reports"), "index.html");
+            File reportDir = new File(gui.infoBarTarget, "reports");
+            File reportFile = new File(reportDir, "index.html");
             if (reportFile.exists()) {
-                if (openReportInBrowser(reportFile)) {
+                if (openReportViaHttp(reportDir, "index.html")) {
                     jLabel3.setText("Open report file: " + reportFile.getAbsolutePath());
                 }
             } else {
@@ -232,16 +256,42 @@ public class Manager extends JPanel {
     }
 
     /**
-     * Opens a report file in the default browser
+     * Opens a file chooser to select a report folder, then serves it via HTTP
+     */
+    private void openReportFolderFromFileSystem() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Select Report Folder");
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setAcceptAllFileFilterUsed(false);
+
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            File selectedDir = chooser.getSelectedFile();
+            File indexFile = new File(selectedDir, "index.html");
+            if (indexFile.exists()) {
+                if (openReportViaHttp(selectedDir, "index.html")) {
+                    jLabel4.setText("Serving report from: " + selectedDir.getAbsolutePath());
+                }
+            } else {
+                jLabel4.setText("No index.html found in the selected folder.");
+            }
+        }
+    }
+
+    /**
+     * Sets the report base directory and opens the report in the browser via HTTP
      *
-     * @param reportFile The report file to open
+     * @param reportDir the directory containing report files
+     * @param entryFile the file to open (e.g., "index.html")
      * @return true if successful, false otherwise
      */
-    private boolean openReportInBrowser(File reportFile) {
+    private boolean openReportViaHttp(File reportDir, String entryFile) {
         try {
-            Desktop.getDesktop().browse(reportFile.toURI());
+            ReportController.setReportBaseDir(reportDir);
+            String port = PropertiesUtil.getPort();
+            String url = "http://127.0.0.1:" + port + "/reports/" + entryFile;
+            Desktop.getDesktop().browse(new URI(url));
             return true;
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             JOptionPane.showMessageDialog(null,
                     "Could not open browser: " + ex.getMessage(),
                     "Error", JOptionPane.ERROR_MESSAGE);

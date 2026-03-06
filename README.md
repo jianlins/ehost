@@ -20,6 +20,13 @@ The RESTful server is a core component of eHOST's latest versions that allows fo
   - The server will automatically find an available port if the configured one is in use
   - Port configuration persists between sessions in the application.properties file
 
+3. **Report Serving** (New in 1.39b2):
+  - IAA reports are served via HTTP instead of `file://` URIs
+  - Enables multi-user report sharing — each user's navigation links route to their own eHOST
+  - New "Open Report Folder..." button to open reports from any directory
+
+> For the complete RESTful server documentation including multi-user deployment, see [docs/RESTful-Server-Guide.md](docs/RESTful-Server-Guide.md)
+
 **Server Status Information**:  When the RESTful server starts, you will see information in:
 - The terminal console window showing the server URL
 - System logs recording server status and port information
@@ -50,6 +57,8 @@ After generation, HTML reports are saved to your project directory and displayed
 2. **Class and Span Matcher**: Shows agreement statistics for annotation spans and classes
 3. **Detailed UnMatched**: Lists annotations that differ between annotators. In the unmatched summaries, if RESTful server is enabled, each mismatched file name will be added a hyperlink. These hyperlinks can be used to navigate to the corresponding files inside eHOST.
    - **Attribute Display**: Attributes are displayed as separate rows with the attribute name in the first column (indented with `&nbsp;&nbsp;`) and each annotator's value in subsequent columns. Missing attributes show as empty cells.
+
+> **Important**: For navigation links to work correctly in multi-user environments, open reports using eHOST's "Open Existing Reports in Browser" button (which serves via HTTP) rather than double-clicking the HTML file. See the [RESTful Server Guide](docs/RESTful-Server-Guide.md) for details.
 
 ### Using HTML Reports for Adjudication
 One of the most powerful features of the IAA reports is the ability to navigate directly to annotations from the reports:
@@ -111,6 +120,11 @@ http://127.0.0.1:8010/ehost/xxx/yyy
 * xxx is the project directory name (not absolute path)
 * yyy is the file name or partial file name (if multiple file matched, only first one will be displayed)
 
+To view IAA reports (after opening via eHOST's report buttons):
+http://127.0.0.1:8010/reports/index.html
+
 You can change the server port by editing the *application.properties* file.
+
+> For the full RESTful server documentation, see [docs/RESTful-Server-Guide.md](docs/RESTful-Server-Guide.md)
 
 Thanks for comments

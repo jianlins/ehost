@@ -1,3 +1,16 @@
+## Version 1.39b2 (2026-03-06):
+
+### Enhanced
+- **HTTP Report Serving for Multi-User Support** (EHOST-004): IAA reports are now served via eHOST's built-in HTTP server instead of `file://` URIs, enabling multiple users to share reports while navigation links route to each user's own eHOST instance
+  - New `ReportController` serves report files at `/reports/**` with configurable base directory
+  - Report navigation links now use relative URLs (`/ehost/{project}/{file}`) instead of hardcoded port numbers
+  - New "Open Report Folder..." button to browse for and open any report directory
+  - "Open Existing Reports in Browser" now opens via HTTP (`http://127.0.0.1:{port}/reports/index.html`)
+  - Added `127.0.0.1` origins to CORS configuration alongside `localhost`
+  - No-cache headers ensure folder changes take effect immediately
+  - New file: `ReportController.java`; updated: `Manager.java`, `GenHtmlForNonMatches.java`, `GenHtmlForNonMatches2.java`, `EhostController.java`, `WebConfig.java`
+  - See [docs/enhancements/004-http-report-serving.md](docs/enhancements/004-http-report-serving.md)
+
 ## Version 1.39b1 (2026-03-04):
 
 ### Enhanced
