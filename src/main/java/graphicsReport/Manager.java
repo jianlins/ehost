@@ -288,7 +288,7 @@ public class Manager extends JPanel {
         try {
             ReportController.setReportBaseDir(reportDir);
             String port = PropertiesUtil.getPort();
-            String url = "http://localhost:" + port + "/reports/" + entryFile;
+            String url = "http://127.0.0.1:" + port + "/reports/" + entryFile;
             Desktop.getDesktop().browse(new URI(url));
             return true;
         } catch (Exception ex) {
