@@ -28,13 +28,15 @@ public class EhostController {
 
     // Helper method to create help section content
     private String getHelpContent() {
+        String port = PropertiesUtil.getPort();
         return "<div class='info'>" +
                 "<h2>Available Endpoints:</h2>" +
                 "<ul>" +
-                "<li>Status check: <code>http://127.0.0.1:8009/</code> or <code>http://127.0.0.1:8009/status</code></li>" +
-                "<li>Shutdown server: <code>http://127.0.0.1:8009/shutdown</code></li>" +
-                "<li>Navigate to project: <code>http://127.0.0.1:8009/ehost/{projectName}</code></li>" +
-                "<li>Navigate to file in project: <code>http://127.0.0.1:8009/ehost/{projectName}/{fileName}</code></li>" +
+                "<li>Status check: <code>http://localhost:" + port + "/</code> or <code>http://localhost:" + port + "/status</code></li>" +
+                "<li>Shutdown server: <code>http://localhost:" + port + "/shutdown</code></li>" +
+                "<li>Navigate to project: <code>http://localhost:" + port + "/ehost/{projectName}</code></li>" +
+                "<li>Navigate to file in project: <code>http://localhost:" + port + "/ehost/{projectName}/{fileName}</code></li>" +
+                "<li>View reports: <code>http://localhost:" + port + "/reports/</code> (when report directory is configured)</li>" +
                 "</ul>" +
                 "<p>Note: You can change the server port by editing the application.properties file.</p>" +
                 "</div>";
