@@ -66,10 +66,16 @@ public class ReportController {
 
     @GetMapping("/reports/**")
     public ResponseEntity<byte[]> serveReportFile(HttpServletRequest request) {
+        logger.debug("Report request: {} | baseDir: {}", request.getRequestURI(),
+                reportBaseDir != null ? reportBaseDir.getAbsolutePath() : "null");
+
         if (reportBaseDir == null || !reportBaseDir.isDirectory()) {
+            String msg = "No report directory configured. baseDir=" +
+                    (reportBaseDir != null ? reportBaseDir.getAbsolutePath() : "null");
+            logger.warn(msg);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .contentType(MediaType.TEXT_PLAIN)
-                    .body("No report directory configured.".getBytes());
+                    .body(msg.getBytes());
         }
 
         // Extract the relative path after "/reports/"
@@ -78,6 +84,13 @@ public class ReportController {
 
         if (relativePath.isEmpty()) {
             relativePath = "index.html";
+        }
+
+        // Decode URL-encoded characters (e.g., %20 for spaces)
+        try {
+            relativePath = java.net.URLDecoder.decode(relativePath, "UTF-8");
+        } catch (java.io.UnsupportedEncodingException e) {
+            // UTF-8 is always supported
         }
 
         // Resolve and validate the file path
@@ -91,15 +104,21 @@ public class ReportController {
 
         File file = resolved.toFile();
         if (!file.exists() || !file.isFile()) {
+            String msg = "File not found: " + relativePath + " (resolved to: " + resolved + ")";
+            logger.warn(msg);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .contentType(MediaType.TEXT_PLAIN)
-                    .body(("File not found: " + relativePath).getBytes());
+                    .body(msg.getBytes());
         }
 
         try {
             byte[] content = Files.readAllBytes(file.toPath());
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(getMediaType(file.getName()));
+            // Disable caching so folder changes take effect immediately
+            headers.setCacheControl("no-cache, no-store, must-revalidate");
+            headers.setPragma("no-cache");
+            headers.setExpires(0);
             return new ResponseEntity<>(content, headers, HttpStatus.OK);
         } catch (IOException e) {
             logger.error("Error reading report file: {}", file.getAbsolutePath(), e);
