@@ -240,9 +240,19 @@ public class IAA extends javax.swing.JFrame {
                 // most collected data will be stored into the class of 
                 // "classAgreementDepot"
                 try{
+                    // Load adjudication annotations if available
+                    boolean hasAdjudication = AdjudicationLoader.load();
+                    if (hasAdjudication) {
+                        if (!selectedAnnotators.contains(AdjudicationLoader.ADJUDICATION_ANNOTATOR_NAME)) {
+                            selectedAnnotators.add(AdjudicationLoader.ADJUDICATION_ANNOTATOR_NAME);
+                        }
+                        log.LoggingToFile.log(Level.INFO,
+                                "Adjudication data loaded and added to IAA comparison.");
+                    }
+
                     report.iaaReport.analysis.Analysis analysiser =  new
                             report.iaaReport.analysis.Analysis( selectedAnnotators, selectedClasses);
-                    analysiser.startAnalysis();                    
+                    analysiser.startAnalysis();
 
                     // #### calculate the f-measure and something else after analysis
                     ClassAgreementDepot.completeForms();
@@ -265,6 +275,9 @@ public class IAA extends javax.swing.JFrame {
 
                     // #### load and display html results on current dialog
                     addHTMLViewer();
+
+                    // Clean up adjudication annotations from Depot
+                    AdjudicationLoader.cleanup();
 
                 }catch(Exception ex){
                     log.LoggingToFile.log(Level.SEVERE,
