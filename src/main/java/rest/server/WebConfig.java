@@ -13,13 +13,17 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        // Create array of allowed origins for ports 8001-8020
-        String[] allowedOrigins = IntStream.rangeClosed(8001, 8020)
+        // Create arrays of allowed origins for ports 8001-8020
+        String[] localhostOrigins = IntStream.rangeClosed(8001, 8020)
                 .mapToObj(port -> "http://localhost:" + port)
+                .toArray(String[]::new);
+        String[] ipOrigins = IntStream.rangeClosed(8001, 8020)
+                .mapToObj(port -> "http://127.0.0.1:" + port)
                 .toArray(String[]::new);
 
         registry.addMapping("/**")
-                .allowedOrigins(allowedOrigins)
+                .allowedOrigins(localhostOrigins)
+                .allowedOrigins(ipOrigins)
                 .allowedOrigins("null", "file://")  // Allow null origin and file protocol
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")  // Allow all headers
