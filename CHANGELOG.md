@@ -1,6 +1,14 @@
 ## Version 1.39b1 (2026-03-04):
 
 ### Enhanced
+- **IAA Adjudication Comparison** (EHOST-003): When adjudication annotations are available in `projectDir/adjudication/`, the IAA report now includes additional pages comparing each annotator against the adjudicated gold standard
+  - Automatically detects and loads adjudication `.knowtator.xml` files as an "Adjudication" annotator
+  - Generates pairwise agreement tables (precision, recall, F-measure) for each annotator vs Adjudication
+  - Produces N-way comparison tables including Adjudication
+  - Creates unmatched detail pages showing where annotators disagree with adjudication
+  - Adds a dedicated "Adjudication Comparison" section to the report index
+  - New file: `AdjudicationLoader.java`; updated: `IAA.java`, `GenIndex.java`
+
 - **IAA Report HTML Output**: Improved attribute display in unmatched/matched HTML reports
   - Each attribute now displays as a separate row for better readability
   - First column shows attribute name with indentation (`&nbsp;&nbsp;AttributeName`)
