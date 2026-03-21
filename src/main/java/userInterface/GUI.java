@@ -7,6 +7,7 @@
  */
 package userInterface;
 
+import adjudication.CollectInfo;
 import adjudication.SugarSeeder;
 import adjudication.parameters.Paras;
 import adjudication.statusBar.DiffCounter;
@@ -10528,6 +10529,23 @@ public class GUI extends JFrame {
      */
     protected void mode_continuePreviousAdjudicationWork() {
         try {
+            // Paras is normally restored from XML via getAdjudicationSetting().
+            // Fall back to scanning annotations if that didn't happen.
+            if (!Paras.isReadyForAdjudication()) {
+                rebuildParasFromAnnotations();
+            }
+
+            // After app restart, AdjudicationDepot is empty because
+            // annotations are only loaded into the regular Depot.
+            // Populate AdjudicationDepot from the regular Depot so that
+            // checkAnnotations(false) has data to work with.
+            if (!adjudication.data.AdjudicationDepot.isReady()) {
+                adjudication.data.AdjudicationDepot depotOfAdj =
+                        new adjudication.data.AdjudicationDepot();
+                depotOfAdj.copyAnnotations(
+                        Paras.getAnnotators(), Paras.getClasses(), true);
+            }
+
             adjudication.Adjudication dialog_adjudication = new adjudication.Adjudication(this);
             dialog_adjudication.checkAnnotations(false);
 
@@ -10550,6 +10568,25 @@ public class GUI extends JFrame {
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
+    }
+
+    /**
+     * Rebuild Paras selected annotators and classes from annotations
+     * when adjudication parameters were not restored from XML.
+     */
+    private void rebuildParasFromAnnotations() {
+        CollectInfo ci = new CollectInfo();
+        ci.gatherInformation();
+        Vector<String> annotators = ci.getAnnotators();
+        Vector<String> classes = ci.getClassNames();
+
+        Paras.removeAll();
+        Paras.setAnnotators(new ArrayList<String>(annotators));
+        if (!Paras.annotatorExists("ADJUDICATION")) {
+            Paras.addAnnotator("ADJUDICATION");
+        }
+        Paras.setClasses(new ArrayList<String>(classes));
+        Paras.__adjudicated = true;
     }
 
 

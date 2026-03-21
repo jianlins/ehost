@@ -56,15 +56,21 @@ Annotations that exist in both the regular Depot and AdjudicationDepot are saved
 Remove the call to `addAdjudicatingAnnotations()` when saving to the "saved" folder. The annotations in AdjudicationDepot are copies of the original annotations, and any accepted/rejected changes should be handled through the regular Depot mechanism.
 
 ## Status
-**FIXED** - 2026-03-04
+**REVERTED** - 2026-03-20
+
+The fix for EHOST-001 was reverted because it caused a more severe regression (EHOST-003): complete loss of adjudication state on app restart. The `<adjudicating>` elements use a different XML tag from `<annotation>` and are loaded into a separate data store (`AdjudicationDepot`), so they are not true duplicates in terms of application behavior. See `docs/bugs/EHOST-003-adjudication-resume-failure.md` and `docs/enhancements/005-adjudication-resume-robustness.md` for details.
 
 ## Fix Details
 
 ### Fix Applied
 - **Date**: 2026-03-04
 - **Fixed by**: opencode (AI assistant)
-- **Commit**: Local changes in working directory
+- **Commit**: `e98e707` (tag: 1.39a2)
 - **Verification**: All 34 tests pass
+
+### Fix Reverted
+- **Date**: 2026-03-20
+- **Reason**: Caused EHOST-003 (adjudication resume failure — all adjudication state lost on restart)
 
 ### Fix Description
 Removed the call to `addAdjudicatingAnnotations()` when saving to the "saved" folder to prevent duplicate annotations.
