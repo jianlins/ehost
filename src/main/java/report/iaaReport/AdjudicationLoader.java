@@ -125,6 +125,36 @@ public class AdjudicationLoader {
         return xmlFiles != null && !xmlFiles.isEmpty();
     }
 
+    /**
+     * Loads adjudication working state from the adjudication/ folder.
+     * The XMLs there contain {@code <adjudicating>} elements (type=5)
+     * which are routed to AdjudicationDepot by
+     * {@link ImportAnnotation#XMLExtractor(eXMLFile)}, preserving their
+     * AdjudicationStatus. Regular {@code <annotation>} elements in the
+     * same files are routed to the regular Depot — callers should ensure
+     * those annotations already exist to avoid duplicates.
+     *
+     * @return true if any adjudication working state was loaded
+     */
+    public static boolean loadWorkingState() {
+        File adjudicationDir = getAdjudicationDir();
+        if (adjudicationDir == null || !adjudicationDir.exists() || !adjudicationDir.isDirectory()) {
+            return false;
+        }
+
+        Vector<File> xmlFiles = listKnowtatorXMLs(adjudicationDir);
+        if (xmlFiles == null || xmlFiles.isEmpty()) {
+            return false;
+        }
+
+        ImportAnnotation importer = new ImportAnnotation();
+        importer.XMLImporter(xmlFiles);
+
+        log.LoggingToFile.log(Level.INFO,
+                "Loaded adjudication working state from " + xmlFiles.size() + " file(s).");
+        return true;
+    }
+
     private static File getAdjudicationDir() {
         File project = env.Parameters.WorkSpace.CurrentProject;
         if (project == null || !project.exists()) {

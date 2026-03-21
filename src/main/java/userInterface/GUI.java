@@ -82,6 +82,7 @@ public class GUI extends JFrame {
      * deleted, or added into current document
      */
     protected boolean modified = false;
+    protected boolean adjudicationModified = false;
 
     /**
      * this path depend on operation system type, and it will be set to correct
@@ -4909,6 +4910,17 @@ public class GUI extends JFrame {
             return; // quit
         }
 
+        // Prompt to save annotation work before leaving annotation mode.
+        if (this.modified) {
+            boolean save = popDialog_Asking_YesNo(
+                    "<html>Do you want to save your annotation work before switching to adjudication mode?</html>",
+                    "Save Annotations:");
+            if (save) {
+                saveto_originalxml();
+                this.modified = false;
+            }
+        }
+
         // disable two radio buttons for switching between review modes
         setReviewChangeButtonEnabled(false);
         // set selected status to these two radio button
@@ -4964,6 +4976,20 @@ public class GUI extends JFrame {
             if (this.reviewmode == ReviewMode.ANNOTATION_MODE) {
                 return;
             }
+        }
+
+        // Prompt to save adjudication work before leaving adjudication mode.
+        // Save must happen BEFORE mode switch so directsave() writes the
+        // adjudication/ folder (it only does so when reviewmode == adjudicationMode).
+        if (reviewmode == ReviewMode.adjudicationMode
+                && adjudicationModified) {
+            boolean save = popDialog_Asking_YesNo(
+                    "<html>Do you want to save your adjudication work before switching to annotation mode?</html>",
+                    "Save Adjudication:");
+            if (save) {
+                saveto_originalxml();
+            }
+            adjudicationModified = false;
         }
 
         jRadioButton_adjudicationMode.setSelected(false);
@@ -5314,7 +5340,7 @@ public class GUI extends JFrame {
         if (text == null)
             return;
 
-        this.modified = true; // tell system that we did a modification.
+        this.setModified(); // tell system that we did a modification.
 
         annotation.spanset.addSpan(start, end, text);
         annotation.annotationText = this.getText(annotation.spanset);
@@ -9761,12 +9787,17 @@ public class GUI extends JFrame {
 
     /**
      * Save modifications of annotations while user leaving current document or
-     * closing eHOST.
+     * closing eHOST.  Also handles unsaved adjudication work.
      */
     private void saveModification() {
         // if user modified something of this current, ask user whether they
         // want to save changes or not.
-        if (this.modified) {
+        boolean needsSave = this.modified;
+        // Also prompt if adjudication work was modified
+        if (adjudicationModified) {
+            needsSave = true;
+        }
+        if (needsSave) {
             // get user's decision
             boolean yes_no = popDialog_Asking_ChangeSaving();
 
@@ -10163,10 +10194,22 @@ public class GUI extends JFrame {
     }
 
     /**
-     * set the flag that current document has been modified
+     * set the flag that current document has been modified.
+     * Also sets adjudicationModified when in adjudication mode so that
+     * the save prompt fires on mode switch.
      */
     public void setModified() {
         this.modified = true;
+        if (reviewmode == ReviewMode.adjudicationMode) {
+            this.adjudicationModified = true;
+        }
+    }
+
+    /**
+     * set the flag that adjudication work has been modified
+     */
+    public void setAdjudicationModified() {
+        this.adjudicationModified = true;
     }
 
     /**
@@ -10535,15 +10578,17 @@ public class GUI extends JFrame {
                 rebuildParasFromAnnotations();
             }
 
-            // After app restart, AdjudicationDepot is empty because
-            // annotations are only loaded into the regular Depot.
-            // Populate AdjudicationDepot from the regular Depot so that
-            // checkAnnotations(false) has data to work with.
+            // After app restart, AdjudicationDepot is empty. Load the
+            // <adjudicating> working copies from the adjudication/ folder,
+            // which preserves their AdjudicationStatus (MATCHES_OK, etc.).
+            // Fall back to copying from regular Depot if no files exist.
             if (!adjudication.data.AdjudicationDepot.isReady()) {
-                adjudication.data.AdjudicationDepot depotOfAdj =
-                        new adjudication.data.AdjudicationDepot();
-                depotOfAdj.copyAnnotations(
-                        Paras.getAnnotators(), Paras.getClasses(), true);
+                if (!report.iaaReport.AdjudicationLoader.loadWorkingState()) {
+                    adjudication.data.AdjudicationDepot depotOfAdj =
+                            new adjudication.data.AdjudicationDepot();
+                    depotOfAdj.copyAnnotations(
+                            Paras.getAnnotators(), Paras.getClasses(), true);
+                }
             }
 
             adjudication.Adjudication dialog_adjudication = new adjudication.Adjudication(this);

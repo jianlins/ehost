@@ -232,6 +232,7 @@ public class ExpandButton extends JPanel{
         // user click accept button on editor panel
         try{// ##1## delete
             Depot.SelectedAnnotationSet.data_onlyKeepPrimaryAnnotation();
+            gui.setAdjudicationModified();
             
 
             // ##2## remove components on comparator panel
@@ -286,6 +287,7 @@ public class ExpandButton extends JPanel{
         // user click accept button on editor panel
         try{// ##1## delete
             Depot.SelectedAnnotationSet.data_onlyKeepAnnotation(uniqueindex);
+            gui.setAdjudicationModified();
 
             // ##2## remove components on comparator panel
             this.setStatusInvisible();
@@ -357,6 +359,7 @@ public class ExpandButton extends JPanel{
         try{
             //##1## delete primary annotation
             Depot.SelectedAnnotationSet.data_onlyDeletePrimaryAnnotation();
+            gui.setAdjudicationModified();
 
             if( Depot.SelectedAnnotationSet.size()==0){
                 
@@ -439,6 +442,7 @@ public class ExpandButton extends JPanel{
         try{// ##1## delete
             //Depot.SelectedAnnotationSet.data_onlyKeepPrimaryAnnotation();
             Depot.SelectedAnnotationSet.data_acceptAll();
+            gui.setAdjudicationModified();
 
             // ##2## remove components on comparator panel
             this.setStatusInvisible();
@@ -527,6 +531,7 @@ public class ExpandButton extends JPanel{
         try{
             //##1## delete primary annotation
             Depot.SelectedAnnotationSet.data_onlyDeleteSpcificAnnotation(uniqueindex);
+            gui.setAdjudicationModified();
 
             // ##2## if there only have 2 annotations in current selected
             // annotation set

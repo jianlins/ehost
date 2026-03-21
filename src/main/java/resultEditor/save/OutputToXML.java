@@ -189,14 +189,15 @@ public class OutputToXML {
             /** add contents */
             root = addAnnotations( root, is_outputing_adjudicated_annotations );
             
-            // For the saved/ folder, also write <adjudicating> elements from
-            // AdjudicationDepot so that adjudication state (statuses like
-            // MATCHES_OK) can be restored when the project is reopened.
-            // These elements use a different XML tag than <annotation>, so
-            // they are loaded into AdjudicationDepot (not regular Depot) on
-            // import and do not cause true duplicates.
-            if(!is_outputing_adjudicated_annotations){
+            if(is_outputing_adjudicated_annotations){
+                // adjudication/ folder: also write <adjudicating> elements
+                // (all working copies with their statuses) so adjudication
+                // state can be restored on resume.
                 root = addAdjudicatingAnnotations( root );
+                root = adjudicationParameters( root );
+            } else {
+                // saved/ folder: only regular <annotation> elements +
+                // adjudication parameters (annotator/class selections).
                 root = adjudicationParameters( root );
             }
             
