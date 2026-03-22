@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<annotations textSource="doc2.txt">
+    <adjudicating>
+        <mention id="EHOST_Instance_38" />
+        <annotator id="eHOST_2010">a2</annotator>
+        <span start="628" end="635" />
+        <spannedText>incised</spannedText>
+        <creationDate>Wed Apr 16 10:18:36 MDT 2025</creationDate>
+        <processed>true</processed>
+        <AdjudicationStatus>NON_MATCHES</AdjudicationStatus>
+    </adjudicating>
+    <classMention id="EHOST_Instance_38">
+        <mentionClass id="CONCEPT">incised</mentionClass>
+    </classMention>
+</annotations>
+

@@ -25,6 +25,14 @@
             <InHerit_Public_Attributes>true</InHerit_Public_Attributes>
             <Source>eHOST</Source>
         </classDef>
+        <classDef>
+            <Name>CONCEPT2</Name>
+            <RGB_R>192</RGB_R>
+            <RGB_G>255</RGB_G>
+            <RGB_B>0</RGB_B>
+            <InHerit_Public_Attributes>true</InHerit_Public_Attributes>
+            <Source>eHOST</Source>
+        </classDef>
     </classDefs>
 </eHOST_Project_Configure>
 
