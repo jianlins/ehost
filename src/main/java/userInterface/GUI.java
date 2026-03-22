@@ -4490,6 +4490,7 @@ public class GUI extends JFrame {
         commons.Tools.beep();
 
         this.modified = false;
+        this.adjudicationModified = false;
     }// GEN-LAST:event_jButton_saveActionPerformed
 
     private void jButton_removeduplicatesActionPerformed(ActionEvent evt) {// GEN-FIRST:event_jButton_removeduplicatesActionPerformed

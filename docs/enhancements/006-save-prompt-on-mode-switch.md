@@ -90,10 +90,25 @@ if (adjudicationModified) {
 
 Changed `this.modified = true` in `addSpan()` to `this.setModified()` so the adjudication flag is set when adding spans in adjudication mode.
 
+### 7. Reset `adjudicationModified` on explicit save (`GUI.java`)
+
+The save button handler (`jButton_saveActionPerformed`) originally only reset the `modified` flag. This meant that after explicitly saving in adjudication mode, the `adjudicationModified` flag stayed `true`, causing a redundant "Save adjudication work?" prompt on the next mode switch even though nothing had changed since the last save.
+
+Fixed by resetting both flags in the save handler:
+
+```java
+private void jButton_saveActionPerformed(ActionEvent evt) {
+    saveto_originalxml();
+    commons.Tools.beep();
+    this.modified = false;
+    this.adjudicationModified = false;
+}
+```
+
 ## Files Changed
 | File | Change |
 |------|--------|
-| `src/main/java/userInterface/GUI.java` | Added `adjudicationModified` flag, save prompts on mode switch, enhanced `setModified()` and `saveModification()` |
+| `src/main/java/userInterface/GUI.java` | Added `adjudicationModified` flag, save prompts on mode switch, enhanced `setModified()`, `saveModification()`, and `jButton_saveActionPerformed()` to reset both flags |
 | `src/main/java/userInterface/annotationCompare/ExpandButton.java` | Added `gui.setAdjudicationModified()` to accept/reject/acceptAll methods |
 
 ## Related

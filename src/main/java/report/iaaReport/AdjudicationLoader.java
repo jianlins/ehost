@@ -148,7 +148,44 @@ public class AdjudicationLoader {
         }
 
         ImportAnnotation importer = new ImportAnnotation();
-        importer.XMLImporter(xmlFiles);
+        Depot depot = new Depot();
+
+        for (File xmlFile : xmlFiles) {
+            try {
+                eXMLFile parsedXml = ImportXML.readXMLContents(xmlFile);
+                if (parsedXml == null) {
+                    continue;
+                }
+                parsedXml = importer.assignateAnnotationIndex(parsedXml);
+
+                // Derive text filename (mirrors ImportAnnotation.getXMLTextSource)
+                String textFilename = parsedXml.filename.trim()
+                        .replaceAll("\\.knowtator\\.xml", " ").trim();
+
+                // Snapshot current Depot annotations before import so we can
+                // restore them afterwards — XMLExtractor (no-param) routes
+                // type=5 elements to AdjudicationDepot (which we need) but
+                // also adds regular annotations to Depot (which duplicates
+                // what was already loaded from saved/).
+                depot.articleInsurance(textFilename);
+                Article depotArticle = depot.getArticleByFilename(textFilename);
+                Vector<Annotation> originalAnnotations = null;
+                if (depotArticle != null) {
+                    originalAnnotations = new Vector<>(depotArticle.annotations);
+                }
+
+                importer.XMLExtractor(parsedXml);
+
+                // Restore original annotations to undo duplicate additions
+                if (depotArticle != null && originalAnnotations != null) {
+                    depotArticle.annotations = originalAnnotations;
+                }
+            } catch (Exception ex) {
+                log.LoggingToFile.log(Level.WARNING,
+                        "Failed to load adjudication state from: " + xmlFile.getName()
+                                + " - " + ex.getMessage());
+            }
+        }
 
         log.LoggingToFile.log(Level.INFO,
                 "Loaded adjudication working state from " + xmlFiles.size() + " file(s).");

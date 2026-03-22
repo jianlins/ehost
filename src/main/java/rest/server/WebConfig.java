@@ -21,10 +21,16 @@ public class WebConfig implements WebMvcConfigurer {
                 .mapToObj(port -> "http://127.0.0.1:" + port)
                 .toArray(String[]::new);
 
+        // Combine all origins into a single array — chained allowedOrigins()
+        // calls replace rather than append, so we must pass them all at once.
+        String[] extraOrigins = {"null", "file://"};
+        String[] allOrigins = new String[localhostOrigins.length + ipOrigins.length + extraOrigins.length];
+        System.arraycopy(localhostOrigins, 0, allOrigins, 0, localhostOrigins.length);
+        System.arraycopy(ipOrigins, 0, allOrigins, localhostOrigins.length, ipOrigins.length);
+        System.arraycopy(extraOrigins, 0, allOrigins, localhostOrigins.length + ipOrigins.length, extraOrigins.length);
+
         registry.addMapping("/**")
-                .allowedOrigins(localhostOrigins)
-                .allowedOrigins(ipOrigins)
-                .allowedOrigins("null", "file://")  // Allow null origin and file protocol
+                .allowedOrigins(allOrigins)
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")  // Allow all headers
                 .exposedHeaders("*")  // Expose all headers
