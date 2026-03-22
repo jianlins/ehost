@@ -1,45 +1,36 @@
+## Version 1.39b4 (2026-03-22):
+
+### Enhanced
+- **Adjudication XML Optimization**: Final optimization with backward compatibility fixes ([docs/enhancements/008-adjudication-xml-optimization.md](docs/enhancements/008-adjudication-xml-optimization.md))
+
+## Version 1.39b3 (2026-03-21):
+
+### Enhanced
+- **Adjudication Detection Simplified**: Removed XML metadata and streamlined detection logic ([docs/enhancements/007-simplify-adjudication-detection.md](docs/enhancements/007-simplify-adjudication-detection.md))
+- **Save Prompts on Mode Switch**: Added prompts to prevent data loss when switching modes ([docs/enhancements/006-save-prompt-on-mode-switch.md](docs/enhancements/006-save-prompt-on-mode-switch.md), [docs/bugs/EHOST-004-no-save-prompt-on-mode-switch.md](docs/bugs/EHOST-004-no-save-prompt-on-mode-switch.md))
+- **Adjudication Resume Robustness**: Improved state persistence and resume detection ([docs/enhancements/005-adjudication-resume-robustness.md](docs/enhancements/005-adjudication-resume-robustness.md), [docs/bugs/EHOST-003-adjudication-resume-failure.md](docs/bugs/EHOST-003-adjudication-resume-failure.md))
+- **Report Serving Improvements**: Debug logging, URL decoding, and no-cache headers ([docs/enhancements/004-http-report-serving.md](docs/enhancements/004-http-report-serving.md))
+
 ## Version 1.39b2 (2026-03-06):
 
 ### Enhanced
-- **HTTP Report Serving for Multi-User Support** (EHOST-004): IAA reports are now served via eHOST's built-in HTTP server instead of `file://` URIs, enabling multiple users to share reports while navigation links route to each user's own eHOST instance
-  - New `ReportController` serves report files at `/reports/**` with configurable base directory
-  - Report navigation links now use relative URLs (`/ehost/{project}/{file}`) instead of hardcoded port numbers
-  - New "Open Report Folder..." button to browse for and open any report directory
-  - "Open Existing Reports in Browser" now opens via HTTP (`http://127.0.0.1:{port}/reports/index.html`)
-  - Added `127.0.0.1` origins to CORS configuration alongside `localhost`
-  - No-cache headers ensure folder changes take effect immediately
-  - New file: `ReportController.java`; updated: `Manager.java`, `GenHtmlForNonMatches.java`, `GenHtmlForNonMatches2.java`, `EhostController.java`, `WebConfig.java`
-  - See [docs/enhancements/004-http-report-serving.md](docs/enhancements/004-http-report-serving.md)
+- **HTTP Report Serving for Multi-User Support**: IAA reports served via HTTP instead of file:// URIs ([docs/enhancements/004-http-report-serving.md](docs/enhancements/004-http-report-serving.md))
+- **IAA Adjudication Comparison**: Compare annotators against adjudicated gold standard ([docs/enhancements/003-iaa-adjudication-comparison.md](docs/enhancements/003-iaa-adjudication-comparison.md))
+- **IAA Report HTML Output**: Improved attribute display in unmatched/matched reports ([docs/enhancements/002-iaa-report-attribute-display.md](docs/enhancements/002-iaa-report-attribute-display.md))
+
+### Fixed
+- **Missing annotator info on class change**: Fixed annotator name/ID not set when changing annotation class ([docs/bugs/EHOST-002-missing-annotator-info-on-class-change.md](docs/bugs/EHOST-002-missing-annotator-info-on-class-change.md))
+- **Duplicate adjudication elements bug**: Fixed annotations saved twice in adjudication mode ([docs/bugs/EHOST-001-duplicate-adjudication-elements.md](docs/bugs/EHOST-001-duplicate-adjudication-elements.md))
 
 ## Version 1.39b1 (2026-03-04):
 
 ### Enhanced
-- **IAA Adjudication Comparison** (EHOST-003): When adjudication annotations are available in `projectDir/adjudication/`, the IAA report now includes additional pages comparing each annotator against the adjudicated gold standard
-  - Automatically detects and loads adjudication `.knowtator.xml` files as an "Adjudication" annotator
-  - Generates pairwise agreement tables (precision, recall, F-measure) for each annotator vs Adjudication
-  - Produces N-way comparison tables including Adjudication
-  - Creates unmatched detail pages showing where annotators disagree with adjudication
-  - Adds a dedicated "Adjudication Comparison" section to the report index
-  - New file: `AdjudicationLoader.java`; updated: `IAA.java`, `GenIndex.java`
-
-- **IAA Report HTML Output**: Improved attribute display in unmatched/matched HTML reports
-  - Each attribute now displays as a separate row for better readability
-  - First column shows attribute name with indentation (`&nbsp;&nbsp;AttributeName`)
-  - Each annotator column shows only the attribute value (not `Name=Value` format)
-  - Empty cells shown with gray background when annotator is missing an attribute
-  - Differences highlighted in red when values differ between annotators
-  - Updated files: `GenHtmlForMatches.java`, `GenHtmlForNonMatches.java`, `GenHtmlForNonMatches2.java`
+- **IAA Adjudication Comparison**: Compare annotators against adjudicated gold standard ([docs/enhancements/003-iaa-adjudication-comparison.md](docs/enhancements/003-iaa-adjudication-comparison.md))
+- **IAA Report HTML Output**: Improved attribute display in unmatched/matched reports ([docs/enhancements/002-iaa-report-attribute-display.md](docs/enhancements/002-iaa-report-attribute-display.md))
 
 ### Fixed
-- **Missing annotator info on class change**: Fixed issue where annotator name and ID were not being set when changing annotation class via AnnotationClassChooser (EHOST-002)
-  - Root cause: `AnnotationClassChooser.java` was only setting annotation class and creation date
-  - Fix: Added code to set annotator name and ID from the current annotator manager
-  - Affected file: `AnnotationClassChooser.java`
-
-- **Duplicate adjudication elements bug**: Fixed issue where annotations could be saved twice to knowtator.xml when exiting project in adjudication mode (EHOST-001)
-  - Root cause: `OutputToXML.java` was saving annotations from both regular Depot and AdjudicationDepot
-  - Fix: Removed duplicate save logic in `buildxml()` method
-  - Added test cases in `OutputToXMLTest.java`
+- **Missing annotator info on class change**: Fixed annotator name/ID not set when changing annotation class ([docs/bugs/EHOST-002-missing-annotator-info-on-class-change.md](docs/bugs/EHOST-002-missing-annotator-info-on-class-change.md))
+- **Duplicate adjudication elements bug**: Fixed annotations saved twice in adjudication mode ([docs/bugs/EHOST-001-duplicate-adjudication-elements.md](docs/bugs/EHOST-001-duplicate-adjudication-elements.md))
 
 ## Version 1.38:
 - **Improved Configuration Management**:
