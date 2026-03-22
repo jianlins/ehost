@@ -252,9 +252,6 @@ public class ImportXML{
             Element root = doc.getRootElement(); // get element of root
 
             
-            getAdjudicationSetting( root );
-            
-            
             //##-2- get all node of annotations
             List list = root.getChildren("annotation");//get all element of
             

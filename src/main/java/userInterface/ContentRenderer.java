@@ -631,10 +631,9 @@ public class ContentRenderer {
                 Paras.__adjudicated = adjudication.data.AdjudicationDepot.isReady();
                 boolean hasPersistedAdjudication = AdjudicationLoader.isAdjudicationAvailable();
 
-                // Show resume dialog if in-memory adjudication depot exists,
-                // or if persisted adjudication data exists on disk, or if
-                // Paras was restored from saved XML (after app restart).
-                if (Paras.isReadyForAdjudication() || hasPersistedAdjudication) {
+                // Show resume dialog if persisted adjudication data exists on disk
+                // (adjudication/*.knowtator.xml files present)
+                if (hasPersistedAdjudication) {
                     Object[] options = {"Yes, please", "No, Start a new adjudication", "Cancel"};
                     int i = JOptionPane.showOptionDialog(gui,
                             "Would you like to continue your previous adjudication work?", "yes",

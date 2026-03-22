@@ -145,7 +145,6 @@ public class OutputToXML {
 
             /** add contents */
             root = addAnnotations( root, false );
-            root = adjudicationParameters( root );
 
             // **** output xml file to disk ****
             // XML storage processing: phycial writing
@@ -194,11 +193,6 @@ public class OutputToXML {
                 // (all working copies with their statuses) so adjudication
                 // state can be restored on resume.
                 root = addAdjudicatingAnnotations( root );
-                root = adjudicationParameters( root );
-            } else {
-                // saved/ folder: only regular <annotation> elements +
-                // adjudication parameters (annotator/class selections).
-                root = adjudicationParameters( root );
             }
             
 
