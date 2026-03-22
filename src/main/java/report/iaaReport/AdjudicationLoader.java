@@ -125,6 +125,73 @@ public class AdjudicationLoader {
         return xmlFiles != null && !xmlFiles.isEmpty();
     }
 
+    /**
+     * Loads adjudication working state from the adjudication/ folder.
+     * The XMLs there contain {@code <adjudicating>} elements (type=5)
+     * which are routed to AdjudicationDepot by
+     * {@link ImportAnnotation#XMLExtractor(eXMLFile)}, preserving their
+     * AdjudicationStatus. Regular {@code <annotation>} elements in the
+     * same files are routed to the regular Depot — callers should ensure
+     * those annotations already exist to avoid duplicates.
+     *
+     * @return true if any adjudication working state was loaded
+     */
+    public static boolean loadWorkingState() {
+        File adjudicationDir = getAdjudicationDir();
+        if (adjudicationDir == null || !adjudicationDir.exists() || !adjudicationDir.isDirectory()) {
+            return false;
+        }
+
+        Vector<File> xmlFiles = listKnowtatorXMLs(adjudicationDir);
+        if (xmlFiles == null || xmlFiles.isEmpty()) {
+            return false;
+        }
+
+        ImportAnnotation importer = new ImportAnnotation();
+        Depot depot = new Depot();
+
+        for (File xmlFile : xmlFiles) {
+            try {
+                eXMLFile parsedXml = ImportXML.readXMLContents(xmlFile);
+                if (parsedXml == null) {
+                    continue;
+                }
+                parsedXml = importer.assignateAnnotationIndex(parsedXml);
+
+                // Derive text filename (mirrors ImportAnnotation.getXMLTextSource)
+                String textFilename = parsedXml.filename.trim()
+                        .replaceAll("\\.knowtator\\.xml", " ").trim();
+
+                // Snapshot current Depot annotations before import so we can
+                // restore them afterwards — XMLExtractor (no-param) routes
+                // type=5 elements to AdjudicationDepot (which we need) but
+                // also adds regular annotations to Depot (which duplicates
+                // what was already loaded from saved/).
+                depot.articleInsurance(textFilename);
+                Article depotArticle = depot.getArticleByFilename(textFilename);
+                Vector<Annotation> originalAnnotations = null;
+                if (depotArticle != null) {
+                    originalAnnotations = new Vector<>(depotArticle.annotations);
+                }
+
+                importer.XMLExtractor(parsedXml);
+
+                // Restore original annotations to undo duplicate additions
+                if (depotArticle != null && originalAnnotations != null) {
+                    depotArticle.annotations = originalAnnotations;
+                }
+            } catch (Exception ex) {
+                log.LoggingToFile.log(Level.WARNING,
+                        "Failed to load adjudication state from: " + xmlFile.getName()
+                                + " - " + ex.getMessage());
+            }
+        }
+
+        log.LoggingToFile.log(Level.INFO,
+                "Loaded adjudication working state from " + xmlFiles.size() + " file(s).");
+        return true;
+    }
+
     private static File getAdjudicationDir() {
         File project = env.Parameters.WorkSpace.CurrentProject;
         if (project == null || !project.exists()) {

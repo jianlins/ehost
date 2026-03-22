@@ -239,9 +239,10 @@ public class IAA extends javax.swing.JFrame {
                 // steps to generate IAA report                
                 // most collected data will be stored into the class of 
                 // "classAgreementDepot"
+                boolean hasAdjudication = false;
                 try{
                     // Load adjudication annotations if available
-                    boolean hasAdjudication = AdjudicationLoader.load();
+                    hasAdjudication = AdjudicationLoader.load();
                     if (hasAdjudication) {
                         if (!selectedAnnotators.contains(AdjudicationLoader.ADJUDICATION_ANNOTATOR_NAME)) {
                             selectedAnnotators.add(AdjudicationLoader.ADJUDICATION_ANNOTATOR_NAME);
@@ -276,15 +277,18 @@ public class IAA extends javax.swing.JFrame {
                     // #### load and display html results on current dialog
                     addHTMLViewer();
 
-                    // Clean up adjudication annotations from Depot
-                    AdjudicationLoader.cleanup();
-
                 }catch(Exception ex){
                     log.LoggingToFile.log(Level.SEVERE,
                             "1109020257::error occurred while running analysis "
                             + "and generating IAA report!!!\nError Details: "
                             + ex.getLocalizedMessage()
                             );
+                }finally{
+                    // Always clean up injected adjudication annotations to
+                    // prevent orphaned entries from corrupting subsequent runs.
+                    if (hasAdjudication) {
+                        AdjudicationLoader.cleanup();
+                    }
                 }
 
             }

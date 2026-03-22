@@ -2,6 +2,7 @@ package userInterface;
 
 import adjudication.parameters.Paras;
 import adjudication.statusBar.DiffCounter;
+import report.iaaReport.AdjudicationLoader;
 import env.Parameters;
 import main.eHOST;
 import org.apache.commons.io.FileUtils;
@@ -628,9 +629,12 @@ public class ContentRenderer {
                 gui.repaint();
 
                 Paras.__adjudicated = adjudication.data.AdjudicationDepot.isReady();
+                boolean hasPersistedAdjudication = AdjudicationLoader.isAdjudicationAvailable();
 
-                // let user select what they want
-                if ((Paras.__adjudicated) && (Paras.isReadyForAdjudication())) {
+                // Show resume dialog if in-memory adjudication depot exists,
+                // or if persisted adjudication data exists on disk, or if
+                // Paras was restored from saved XML (after app restart).
+                if (Paras.isReadyForAdjudication() || hasPersistedAdjudication) {
                     Object[] options = {"Yes, please", "No, Start a new adjudication", "Cancel"};
                     int i = JOptionPane.showOptionDialog(gui,
                             "Would you like to continue your previous adjudication work?", "yes",

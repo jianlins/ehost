@@ -189,11 +189,15 @@ public class OutputToXML {
             /** add contents */
             root = addAnnotations( root, is_outputing_adjudicated_annotations );
             
-            // Only output adjudication parameters to the adjudication folder, not the saved folder
-            // FIX: Removed call to addAdjudicatingAnnotations() here to prevent duplicate annotations
-            // AdjudicationDepot contains copies of annotations from regular Depot, so saving both
-            // causes duplicates in knowtator.xml
-            if(!is_outputing_adjudicated_annotations){
+            if(is_outputing_adjudicated_annotations){
+                // adjudication/ folder: also write <adjudicating> elements
+                // (all working copies with their statuses) so adjudication
+                // state can be restored on resume.
+                root = addAdjudicatingAnnotations( root );
+                root = adjudicationParameters( root );
+            } else {
+                // saved/ folder: only regular <annotation> elements +
+                // adjudication parameters (annotator/class selections).
                 root = adjudicationParameters( root );
             }
             
