@@ -883,7 +883,7 @@ public class GUI extends JFrame {
         jToggleButton_DictionarySetting.setForeground(new Color(41, 41, 41));
         jToggleButton_DictionarySetting.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
                 "res/configure.png"))); // NOI18N
-        jToggleButton_DictionarySetting.setText("<html>SYSTEM<br>Setting<html> ");
+        jToggleButton_DictionarySetting.setText("<html>Dictionary<br>Setting</html> ");
         jToggleButton_DictionarySetting.setFocusable(false);
         jToggleButton_DictionarySetting.setHorizontalTextPosition(SwingConstants.RIGHT);
         jToggleButton_DictionarySetting.setMaximumSize(new Dimension(110, 100));

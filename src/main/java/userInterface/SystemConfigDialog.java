@@ -93,7 +93,7 @@ public class SystemConfigDialog extends JDialog {
         chkPinExtractor = new JCheckBox("PIN Extractor");
         chkDictionaryManager = new JCheckBox("Dictionary Manager");
         chkFileConverter = new JCheckBox("File Converter (currently unused)");
-        chkSystemSettings = new JCheckBox("System Settings");
+        chkSystemSettings = new JCheckBox("Dictionary Settings");
 
         maskPanel.add(chkResultEditor);
         maskPanel.add(chkNlpAssisted);
