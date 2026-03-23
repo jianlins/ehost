@@ -145,7 +145,6 @@ public class OutputToXML {
 
             /** add contents */
             root = addAnnotations( root, false );
-            root = adjudicationParameters( root );
 
             // **** output xml file to disk ****
             // XML storage processing: phycial writing
@@ -194,11 +193,6 @@ public class OutputToXML {
                 // (all working copies with their statuses) so adjudication
                 // state can be restored on resume.
                 root = addAdjudicatingAnnotations( root );
-                root = adjudicationParameters( root );
-            } else {
-                // saved/ folder: only regular <annotation> elements +
-                // adjudication parameters (annotator/class selections).
-                root = adjudicationParameters( root );
             }
             
 
@@ -307,6 +301,10 @@ public class OutputToXML {
      * Record annotations that are working in the mirror memory for adjudication 
      * mode, so next time we can continue previous unfinished adjudication process.
      * 
+     * NOTE: MATCHES_OK annotations are NOT saved as <adjudicating> elements
+     * because they are already saved as <annotation> elements (final results).
+     * This reduces file size and redundancy while keeping them visible in
+     * adjudication mode.
      */
     private Element addAdjudicatingAnnotations(Element root )
     {
@@ -327,6 +325,17 @@ public class OutputToXML {
 
             for(resultEditor.annotations.Annotation annotation: article.annotations)
             {                                
+                // ========== Optimization: Skip already-resolved annotations ==========
+                // MATCHES_OK and MATCHES_DLETED annotations are already resolved:
+                // - MATCHES_OK is saved as <annotation> with annotator="ADJUDICATION"
+                // - MATCHES_DLETED can be reconstructed by comparing adjudication/ and saved/ folders
+                // No need to save them as <adjudicating> elements, which reduces redundancy.
+                // They remain visible in adjudication mode but are not saved redundantly.
+                if (annotation.adjudicationStatus == resultEditor.annotations.Annotation.AdjudicationStatus.MATCHES_OK ||
+                    annotation.adjudicationStatus == resultEditor.annotations.Annotation.AdjudicationStatus.MATCHES_DLETED) {
+                    continue;  // Skip - already resolved, no need to save as adjudicating
+                }
+                // ========== End Optimization ==========
                 
                 root = buildAdjudicatingAnnotationNode(
                         // is_outputing_adjudicated_annotations,
