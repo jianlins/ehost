@@ -148,37 +148,6 @@ public class GenIndex {
             p.println("<h2 style=\"color: #2E6DA4;\">Adjudication Comparison</h2>");
             p.println("<p>Comparisons between annotator annotations and adjudicated (gold standard) annotations.</p>");
 
-            for (AnalyzedAnnotator analyzedAnnotator : analyzedAnnotators) {
-                if (analyzedAnnotator == null) continue;
-                String rawName = analyzedAnnotator.mainAnnotator.trim();
-                if (AdjudicationLoader.ADJUDICATION_ANNOTATOR_NAME.equals(rawName)) continue;
-
-                String safeName = sanitizeName(rawName);
-                p.println("<li><a href=\""
-                        + safeName
-                        + "-UNMATCHED-SUMMARY"
-                        + ".html\"><b>Annotator ( " + rawName
-                        + " ) vs Adjudication - Unmatched SUMMARY</b></a></li>");
-
-                for (String originalclassname : classes) {
-                    if (originalclassname == null || originalclassname.trim().length() < 1)
-                        continue;
-                    if (SeparatedDetailsByClass.isNoData_ToNonMatches(rawName, originalclassname.trim()))
-                        continue;
-
-                    String classname = sanitizeName(originalclassname.trim());
-                    p.println("<li><a href=\""
-                            + safeName
-                            + "-UNMATCHED-by-class-"
-                            + classname
-                            + ".html\">Annotator ( " + rawName
-                            + " ) vs Adjudication - class( " + originalclassname.trim()
-                            + " )</a></li>");
-                }
-            }
-
-            // Also link to the Adjudication unmatched page
-            p.println("<br>");
             String adjSafeName = sanitizeName(AdjudicationLoader.ADJUDICATION_ANNOTATOR_NAME);
             p.println("<li><a href=\""
                     + adjSafeName
