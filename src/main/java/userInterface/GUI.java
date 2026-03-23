@@ -896,6 +896,25 @@ public class GUI extends JFrame {
         });
         ToolBar.add(jToggleButton_DictionarySetting);
 
+        JButton jButton_SystemConfig = new JButton();
+        jButton_SystemConfig.setFont(new Font("Segoe UI", 1, 12));
+        jButton_SystemConfig.setForeground(new Color(41, 41, 41));
+        jButton_SystemConfig.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
+                "res/configure.png")));
+        jButton_SystemConfig.setText("<html>System<br>Config</html>");
+        jButton_SystemConfig.setFocusable(false);
+        jButton_SystemConfig.setHorizontalTextPosition(SwingConstants.RIGHT);
+        jButton_SystemConfig.setMaximumSize(new Dimension(110, 100));
+        jButton_SystemConfig.setMinimumSize(new Dimension(110, 0));
+        jButton_SystemConfig.setVerticalTextPosition(SwingConstants.BOTTOM);
+        jButton_SystemConfig.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                SystemConfigDialog dialog = new SystemConfigDialog(GUI.this);
+                dialog.setVisible(true);
+            }
+        });
+        ToolBar.add(jButton_SystemConfig);
+
         buttonGroup_Tabs.add(jToggle_AssignmentsScreen);
         jToggle_AssignmentsScreen.setFont(new Font("SansSerif", 1, 12)); // NOI18N
         jToggle_AssignmentsScreen.setIcon(new ImageIcon(getClass().getClassLoader().getResource(
@@ -10497,7 +10516,7 @@ public class GUI extends JFrame {
      * Enable or disable functions by showing or hiding buttons on the tools
      * bar.
      */
-    private void enableFunctionsByMask() {
+    public void enableFunctionsByMask() {
         if ((env.Parameters.Sysini.functions == null)
                 || (env.Parameters.Sysini.functions.length != 6)) {
             env.Parameters.Sysini.functions = new char[6];
