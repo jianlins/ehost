@@ -644,13 +644,28 @@ public class ContentRenderer {
                     if (i == 0) { // yes, continue latest adjudication work
                         gui.mode_continuePreviousAdjudicationWork();
                         return;
-                    } else if (i == 2) { // cancel
-                        // ---- 2.2 ----
+                    } else if (i == 1) { // start a new adjudication
+                        // ---- 2.2 ---- warn that previous adjudication will be erased
+                        int confirm = JOptionPane.showConfirmDialog(gui,
+                                "<html><b>Warning:</b> Starting a new adjudication will erase all "
+                                        + "previously adjudicated annotations.<br><br>"
+                                        + "Annotators\u2019 original annotations will <b>not</b> be affected."
+                                        + "<br><br>Do you want to proceed?</html>",
+                                "Confirm New Adjudication",
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.WARNING_MESSAGE);
+                        if (confirm != JOptionPane.YES_OPTION) {
+                            gui.mode_enterAnnotationMode(true);
+                            break;
+                        }
+                        // Clear in-memory adjudication data
+                        adjudication.data.AdjudicationDepot.clear();
+                        // Delete persisted adjudication files
+                        clearAdjudicationFiles();
+                    } else { // cancel
                         gui.mode_enterAnnotationMode(true);
-                    }
-
-                    if (i != 1)
                         break;
+                    }
                 }
 
                 // ---- 2.3 ----
@@ -683,6 +698,30 @@ public class ContentRenderer {
                 // buttons while out of
                 // consense mode
                 break;
+        }
+    }
+
+    /**
+     * Deletes all .knowtator.xml files from the adjudication/ folder
+     * of the current project so a fresh adjudication can begin.
+     */
+    private void clearAdjudicationFiles() {
+        File project = env.Parameters.WorkSpace.CurrentProject;
+        if (project == null || !project.exists()) {
+            return;
+        }
+        File adjDir = new File(project.getAbsolutePath() + File.separatorChar + "adjudication");
+        if (!adjDir.exists() || !adjDir.isDirectory()) {
+            return;
+        }
+        File[] files = adjDir.listFiles();
+        if (files == null) {
+            return;
+        }
+        for (File f : files) {
+            if (f.isFile() && f.getName().toLowerCase().endsWith(".knowtator.xml")) {
+                f.delete();
+            }
         }
     }
 
