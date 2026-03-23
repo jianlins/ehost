@@ -1,3 +1,8 @@
+## Version 1.39b5 (2026-03-23):
+
+### Enhanced
+- **Adjudication Restart Warning**: Added confirmation warning dialog when starting a new adjudication to prevent accidental loss of previous adjudication work ([docs/enhancements/009-adjudication-restart-warning.md](docs/enhancements/009-adjudication-restart-warning.md))
+
 ## Version 1.39b4 (2026-03-22):
 
 ### Enhanced
