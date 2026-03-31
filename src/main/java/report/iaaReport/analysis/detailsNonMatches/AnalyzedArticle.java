@@ -104,15 +104,27 @@ public class AnalyzedArticle {
             if (mainAnns == null)
                 continue;
 
+            // First pass: check if annotation already exists in this row
+            boolean alreadyExists = false;
+            boolean spanMatches = false;
             for (Annotation ann : mainAnns) {
-                if (annotation.uniqueIndex == ann.uniqueIndex)
-                    return; // already exists
-
-                if (annotation.spanset.equals(ann.spanset)
-                        || annotation.spanset.isOverlapping(ann.spanset)) {
-                    analyzedAnnotation.addmain(annotation);
-                    return;
+                if (annotation.uniqueIndex == ann.uniqueIndex) {
+                    alreadyExists = true;
+                    break;
                 }
+                if (!spanMatches
+                        && (annotation.spanset.equals(ann.spanset)
+                            || annotation.spanset.isOverlapping(ann.spanset))) {
+                    spanMatches = true;
+                }
+            }
+
+            if (alreadyExists)
+                return;
+
+            if (spanMatches) {
+                analyzedAnnotation.addmain(annotation);
+                return;
             }
         }
     }

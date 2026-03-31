@@ -129,6 +129,40 @@ public class OverlappingAnnotationsTest {
     }
 
     @Test
+    @DisplayName("addToExistingRow should not duplicate when row has multiple overlapping entries")
+    public void testAddToExistingRow_noDuplicateInMultiEntryRow() throws Exception {
+        String[] annotators = {"a1", "a2", "a3"};
+
+        // CONCEPT at (332,386) and CON2 at (345,362) — overlapping spans
+        Annotation concept = createAnnotation("which showed spread", "a1", "CONCEPT", 332, 386, 10);
+        Annotation con2 = createAnnotation("spread of dye", "a1", "CON2", 345, 362, 11);
+
+        AnalyzedArticle article = new AnalyzedArticle("doc1.txt");
+        article.initRow(concept, annotators);
+        article.addToExistingRow(con2);
+
+        // Row should have [CONCEPT, CON2]
+        assertEquals(1, article.rows.size());
+        assertEquals(2, article.rows.get(0).mainAnnotations.size(),
+                "Row should have 2 entries after first addToExistingRow");
+
+        // Simulate second comparison round: try to add both again
+        article.addToExistingRow(concept);
+        article.addToExistingRow(con2);
+
+        // Should still have exactly 2 (no duplicates)
+        assertEquals(2, article.rows.get(0).mainAnnotations.size(),
+                "Should not duplicate: still 2 after re-adding both annotations");
+
+        // Simulate third comparison round
+        article.addToExistingRow(concept);
+        article.addToExistingRow(con2);
+
+        assertEquals(2, article.rows.get(0).mainAnnotations.size(),
+                "Should not duplicate: still 2 after third round");
+    }
+
+    @Test
     @DisplayName("addToExistingRow should not add annotation with different span")
     public void testAddToExistingRow_differentSpan() throws Exception {
         String[] annotators = {"a1", "a2"};
