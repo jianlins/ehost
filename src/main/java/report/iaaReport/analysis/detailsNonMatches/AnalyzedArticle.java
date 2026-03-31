@@ -61,6 +61,9 @@ public class AnalyzedArticle {
 
                     if( annotation.spanset.equals( ann.spanset ) )                         
                         return true;
+
+                    if( annotation.spanset.isOverlapping( ann.spanset ) )
+                        return true;
                 }
 
             }
@@ -105,7 +108,8 @@ public class AnalyzedArticle {
                 if (annotation.uniqueIndex == ann.uniqueIndex)
                     return; // already exists
 
-                if (annotation.spanset.equals(ann.spanset)) {
+                if (annotation.spanset.equals(ann.spanset)
+                        || annotation.spanset.isOverlapping(ann.spanset)) {
                     analyzedAnnotation.addmain(annotation);
                     return;
                 }
