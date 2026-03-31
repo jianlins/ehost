@@ -478,7 +478,18 @@ public class GenHtmlForNonMatches2
                             AnalyzedAnnotationDifference diff = getOtherAnnotation(i, diffs);
                             if(diff!=null)
                             {
-                                if(diff.diffInClass){
+                                // Re-compute class difference against the actual main annotation
+                                // at this row index, not the pre-stored diffInClass which was
+                                // computed against the row head (index 0).
+                                boolean actualClassDiff;
+                                if (mainAnnotation != null && mainAnnotation.annotationclass != null
+                                        && diff.annotation != null && diff.annotation.annotationclass != null) {
+                                    actualClassDiff = !mainAnnotation.annotationclass.trim().equals(
+                                            diff.annotation.annotationclass.trim());
+                                } else {
+                                    actualClassDiff = diff.diffInClass;
+                                }
+                                if(actualClassDiff){
                                     Onerecord.add("<td BGCOLOR=\"#FFD0D0\"> "+diff.annotation.annotationclass + "</td>");
                                     foundDifference = true;
                                 }else

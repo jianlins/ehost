@@ -84,4 +84,32 @@ public class AnalyzedArticle {
                     + "head. \nError Details:: "+ ex.getMessage());
         }
     }
+
+    /**Add an annotation to an existing row whose span matches.
+     * This handles the case where the same annotator has multiple annotations
+     * at the same span with different classes (e.g., "CONCEPT" and "CON2").
+     */
+    void addToExistingRow(Annotation annotation) throws Exception {
+        if (annotation == null)
+            throw new Exception("1109020304::cannot add a null annotation to an existing row.");
+
+        for (AnalyzedAnnotation analyzedAnnotation : rows) {
+            if (analyzedAnnotation == null)
+                continue;
+
+            Vector<Annotation> mainAnns = analyzedAnnotation.mainAnnotations;
+            if (mainAnns == null)
+                continue;
+
+            for (Annotation ann : mainAnns) {
+                if (annotation.uniqueIndex == ann.uniqueIndex)
+                    return; // already exists
+
+                if (annotation.spanset.equals(ann.spanset)) {
+                    analyzedAnnotation.addmain(annotation);
+                    return;
+                }
+            }
+        }
+    }
 }

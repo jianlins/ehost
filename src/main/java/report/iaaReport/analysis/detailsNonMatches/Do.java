@@ -371,19 +371,24 @@ public class Do {
 
                     if(Comparator.checkAnnotator(annotation, annotator2))
                     {
+                        // Try to find the best matching main annotation (prefer same class)
+                        Annotation bestMainMatch = findBestMainMatch(analyzedAnnotation, annotation, article.filename);
+                        if (bestMainMatch == null)
+                            bestMainMatch = annotation_rowhead;
+
                         boolean sameSpan = false;
                         boolean sameClass = false;
                         boolean sameNormalRelationship = false;
                         boolean sameComplexRelationship = false;
                         boolean sameComment = false;
                         
-                        boolean overlapped = Comparator.isSpanOverLap(annotation_rowhead, annotation);
+                        boolean overlapped = Comparator.isSpanOverLap(bestMainMatch, annotation);
 
-                        sameSpan = Comparator.equalSpans(annotation_rowhead, annotation);
-                        sameClass = Comparator.equalClasses(annotation_rowhead, annotation);
-                        sameNormalRelationship = Comparator.equalAttributes(annotation_rowhead, annotation);
-                        sameComplexRelationship = Comparator.equalRelationships(annotation_rowhead, annotation, article.filename, IAA.CHECK_OVERLAPPED_SPANS);
-                        sameComment = Comparator.equalComments(annotation_rowhead, annotation);
+                        sameSpan = Comparator.equalSpans(bestMainMatch, annotation);
+                        sameClass = Comparator.equalClasses(bestMainMatch, annotation);
+                        sameNormalRelationship = Comparator.equalAttributes(bestMainMatch, annotation);
+                        sameComplexRelationship = Comparator.equalRelationships(bestMainMatch, annotation, article.filename, IAA.CHECK_OVERLAPPED_SPANS);
+                        sameComment = Comparator.equalComments(bestMainMatch, annotation);
 
                         if( IAA.CHECK_OVERLAPPED_SPANS ){ // if IAA wants overlapped annotations
                             
@@ -394,13 +399,12 @@ public class Do {
                         }
                         // consider overlapped annotations are different
                         else{
-                            // 如果不重叠，就不是same span
                             if( !sameSpan )
                                 continue;
                             
                             // not same span if they are overlapping
                             if( overlapped )
-                                continue; // there are different while spans are overlapped while IAA.CHECK_OVERLAPPED_SPANS=true;
+                                continue;
                         }
                         
                         boolean same = true;
@@ -500,21 +504,24 @@ public class Do {
 
                     if(Comparator.checkAnnotator(annotation, annotator2))
                     {
+                        // Find the best matching main annotation for comparison
+                        Annotation bestMainMatch = findBestMainMatch(analyzedAnnotation, annotation, article.filename);
+                        if (bestMainMatch == null)
+                            bestMainMatch = annotation_rowhead;
+
                         boolean sameSpan = false;
                         boolean sameClass = false;
                         boolean sameNormalRelationship = false;
                         boolean sameComplexRelationship = false;
                         boolean overlap = false;
                         boolean sameComment = false;
-                        
-                        //boolean overlapped = Comparator.isSpanOverLap(annotation_rowhead, annotation);
 
-                        sameSpan = Comparator.equalSpans(annotation_rowhead, annotation);
-                        sameClass = Comparator.equalClasses(annotation_rowhead, annotation);
-                        sameNormalRelationship = Comparator.equalAttributes(annotation_rowhead, annotation);
-                        sameComplexRelationship = Comparator.equalRelationships(annotation_rowhead, annotation, article.filename, IAA.CHECK_OVERLAPPED_SPANS);
-                        sameComment = Comparator.equalComments(annotation_rowhead, annotation);
-                        overlap = Comparator.isSpanOverLap(annotation_rowhead, annotation);
+                        sameSpan = Comparator.equalSpans(bestMainMatch, annotation);
+                        sameClass = Comparator.equalClasses(bestMainMatch, annotation);
+                        sameNormalRelationship = Comparator.equalAttributes(bestMainMatch, annotation);
+                        sameComplexRelationship = Comparator.equalRelationships(bestMainMatch, annotation, article.filename, IAA.CHECK_OVERLAPPED_SPANS);
+                        sameComment = Comparator.equalComments(bestMainMatch, annotation);
+                        overlap = Comparator.isSpanOverLap(bestMainMatch, annotation);
 
                         
                         
@@ -760,6 +767,47 @@ public class Do {
         }
     }
 
+    /**
+     * Find the best matching main annotation for a given other annotation.
+     * Prefers an exact class match; falls back to first span-matching annotation.
+     * This ensures that when multiple main annotations exist at the same span
+     * (e.g., CONCEPT and CON2), the other annotator's CON2 is compared against
+     * the main's CON2 rather than the main's CONCEPT.
+     */
+    private Annotation findBestMainMatch(AnalyzedAnnotation analyzedAnnotation,
+                                          Annotation otherAnnotation,
+                                          String filename) {
+        if (analyzedAnnotation == null || analyzedAnnotation.mainAnnotations == null)
+            return null;
+
+        Annotation firstSpanMatch = null;
+        for (Annotation mainAnn : analyzedAnnotation.mainAnnotations) {
+            if (mainAnn == null) continue;
+            try {
+                boolean spanMatch;
+                if (IAA.CHECK_OVERLAPPED_SPANS) {
+                    spanMatch = Comparator.equalSpans(mainAnn, otherAnnotation)
+                            || Comparator.isSpanOverLap(mainAnn, otherAnnotation);
+                } else {
+                    spanMatch = Comparator.equalSpans(mainAnn, otherAnnotation);
+                }
+                if (!spanMatch) continue;
+
+                if (firstSpanMatch == null) {
+                    firstSpanMatch = mainAnn;
+                }
+
+                // Prefer exact class match
+                if (Comparator.equalClasses(mainAnn, otherAnnotation)) {
+                    return mainAnn;
+                }
+            } catch (Exception ex) {
+                // Fall through to try next main annotation
+            }
+        }
+        return firstSpanMatch;
+    }
+
     static int iii = 0;
 
     private AnalyzedArticle initMainAnnotator(AnalyzedAnnotator _analyzedAnnotator, String annotator, Article article, String[] annotators) throws Exception {
@@ -814,10 +862,10 @@ public class Do {
                 if(analyzedArticle.isInited(annotation)==false)
                 {
                     analyzedArticle.initRow(annotation, annotators);
-                    //System.out.println("INITing - " + annotation.annotationText + " - [ " + annotation.spanstart + ", " + annotation.spanstart + "]: "+annotation.annotator);
-                }//else{
-                //   System.out.println("inited - " + annotation.annotationText + " - [ " + annotation.spanstart + ", " + annotation.spanstart + "]: "+annotation.annotator + "---------");
-                //}
+                }else{
+                    // Add to existing row when same span exists (e.g., CONCEPT and CON2 at same span)
+                    analyzedArticle.addToExistingRow(annotation);
+                }
             }
 
             //for(AnalyzedAnnotation row:analyzedArticle.rows){
