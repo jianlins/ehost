@@ -291,6 +291,7 @@ public class GenHtmlForNonMatches2
 
                     
                     //#### print the rest rows
+                    AnalyzedAnnotationDifference[][] pairedDiffs = buildPairedDiffs(analyzedAnnotation, maxsize);
                     for(int i=0; i<maxsize; i++)
                     {                        
 
@@ -329,8 +330,7 @@ public class GenHtmlForNonMatches2
                         int size_other = analyzedAnnotation.othersAnnotations.length;
                         for(int j=0; j<size_other; j++)
                         {
-                            Vector<AnalyzedAnnotationDifference> diffs = analyzedAnnotation.othersAnnotations[j].annotationsDiffs;
-                            AnalyzedAnnotationDifference diff = getOtherAnnotation(i, diffs);
+                            AnalyzedAnnotationDifference diff = pairedDiffs[j][i];
                             
                             if (diff != null) {
 
@@ -410,8 +410,7 @@ public class GenHtmlForNonMatches2
 
                         for(int j=0; j<size_other; j++)
                         {
-                            Vector<AnalyzedAnnotationDifference> diffs = analyzedAnnotation.othersAnnotations[j].annotationsDiffs;
-                            AnalyzedAnnotationDifference diff = getOtherAnnotation(i, diffs);
+                            AnalyzedAnnotationDifference diff = pairedDiffs[j][i];
                             if(diff!=null){
                                 // if main annotation is null, and the diff annotation isn't null
                                 // they are different
@@ -474,8 +473,7 @@ public class GenHtmlForNonMatches2
 
                         for(int j=0; j<size_other; j++)
                         {
-                            Vector<AnalyzedAnnotationDifference> diffs = analyzedAnnotation.othersAnnotations[j].annotationsDiffs;
-                            AnalyzedAnnotationDifference diff = getOtherAnnotation(i, diffs);
+                            AnalyzedAnnotationDifference diff = pairedDiffs[j][i];
                             if(diff!=null)
                             {
                                 // Re-compute class difference against the actual main annotation
@@ -520,8 +518,7 @@ public class GenHtmlForNonMatches2
 
                             for(int j=0; j<size_other; j++)
                             {
-                                Vector<AnalyzedAnnotationDifference> diffs = analyzedAnnotation.othersAnnotations[j].annotationsDiffs;
-                                AnalyzedAnnotationDifference diff = getOtherAnnotation(i, diffs);
+                                AnalyzedAnnotationDifference diff = pairedDiffs[j][i];
                                 if(diff!=null)
                                 {
                                     String complexstr = diff.annotation.getComplexRelationshipString();
@@ -562,8 +559,7 @@ public class GenHtmlForNonMatches2
                                 }
                             }
                             for(int j = 0; j < size_other; j++) {
-                                Vector<AnalyzedAnnotationDifference> diffs = analyzedAnnotation.othersAnnotations[j].annotationsDiffs;
-                                AnalyzedAnnotationDifference diff = getOtherAnnotation(i, diffs);
+                                AnalyzedAnnotationDifference diff = pairedDiffs[j][i];
                                 if(diff != null && diff.annotation != null && diff.annotation.attributes != null) {
                                     for(AnnotationAttributeDef attr : diff.annotation.attributes) {
                                         if(attr != null && attr.name != null) {
@@ -600,7 +596,7 @@ public class GenHtmlForNonMatches2
                                             }
                                         }
                                     } else {
-                                        AnalyzedAnnotationDifference otherDiff = getOtherAnnotation(i, analyzedAnnotation.othersAnnotations[colIdx - 1].annotationsDiffs);
+                                        AnalyzedAnnotationDifference otherDiff = pairedDiffs[colIdx - 1][i];
                                         if(otherDiff != null && otherDiff.annotation != null && otherDiff.annotation.attributes != null) {
                                             for(AnnotationAttributeDef oa : otherDiff.annotation.attributes) {
                                                 if(oa != null && oa.name != null && oa.name.equals(uniqueAttr.name)) {
@@ -673,8 +669,7 @@ public class GenHtmlForNonMatches2
 
                             for(int j=0; j<size_other; j++)
                             {
-                                Vector<AnalyzedAnnotationDifference> diffs = analyzedAnnotation.othersAnnotations[j].annotationsDiffs;
-                                AnalyzedAnnotationDifference diff = getOtherAnnotation(i, diffs);
+                                AnalyzedAnnotationDifference diff = pairedDiffs[j][i];
                                 if(diff!=null)
                                 {
                                     String commentStr = diff.annotation.comments;
@@ -808,6 +803,66 @@ public class GenHtmlForNonMatches2
             log.LoggingToFile.log(Level.SEVERE, "1109020554::fail to get other annotation to build detail matched/nonmatched annotations.");
             return null;
         }
+    }
+
+    /**
+     * Build a paired mapping of other annotators' annotations to main annotations.
+     * For each other annotator, creates an array where index i corresponds to the
+     * best-matching diff for mainAnnotations[i] (preferring same class).
+     * 
+     * Remaining unmatched diffs are placed in subsequent indices.
+     * This fixes the ordering mismatch where diffs were added in article order
+     * instead of mainAnnotation order.
+     *
+     * @return pairedDiffs[otherAnnotatorIndex][rowIndex]
+     */
+    private AnalyzedAnnotationDifference[][] buildPairedDiffs(AnalyzedAnnotation analyzedAnnotation, int maxsize) {
+        int numOthers = analyzedAnnotation.othersAnnotations.length;
+        AnalyzedAnnotationDifference[][] paired = new AnalyzedAnnotationDifference[numOthers][maxsize];
+
+        for (int j = 0; j < numOthers; j++) {
+            Vector<AnalyzedAnnotationDifference> diffs = analyzedAnnotation.othersAnnotations[j].annotationsDiffs;
+            boolean[] usedDiff = new boolean[diffs.size()];
+            boolean[] usedSlot = new boolean[maxsize];
+
+            // First pass: match by class to mainAnnotations
+            int mainSize = analyzedAnnotation.mainAnnotations.size();
+            for (int i = 0; i < mainSize && i < maxsize; i++) {
+                Annotation mainAnn = analyzedAnnotation.mainAnnotations.get(i);
+                if (mainAnn == null || mainAnn.annotationclass == null) continue;
+
+                for (int d = 0; d < diffs.size(); d++) {
+                    if (usedDiff[d]) continue;
+                    AnalyzedAnnotationDifference diff = diffs.get(d);
+                    if (diff == null || diff.annotation == null || diff.annotation.annotationclass == null) continue;
+
+                    if (mainAnn.annotationclass.trim().equals(diff.annotation.annotationclass.trim())) {
+                        paired[j][i] = diff;
+                        usedDiff[d] = true;
+                        usedSlot[i] = true;
+                        break;
+                    }
+                }
+            }
+
+            // Second pass: fill unmatched diffs into available slots
+            int nextSlot = 0;
+            for (int d = 0; d < diffs.size(); d++) {
+                if (usedDiff[d]) continue;
+
+                // Find next available slot
+                while (nextSlot < maxsize && usedSlot[nextSlot]) {
+                    nextSlot++;
+                }
+                if (nextSlot < maxsize) {
+                    paired[j][nextSlot] = diffs.get(d);
+                    usedSlot[nextSlot] = true;
+                    nextSlot++;
+                }
+            }
+        }
+
+        return paired;
     }
 
 

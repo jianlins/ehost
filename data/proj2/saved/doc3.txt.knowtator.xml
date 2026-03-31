@@ -10,6 +10,36 @@
     <classMention id="EHOST_Instance_8">
         <mentionClass id="CONCEPT">Eltroxin</mentionClass>
     </classMention>
+    <annotation>
+        <mention id="EHOST_Instance_20" />
+        <annotator id="eHOST_2010">sjl</annotator>
+        <span start="746" end="754" />
+        <spannedText>Eltroxin</spannedText>
+        <creationDate>Sat Apr 19 00:02:18 MDT 2025</creationDate>
+    </annotation>
+    <classMention id="EHOST_Instance_20">
+        <mentionClass id="CON2">Eltroxin</mentionClass>
+    </classMention>
+    <annotation>
+        <mention id="EHOST_Instance_21" />
+        <annotator id="eHOST_2010">ADJ</annotator>
+        <span start="746" end="754" />
+        <spannedText>Eltroxin</spannedText>
+        <creationDate>Sat Apr 19 00:02:19 MDT 2025</creationDate>
+    </annotation>
+    <classMention id="EHOST_Instance_21">
+        <mentionClass id="CONCEPT">Eltroxin</mentionClass>
+    </classMention>
+    <annotation>
+        <mention id="EHOST_Instance_22" />
+        <annotator id="eHOST_2010">ADJ</annotator>
+        <span start="746" end="754" />
+        <spannedText>Eltroxin</spannedText>
+        <creationDate>Sat Apr 19 00:02:20 MDT 2025</creationDate>
+    </annotation>
+    <classMention id="EHOST_Instance_22">
+        <mentionClass id="CON2">Eltroxin</mentionClass>
+    </classMention>
     <eHOST_Adjudication_Status version="1.0">
         <Adjudication_Selected_Annotators version="1.0" />
         <Adjudication_Selected_Classes version="1.0" />
