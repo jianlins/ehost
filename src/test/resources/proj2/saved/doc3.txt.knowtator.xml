@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<annotations textSource="doc3.txt">
+    <annotation>
+        <mention id="EHOST_Instance_91" />
+        <annotator id="eHOST_2010">a1</annotator>
+        <span start="746" end="754" />
+        <spannedText>Eltroxin</spannedText>
+        <creationDate>Sat Apr 19 00:02:17 MDT 2025</creationDate>
+    </annotation>
+    <classMention id="EHOST_Instance_91">
+        <mentionClass id="CONCEPT">Eltroxin</mentionClass>
+    </classMention>
+    <annotation>
+        <mention id="EHOST_Instance_92" />
+        <annotator id="eHOST_2010">a1</annotator>
+        <span start="746" end="754" />
+        <spannedText>Eltroxin</spannedText>
+        <creationDate>Sat Apr 19 00:02:18 MDT 2025</creationDate>
+    </annotation>
+    <classMention id="EHOST_Instance_92">
+        <mentionClass id="CON2">Eltroxin</mentionClass>
+    </classMention>
+    <annotation>
+        <mention id="EHOST_Instance_93" />
+        <annotator id="eHOST_2010">a2</annotator>
+        <span start="746" end="754" />
+        <spannedText>Eltroxin</spannedText>
+        <creationDate>Sat Apr 19 00:02:19 MDT 2025</creationDate>
+    </annotation>
+    <classMention id="EHOST_Instance_93">
+        <mentionClass id="CONCEPT">Eltroxin</mentionClass>
+    </classMention>
+    <annotation>
+        <mention id="EHOST_Instance_94" />
+        <annotator id="eHOST_2010">a2</annotator>
+        <span start="746" end="754" />
+        <spannedText>Eltroxin</spannedText>
+        <creationDate>Sat Apr 19 00:02:20 MDT 2025</creationDate>
+    </annotation>
+    <classMention id="EHOST_Instance_94">
+        <mentionClass id="CON2">Eltroxin</mentionClass>
+    </classMention>
+</annotations>
+

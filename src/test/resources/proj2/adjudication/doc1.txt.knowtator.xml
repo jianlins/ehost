@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<annotations textSource="doc1.txt">
+    <annotation>
+        <mention id="EHOST_Instance_80" />
+        <annotator id="01">ADJUDICATION</annotator>
+        <span start="574" end="594" />
+        <spannedText>dramatic improvement</spannedText>
+        <annotationComment>eeedd</annotationComment>
+        <creationDate>Wed Apr 01 15:34:00 MDT 2026</creationDate>
+    </annotation>
+    <classMention id="EHOST_Instance_80">
+        <mentionClass id="CONCEPT">dramatic improvement</mentionClass>
+    </classMention>
+    <annotation>
+        <mention id="EHOST_Instance_81" />
+        <annotator id="eHOST_2010">ADJUDICATION</annotator>
+        <span start="345" end="354" />
+        <spannedText>spread of</spannedText>
+        <creationDate>Wed Apr 01 14:28:31 MDT 2026</creationDate>
+    </annotation>
+    <stringSlotMention id="EHOST_Instance_83">
+        <mentionSlot id="att1" />
+        <stringSlotMentionValue value="2" />
+    </stringSlotMention>
+    <stringSlotMention id="EHOST_Instance_84">
+        <mentionSlot id="att2" />
+        <stringSlotMentionValue value="a" />
+    </stringSlotMention>
+    <classMention id="EHOST_Instance_81">
+        <hasSlotMention id="EHOST_Instance_83" />
+        <hasSlotMention id="EHOST_Instance_84" />
+        <mentionClass id="CON2">spread of</mentionClass>
+    </classMention>
+    <annotation>
+        <mention id="EHOST_Instance_82" />
+        <annotator id="eHOST_2010">ADJUDICATION</annotator>
+        <span start="332" end="386" />
+        <spannedText>which showed spread of the dye into the epidural space</spannedText>
+        <creationDate>Wed Apr 01 15:34:30 MDT 2026</creationDate>
+    </annotation>
+    <classMention id="EHOST_Instance_82">
+        <mentionClass id="CONCEPT">which showed spread of the dye into the epidural space</mentionClass>
+    </classMention>
+    <adjudicating>
+        <mention id="EHOST_Instance_87" />
+        <annotator id="eHOST_2010">ADJUDICATION</annotator>
+        <span start="332" end="386" />
+        <spannedText>which showed spread of the dye into the epidural space</spannedText>
+        <creationDate>Wed Apr 01 15:34:30 MDT 2026</creationDate>
+        <processed>true</processed>
+        <AdjudicationStatus>NON_MATCHES</AdjudicationStatus>
+    </adjudicating>
+    <classMention id="EHOST_Instance_87">
+        <mentionClass id="CONCEPT">which showed spread of the dye into the epidural space</mentionClass>
+    </classMention>
+</annotations>
+
