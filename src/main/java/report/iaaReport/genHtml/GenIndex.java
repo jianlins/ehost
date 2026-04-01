@@ -80,6 +80,9 @@ public class GenIndex {
         for(AnalyzedAnnotator analyzedAnnotator: analyzedAnnotators){
             if(analyzedAnnotator==null)
                 continue;
+            // Skip the Adjudication annotator here; it gets its own dedicated section below
+            if (AdjudicationLoader.ADJUDICATION_ANNOTATOR_NAME.equals(analyzedAnnotator.mainAnnotator.trim()))
+                continue;
             String annotatorName = analyzedAnnotator.mainAnnotator.trim();
             annotatorName = annotatorName.trim();
             annotatorName = annotatorName.replaceAll(" ", "_");

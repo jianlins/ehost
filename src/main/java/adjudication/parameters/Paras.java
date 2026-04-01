@@ -61,8 +61,8 @@ public class Paras {
      * static boolean variables that used as a flag to indicate what kind of
      * annotation is matches.
      */
-    public static boolean CHECK_OVERLAPPED_SPANS, CHECK_ATTRIBUTES,
-            CHECK_RELATIONSHIP, CHECK_CLASS, CHECK_COMMENT;
+    public static boolean CHECK_OVERLAPPED_SPANS = true, CHECK_ATTRIBUTES = true,
+            CHECK_RELATIONSHIP, CHECK_CLASS = true, CHECK_COMMENT;
 
     /**
      * remove all recorded names of classes from list
@@ -87,10 +87,10 @@ public class Paras {
      * which fields of an annotation need to be compared.
      */
     public static void removeParas(){
-        CHECK_OVERLAPPED_SPANS = false;
-        CHECK_ATTRIBUTES = false;
-        CHECK_RELATIONSHIP = false; 
-        CHECK_CLASS = false; 
+        CHECK_OVERLAPPED_SPANS = true;
+        CHECK_ATTRIBUTES = true;
+        CHECK_RELATIONSHIP = false;
+        CHECK_CLASS = true;
         CHECK_COMMENT = false;
     }
     /**Set the parameters based on the given parameter name and value. There are 

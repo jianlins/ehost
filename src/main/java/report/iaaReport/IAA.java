@@ -25,9 +25,9 @@ import report.iaaReport.genHtml.GenHtml;
  */
 public class IAA extends javax.swing.JFrame {
 
-    public static boolean CHECK_ATTRIBUTES = false;
+    public static boolean CHECK_ATTRIBUTES = true;
     public static boolean CHECK_RELATIONSHIP = false;
-    public static boolean CHECK_OVERLAPPED_SPANS = false;
+    public static boolean CHECK_OVERLAPPED_SPANS = true;
     public static boolean CHECK_CLASS = true;
     public static boolean CHECK_COMMENT = false;
 

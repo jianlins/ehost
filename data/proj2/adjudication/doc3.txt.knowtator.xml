@@ -1,33 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <annotations textSource="doc3.txt">
     <annotation>
-        <mention id="EHOST_Instance_235" />
+        <mention id="EHOST_Instance_95" />
         <annotator id="eHOST_2010">ADJUDICATION</annotator>
-        <span start="746" end="754" />
-        <spannedText>Eltroxin</spannedText>
-        <creationDate>Sat Apr 19 00:02:18 MDT 2025</creationDate>
+        <span start="746" end="760" />
+        <spannedText>Eltroxin which</spannedText>
+        <creationDate>Wed Apr 01 15:33:45 MDT 2026</creationDate>
     </annotation>
-    <stringSlotMention id="EHOST_Instance_238">
+    <stringSlotMention id="EHOST_Instance_98">
         <mentionSlot id="att1" />
         <stringSlotMentionValue value="3" />
     </stringSlotMention>
-    <stringSlotMention id="EHOST_Instance_239">
+    <stringSlotMention id="EHOST_Instance_99">
         <mentionSlot id="att2" />
-        <stringSlotMentionValue value="c" />
+        <stringSlotMentionValue value="a" />
     </stringSlotMention>
-    <classMention id="EHOST_Instance_235">
-        <hasSlotMention id="EHOST_Instance_238" />
-        <hasSlotMention id="EHOST_Instance_239" />
-        <mentionClass id="CON2">Eltroxin</mentionClass>
+    <classMention id="EHOST_Instance_95">
+        <hasSlotMention id="EHOST_Instance_98" />
+        <hasSlotMention id="EHOST_Instance_99" />
+        <mentionClass id="CON2">Eltroxin which</mentionClass>
     </classMention>
     <annotation>
-        <mention id="EHOST_Instance_236" />
+        <mention id="EHOST_Instance_96" />
         <annotator id="eHOST_2010">ADJUDICATION</annotator>
         <span start="746" end="754" />
         <spannedText>Eltroxin</spannedText>
         <creationDate>Sat Apr 19 00:02:19 MDT 2025</creationDate>
     </annotation>
-    <classMention id="EHOST_Instance_236">
+    <classMention id="EHOST_Instance_96">
         <mentionClass id="CONCEPT">Eltroxin</mentionClass>
     </classMention>
 </annotations>
