@@ -28,9 +28,22 @@
         <classDef>
             <Name>CON2</Name>
             <RGB_R>128</RGB_R>
-            <RGB_G>0</RGB_G>
-            <RGB_B>192</RGB_B>
+            <RGB_G>255</RGB_G>
+            <RGB_B>0</RGB_B>
             <InHerit_Public_Attributes>true</InHerit_Public_Attributes>
+            <attributeDef>
+                <Name>Attr1</Name>
+                <isCode>false</isCode>
+                <attributeDefOptionDef>1</attributeDefOptionDef>
+                <attributeDefOptionDef>2</attributeDefOptionDef>
+                <attributeDefOptionDef>3</attributeDefOptionDef>
+            </attributeDef>
+            <attributeDef>
+                <Name>Attr2</Name>
+                <isCode>false</isCode>
+                <attributeDefOptionDef>a</attributeDefOptionDef>
+                <attributeDefOptionDef>b</attributeDefOptionDef>
+            </attributeDef>
             <Source>eHOST</Source>
         </classDef>
     </classDefs>

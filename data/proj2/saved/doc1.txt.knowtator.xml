@@ -1,117 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <annotations textSource="doc1.txt">
     <annotation>
-        <mention id="EHOST_Instance_1" />
-        <annotator id="01">test1</annotator>
+        <mention id="EHOST_Instance_163" />
+        <annotator id="01">a1</annotator>
         <span start="578" end="587" />
         <spannedText>attention</spannedText>
         <annotationComment>eeedd</annotationComment>
         <creationDate>Thu Jan 18 19:04:39 MST 2024</creationDate>
     </annotation>
-    <classMention id="EHOST_Instance_1">
+    <classMention id="EHOST_Instance_163">
         <mentionClass id="CONCEPT">attention</mentionClass>
     </classMention>
     <annotation>
-        <mention id="EHOST_Instance_2" />
-        <annotator id="eHOST_2010">test1</annotator>
+        <mention id="EHOST_Instance_164" />
+        <annotator id="01">a1</annotator>
         <span start="495" end="499" />
         <spannedText>skin</spannedText>
         <creationDate>Tue Apr 15 22:38:19 MDT 2025</creationDate>
     </annotation>
-    <classMention id="EHOST_Instance_2">
+    <classMention id="EHOST_Instance_164">
         <mentionClass id="CONCEPT">skin</mentionClass>
     </classMention>
     <annotation>
-        <mention id="EHOST_Instance_3" />
-        <annotator id="eHOST_2010">sjl</annotator>
+        <mention id="EHOST_Instance_165" />
+        <annotator id="01">a1</annotator>
         <span start="578" end="587" />
         <spannedText>attention</spannedText>
         <annotationComment>eeedd</annotationComment>
         <creationDate>Thu Jan 18 19:04:39 MST 2024</creationDate>
     </annotation>
-    <classMention id="EHOST_Instance_3">
+    <classMention id="EHOST_Instance_165">
         <mentionClass id="CONCEPT">attention</mentionClass>
     </classMention>
     <annotation>
-        <mention id="EHOST_Instance_4" />
-        <annotator id="eHOST_2010">ADJ</annotator>
-        <span start="354" end="364" />
-        <spannedText>undermined</spannedText>
-        <creationDate>Tue Apr 15 22:36:58 MDT 2025</creationDate>
-    </annotation>
-    <classMention id="EHOST_Instance_4">
-        <mentionClass id="CONCEPT">undermined</mentionClass>
-    </classMention>
-    <annotation>
-        <mention id="EHOST_Instance_10" />
-        <annotator id="01">test1</annotator>
+        <mention id="EHOST_Instance_166" />
+        <annotator id="eHOST_2010">a1</annotator>
         <span start="332" end="386" />
         <spannedText>which showed spread of the dye into the epidural space</spannedText>
-        <creationDate>Thu Mar 31 10:00:00 MST 2026</creationDate>
+        <creationDate>Tue Mar 31 11:30:51 MDT 2026</creationDate>
     </annotation>
-    <classMention id="EHOST_Instance_10">
+    <classMention id="EHOST_Instance_166">
         <mentionClass id="CONCEPT">which showed spread of the dye into the epidural space</mentionClass>
     </classMention>
     <annotation>
-        <mention id="EHOST_Instance_11" />
-        <annotator id="01">test1</annotator>
-        <span start="332" end="386" />
-        <spannedText>which showed spread of the dye into the epidural space</spannedText>
-        <creationDate>Thu Mar 31 10:00:01 MST 2026</creationDate>
+        <mention id="EHOST_Instance_167" />
+        <annotator id="eHOST_2010">a1</annotator>
+        <span start="345" end="362" />
+        <spannedText>spread of the dye</spannedText>
+        <creationDate>Tue Mar 31 11:31:05 MDT 2026</creationDate>
     </annotation>
-    <classMention id="EHOST_Instance_11">
-        <mentionClass id="CON2">which showed spread of the dye into the epidural space</mentionClass>
+    <stringSlotMention id="EHOST_Instance_169">
+        <mentionSlot id="Attr1" />
+        <stringSlotMentionValue value="1" />
+    </stringSlotMention>
+    <stringSlotMention id="EHOST_Instance_170">
+        <mentionSlot id="Attr2" />
+        <stringSlotMentionValue value="a" />
+    </stringSlotMention>
+    <classMention id="EHOST_Instance_167">
+        <hasSlotMention id="EHOST_Instance_169" />
+        <hasSlotMention id="EHOST_Instance_170" />
+        <mentionClass id="CON2">spread of the dye</mentionClass>
     </classMention>
     <annotation>
-        <mention id="EHOST_Instance_12" />
-        <annotator id="eHOST_2010">sjl</annotator>
-        <span start="332" end="386" />
-        <spannedText>which showed spread of the dye into the epidural space</spannedText>
-        <creationDate>Thu Mar 31 10:00:02 MST 2026</creationDate>
+        <mention id="EHOST_Instance_168" />
+        <annotator id="eHOST_2010">a2</annotator>
+        <span start="345" end="386" />
+        <spannedText>spread of the dye into the epidural space</spannedText>
+        <creationDate>Tue Mar 31 11:31:41 MDT 2026</creationDate>
     </annotation>
-    <classMention id="EHOST_Instance_12">
-        <mentionClass id="CONCEPT">which showed spread of the dye into the epidural space</mentionClass>
+    <classMention id="EHOST_Instance_168">
+        <mentionClass id="CONCEPT">spread of the dye into the epidural space</mentionClass>
     </classMention>
-    <annotation>
-        <mention id="EHOST_Instance_13" />
-        <annotator id="eHOST_2010">sjl</annotator>
-        <span start="332" end="386" />
-        <spannedText>which showed spread of the dye into the epidural space</spannedText>
-        <creationDate>Thu Mar 31 10:00:03 MST 2026</creationDate>
-    </annotation>
-    <classMention id="EHOST_Instance_13">
-        <mentionClass id="CON2">which showed spread of the dye into the epidural space</mentionClass>
-    </classMention>
-    <annotation>
-        <mention id="EHOST_Instance_14" />
-        <annotator id="eHOST_2010">ADJ</annotator>
-        <span start="332" end="386" />
-        <spannedText>which showed spread of the dye into the epidural space</spannedText>
-        <creationDate>Thu Mar 31 10:00:04 MST 2026</creationDate>
-    </annotation>
-    <classMention id="EHOST_Instance_14">
-        <mentionClass id="CONCEPT">which showed spread of the dye into the epidural space</mentionClass>
-    </classMention>
-    <annotation>
-        <mention id="EHOST_Instance_15" />
-        <annotator id="eHOST_2010">ADJ</annotator>
-        <span start="332" end="386" />
-        <spannedText>which showed spread of the dye into the epidural space</spannedText>
-        <creationDate>Thu Mar 31 10:00:05 MST 2026</creationDate>
-    </annotation>
-    <classMention id="EHOST_Instance_15">
-        <mentionClass id="CON2">which showed spread of the dye into the epidural space</mentionClass>
-    </classMention>
-    <eHOST_Adjudication_Status version="1.0">
-        <Adjudication_Selected_Annotators version="1.0" />
-        <Adjudication_Selected_Classes version="1.0" />
-        <Adjudication_Others>
-            <CHECK_OVERLAPPED_SPANS>false</CHECK_OVERLAPPED_SPANS>
-            <CHECK_ATTRIBUTES>false</CHECK_ATTRIBUTES>
-            <CHECK_RELATIONSHIP>false</CHECK_RELATIONSHIP>
-            <CHECK_CLASS>false</CHECK_CLASS>
-            <CHECK_COMMENT>false</CHECK_COMMENT>
-        </Adjudication_Others>
-    </eHOST_Adjudication_Status>
 </annotations>
 

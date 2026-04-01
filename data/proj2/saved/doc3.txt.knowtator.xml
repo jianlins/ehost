@@ -1,55 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <annotations textSource="doc3.txt">
     <annotation>
-        <mention id="EHOST_Instance_8" />
-        <annotator id="eHOST_2010">sjl</annotator>
-        <span start="746" end="754" />
-        <spannedText>Eltroxin</spannedText>
-        <creationDate>Sat Apr 19 00:02:17 MDT 2025</creationDate>
+        <mention id="EHOST_Instance_188" />
+        <annotator id="01">a1</annotator>
+        <span start="746" end="767" />
+        <spannedText>Eltroxin which is for</spannedText>
+        <creationDate>Tue Mar 31 11:41:55 MDT 2026</creationDate>
     </annotation>
-    <classMention id="EHOST_Instance_8">
-        <mentionClass id="CONCEPT">Eltroxin</mentionClass>
+    <classMention id="EHOST_Instance_188">
+        <mentionClass id="CONCEPT">Eltroxin which is for</mentionClass>
     </classMention>
     <annotation>
-        <mention id="EHOST_Instance_20" />
-        <annotator id="eHOST_2010">sjl</annotator>
-        <span start="746" end="754" />
-        <spannedText>Eltroxin</spannedText>
-        <creationDate>Sat Apr 19 00:02:18 MDT 2025</creationDate>
+        <mention id="EHOST_Instance_189" />
+        <annotator id="eHOST_2010">a2</annotator>
+        <span start="755" end="760" />
+        <spannedText>which</spannedText>
+        <creationDate>Tue Mar 31 11:41:58 MDT 2026</creationDate>
     </annotation>
-    <classMention id="EHOST_Instance_20">
-        <mentionClass id="CON2">Eltroxin</mentionClass>
+    <stringSlotMention id="EHOST_Instance_191">
+        <mentionSlot id="Attr1" />
+        <stringSlotMentionValue value="2" />
+    </stringSlotMention>
+    <stringSlotMention id="EHOST_Instance_192">
+        <mentionSlot id="Attr2" />
+        <stringSlotMentionValue value="a" />
+    </stringSlotMention>
+    <classMention id="EHOST_Instance_189">
+        <hasSlotMention id="EHOST_Instance_191" />
+        <hasSlotMention id="EHOST_Instance_192" />
+        <mentionClass id="CON2">which</mentionClass>
     </classMention>
     <annotation>
-        <mention id="EHOST_Instance_21" />
-        <annotator id="eHOST_2010">ADJ</annotator>
-        <span start="746" end="754" />
-        <spannedText>Eltroxin</spannedText>
-        <creationDate>Sat Apr 19 00:02:19 MDT 2025</creationDate>
+        <mention id="EHOST_Instance_190" />
+        <annotator id="eHOST_2010">a1</annotator>
+        <span start="755" end="760" />
+        <spannedText>which</spannedText>
+        <creationDate>Tue Mar 31 11:42:25 MDT 2026</creationDate>
     </annotation>
-    <classMention id="EHOST_Instance_21">
-        <mentionClass id="CONCEPT">Eltroxin</mentionClass>
+    <stringSlotMention id="EHOST_Instance_193">
+        <mentionSlot id="Attr1" />
+        <stringSlotMentionValue value="1" />
+    </stringSlotMention>
+    <stringSlotMention id="EHOST_Instance_194">
+        <mentionSlot id="Attr2" />
+        <stringSlotMentionValue value="a" />
+    </stringSlotMention>
+    <classMention id="EHOST_Instance_190">
+        <hasSlotMention id="EHOST_Instance_193" />
+        <hasSlotMention id="EHOST_Instance_194" />
+        <mentionClass id="CON2">which</mentionClass>
     </classMention>
-    <annotation>
-        <mention id="EHOST_Instance_22" />
-        <annotator id="eHOST_2010">ADJ</annotator>
-        <span start="746" end="754" />
-        <spannedText>Eltroxin</spannedText>
-        <creationDate>Sat Apr 19 00:02:20 MDT 2025</creationDate>
-    </annotation>
-    <classMention id="EHOST_Instance_22">
-        <mentionClass id="CON2">Eltroxin</mentionClass>
-    </classMention>
-    <eHOST_Adjudication_Status version="1.0">
-        <Adjudication_Selected_Annotators version="1.0" />
-        <Adjudication_Selected_Classes version="1.0" />
-        <Adjudication_Others>
-            <CHECK_OVERLAPPED_SPANS>false</CHECK_OVERLAPPED_SPANS>
-            <CHECK_ATTRIBUTES>false</CHECK_ATTRIBUTES>
-            <CHECK_RELATIONSHIP>false</CHECK_RELATIONSHIP>
-            <CHECK_CLASS>false</CHECK_CLASS>
-            <CHECK_COMMENT>false</CHECK_COMMENT>
-        </Adjudication_Others>
-    </eHOST_Adjudication_Status>
 </annotations>
 
