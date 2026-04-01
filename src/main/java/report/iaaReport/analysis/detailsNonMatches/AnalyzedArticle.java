@@ -61,6 +61,9 @@ public class AnalyzedArticle {
 
                     if( annotation.spanset.equals( ann.spanset ) )                         
                         return true;
+
+                    if( annotation.spanset.isOverlapping( ann.spanset ) )
+                        return true;
                 }
 
             }
@@ -82,6 +85,47 @@ public class AnalyzedArticle {
             throw new Exception("1109020303::error occurred while we try to "
                     + "initilize an annotation as a row "
                     + "head. \nError Details:: "+ ex.getMessage());
+        }
+    }
+
+    /**Add an annotation to an existing row whose span matches.
+     * This handles the case where the same annotator has multiple annotations
+     * at the same span with different classes (e.g., "CONCEPT" and "CON2").
+     */
+    void addToExistingRow(Annotation annotation) throws Exception {
+        if (annotation == null)
+            throw new Exception("1109020304::cannot add a null annotation to an existing row.");
+
+        for (AnalyzedAnnotation analyzedAnnotation : rows) {
+            if (analyzedAnnotation == null)
+                continue;
+
+            Vector<Annotation> mainAnns = analyzedAnnotation.mainAnnotations;
+            if (mainAnns == null)
+                continue;
+
+            // First pass: check if annotation already exists in this row
+            boolean alreadyExists = false;
+            boolean spanMatches = false;
+            for (Annotation ann : mainAnns) {
+                if (annotation.uniqueIndex == ann.uniqueIndex) {
+                    alreadyExists = true;
+                    break;
+                }
+                if (!spanMatches
+                        && (annotation.spanset.equals(ann.spanset)
+                            || annotation.spanset.isOverlapping(ann.spanset))) {
+                    spanMatches = true;
+                }
+            }
+
+            if (alreadyExists)
+                return;
+
+            if (spanMatches) {
+                analyzedAnnotation.addmain(annotation);
+                return;
+            }
         }
     }
 }
