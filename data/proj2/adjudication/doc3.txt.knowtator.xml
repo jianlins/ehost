@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<annotations textSource="doc3.txt">
+    <annotation>
+        <mention id="EHOST_Instance_235" />
+        <annotator id="eHOST_2010">ADJUDICATION</annotator>
+        <span start="746" end="754" />
+        <spannedText>Eltroxin</spannedText>
+        <creationDate>Sat Apr 19 00:02:18 MDT 2025</creationDate>
+    </annotation>
+    <stringSlotMention id="EHOST_Instance_238">
+        <mentionSlot id="att1" />
+        <stringSlotMentionValue value="3" />
+    </stringSlotMention>
+    <stringSlotMention id="EHOST_Instance_239">
+        <mentionSlot id="att2" />
+        <stringSlotMentionValue value="c" />
+    </stringSlotMention>
+    <classMention id="EHOST_Instance_235">
+        <hasSlotMention id="EHOST_Instance_238" />
+        <hasSlotMention id="EHOST_Instance_239" />
+        <mentionClass id="CON2">Eltroxin</mentionClass>
+    </classMention>
+    <annotation>
+        <mention id="EHOST_Instance_236" />
+        <annotator id="eHOST_2010">ADJUDICATION</annotator>
+        <span start="746" end="754" />
+        <spannedText>Eltroxin</spannedText>
+        <creationDate>Sat Apr 19 00:02:19 MDT 2025</creationDate>
+    </annotation>
+    <classMention id="EHOST_Instance_236">
+        <mentionClass id="CONCEPT">Eltroxin</mentionClass>
+    </classMention>
+</annotations>
+

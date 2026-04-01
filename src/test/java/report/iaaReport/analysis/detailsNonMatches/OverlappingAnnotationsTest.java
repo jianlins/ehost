@@ -400,4 +400,203 @@ public class OverlappingAnnotationsTest {
             }
         }
     }
+
+    @Test
+    @DisplayName("Reproduce user scenario: ADJ with different spans should not have duplicate mainAnnotations")
+    public void testUserScenario_overlappingDifferentSpans() throws Exception {
+        // Exact reproduction of user's data:
+        // ADJ: CONCEPT@(332,386) + CON2@(345,362) — overlapping, different spans
+        // a1:  CONCEPT@(332,386) + CON2@(345,362) — same as ADJ
+        // a2:  CONCEPT@(345,386) — different span, no CON2
+        Article article = new Article("doc1.txt");
+
+        Annotation adj_concept = createAnnotation("which showed spread of the dye into the epidural space", "ADJ", "CONCEPT", 332, 386, 14);
+        Annotation adj_con2 = createAnnotation("spread of the dye", "ADJ", "CON2", 345, 362, 15);
+        Annotation a1_concept = createAnnotation("which showed spread of the dye into the epidural space", "a1", "CONCEPT", 332, 386, 12);
+        Annotation a1_con2 = createAnnotation("spread of the dye", "a1", "CON2", 345, 362, 13);
+        Annotation a2_concept = createAnnotation("spread of the dye into the epidural space", "a2", "CONCEPT", 345, 386, 16);
+
+        article.addAnnotation(adj_concept);
+        article.addAnnotation(adj_con2);
+        article.addAnnotation(a1_concept);
+        article.addAnnotation(a1_con2);
+        article.addAnnotation(a2_concept);
+
+        new Depot().add(article);
+
+        ArrayList<String> selectedClasses = new ArrayList<>();
+        selectedClasses.add("CONCEPT");
+        selectedClasses.add("CON2");
+        IAA.setClasses(selectedClasses);
+
+        ArrayList<String> selectedAnnotators = new ArrayList<>();
+        selectedAnnotators.add("ADJ");
+        selectedAnnotators.add("a1");
+        selectedAnnotators.add("a2");
+
+        Do doAnalysis = new Do(selectedAnnotators, selectedClasses);
+        doAnalysis.run(selectedAnnotators);
+
+        AnalyzedResult result = new AnalyzedResult();
+        Vector<AnalyzedAnnotator> analyzedAnnotators = result.getAll();
+
+        // Find ADJ's analysis
+        AnalyzedAnnotator adjAnnotator = null;
+        for (AnalyzedAnnotator aa : analyzedAnnotators) {
+            if ("ADJ".equals(aa.mainAnnotator.trim())) adjAnnotator = aa;
+        }
+        assertNotNull(adjAnnotator, "Should have analysis for ADJ");
+
+        AnalyzedArticle adjArticle = adjAnnotator.getArticle("doc1.txt");
+        assertNotNull(adjArticle, "ADJ should have analyzed article");
+
+        // Dump state for diagnosis
+        System.out.println("=== ADJ article rows: " + adjArticle.rows.size() + " ===");
+        for (int r = 0; r < adjArticle.rows.size(); r++) {
+            AnalyzedAnnotation row = adjArticle.rows.get(r);
+            System.out.println("Row " + r + ": mainAnnotations=" + row.mainAnnotations.size());
+            for (Annotation a : row.mainAnnotations) {
+                System.out.println("  main: " + a.annotationclass + "@(" + a.spanstart + "," + a.spanend + ") uid=" + a.uniqueIndex);
+            }
+            if (row.othersAnnotations != null) {
+                for (OthersAnnotations oa : row.othersAnnotations) {
+                    System.out.println("  other[" + oa.annotator + "]: " + oa.annotationsDiffs.size() + " diffs");
+                    for (AnalyzedAnnotationDifference d : oa.annotationsDiffs) {
+                        if (d != null && d.annotation != null)
+                            System.out.println("    diff: " + d.annotation.annotationclass + "@(" + d.annotation.spanstart + "," + d.annotation.spanend + ") uid=" + d.annotation.uniqueIndex);
+                    }
+                }
+            }
+        }
+
+        // KEY ASSERTION: The first row should have EXACTLY 2 mainAnnotations
+        AnalyzedAnnotation row0 = adjArticle.rows.get(0);
+        assertEquals(2, row0.mainAnnotations.size(),
+                "ADJ's primary row should have exactly 2 mainAnnotations (CONCEPT+CON2), " +
+                        "got " + row0.mainAnnotations.size());
+
+        // No row should have more than 2 mainAnnotations
+        for (int r = 0; r < adjArticle.rows.size(); r++) {
+            AnalyzedAnnotation row = adjArticle.rows.get(r);
+            assertTrue(row.mainAnnotations.size() <= 2,
+                    "Row " + r + " has " + row.mainAnnotations.size() +
+                            " mainAnnotations (max expected: 2)");
+        }
+    }
+
+    @Test
+    @DisplayName("Bug: a1's overlapping CONCEPT annotation should appear in report when spans differ")
+    public void testOverlappingConceptFromOtherAnnotator() throws Exception {
+        // Reproduce exact user scenario with CHECK_OVERLAPPED_SPANS=true:
+        // Adjudication: CON2@(352,362), CONCEPT@(338,380)
+        // a1: CON2@(345,354), CONCEPT@(332,386)
+        // a2: CON2@(352,362), CONCEPT@(338,380)
+        // Bug: a1's CONCEPT@(332,386) was not showing in the report
+        IAA.CHECK_OVERLAPPED_SPANS = true;
+        IAA.CHECK_CLASS = true;
+        IAA.CHECK_ATTRIBUTES = true;
+
+        Article article = new Article("doc1.txt");
+
+        Annotation adj_con2 = createAnnotation("of the dye", "ADJ", "CON2", 352, 362, 1);
+        adj_con2.attributes = new Vector<>();
+        adj_con2.attributes.add(new resultEditor.annotations.AnnotationAttributeDef("att1", "1"));
+        adj_con2.attributes.add(new resultEditor.annotations.AnnotationAttributeDef("att2", "b"));
+
+        Annotation adj_concept = createAnnotation("showed spread of the dye into the epidural", "ADJ", "CONCEPT", 338, 380, 2);
+
+        Annotation a1_con2 = createAnnotation("spread of", "a1", "CON2", 345, 354, 3);
+        a1_con2.attributes = new Vector<>();
+        a1_con2.attributes.add(new resultEditor.annotations.AnnotationAttributeDef("att1", "2"));
+        a1_con2.attributes.add(new resultEditor.annotations.AnnotationAttributeDef("att2", "b"));
+
+        Annotation a1_concept = createAnnotation("which showed spread of the dye into the epidural space", "a1", "CONCEPT", 332, 386, 4);
+
+        Annotation a2_con2 = createAnnotation("of the dye", "a2", "CON2", 352, 362, 5);
+        a2_con2.attributes = new Vector<>();
+        a2_con2.attributes.add(new resultEditor.annotations.AnnotationAttributeDef("att1", "1"));
+        a2_con2.attributes.add(new resultEditor.annotations.AnnotationAttributeDef("att2", "b"));
+
+        Annotation a2_concept = createAnnotation("showed spread of the dye into the epidural", "a2", "CONCEPT", 338, 380, 6);
+
+        article.addAnnotation(adj_con2);
+        article.addAnnotation(adj_concept);
+        article.addAnnotation(a1_con2);
+        article.addAnnotation(a1_concept);
+        article.addAnnotation(a2_con2);
+        article.addAnnotation(a2_concept);
+
+        new Depot().add(article);
+
+        ArrayList<String> selectedClasses = new ArrayList<>();
+        selectedClasses.add("CONCEPT");
+        selectedClasses.add("CON2");
+        IAA.setClasses(selectedClasses);
+
+        ArrayList<String> selectedAnnotators = new ArrayList<>();
+        selectedAnnotators.add("ADJ");
+        selectedAnnotators.add("a1");
+        selectedAnnotators.add("a2");
+
+        Do doAnalysis = new Do(selectedAnnotators, selectedClasses);
+        doAnalysis.run(selectedAnnotators);
+
+        AnalyzedResult result = new AnalyzedResult();
+        Vector<AnalyzedAnnotator> analyzedAnnotators = result.getAll();
+
+        // Find ADJ's analysis
+        AnalyzedAnnotator adjAnnotator = null;
+        for (AnalyzedAnnotator aa : analyzedAnnotators) {
+            if ("ADJ".equals(aa.mainAnnotator.trim())) adjAnnotator = aa;
+        }
+        assertNotNull(adjAnnotator, "Should have analysis for ADJ");
+
+        AnalyzedArticle adjArticle = adjAnnotator.getArticle("doc1.txt");
+        assertNotNull(adjArticle, "ADJ should have analyzed article");
+
+        // Dump state for diagnosis
+        System.out.println("=== testOverlappingConceptFromOtherAnnotator ===");
+        for (int r = 0; r < adjArticle.rows.size(); r++) {
+            AnalyzedAnnotation row = adjArticle.rows.get(r);
+            System.out.println("Row " + r + ": mainAnnotations=" + row.mainAnnotations.size());
+            for (Annotation a : row.mainAnnotations) {
+                System.out.println("  main: " + a.annotationclass + "@(" + a.spanstart + "," + a.spanend + ")");
+            }
+            if (row.othersAnnotations != null) {
+                for (OthersAnnotations oa : row.othersAnnotations) {
+                    System.out.println("  other[" + oa.annotator + "]: " + oa.annotationsDiffs.size() + " diffs");
+                    for (AnalyzedAnnotationDifference d : oa.annotationsDiffs) {
+                        if (d != null && d.annotation != null)
+                            System.out.println("    diff: " + d.annotation.annotationclass + "@(" + d.annotation.spanstart + "," + d.annotation.spanend + ")");
+                    }
+                }
+            }
+        }
+
+        // The row with CON2+CONCEPT should have a1's annotations too
+        assertEquals(1, adjArticle.rows.size(), "ADJ should have 1 row");
+        AnalyzedAnnotation row = adjArticle.rows.get(0);
+        assertEquals(2, row.mainAnnotations.size(), "Should have 2 main annotations (CON2+CONCEPT)");
+
+        // Find a1's othersAnnotations slot
+        OthersAnnotations a1Others = null;
+        for (OthersAnnotations oa : row.othersAnnotations) {
+            if ("a1".equals(oa.annotator.trim())) a1Others = oa;
+        }
+        assertNotNull(a1Others, "Should have a1's annotations");
+
+        // a1 should have BOTH CON2 AND CONCEPT annotations in the row
+        assertEquals(2, a1Others.annotationsDiffs.size(),
+                "a1 should have 2 diffs (CON2 + CONCEPT), but got " + a1Others.annotationsDiffs.size());
+
+        boolean foundA1Con2 = false, foundA1Concept = false;
+        for (AnalyzedAnnotationDifference d : a1Others.annotationsDiffs) {
+            if (d != null && d.annotation != null) {
+                if ("CON2".equals(d.annotation.annotationclass)) foundA1Con2 = true;
+                if ("CONCEPT".equals(d.annotation.annotationclass)) foundA1Concept = true;
+            }
+        }
+        assertTrue(foundA1Con2, "a1's CON2 should be in the comparison");
+        assertTrue(foundA1Concept, "a1's CONCEPT should be in the comparison (bug: was missing)");
+    }
 }
