@@ -99,9 +99,12 @@ public class HtmlReportIntegrationTest {
     }
 
     /**
-     * Loads all annotation XML files from data/proj2/saved into the Depot.
+     * Loads all annotation XML files from proj2/saved and proj2/adjudication into the Depot.
      */
     private void loadAnnotationsFromProj2() {
+        ImportAnnotation importer = new ImportAnnotation();
+
+        // Load regular annotator annotations from saved/
         File savedDir = new File(proj2Dir, "saved");
         assertTrue(savedDir.exists(), "saved directory not found: " + savedDir);
 
@@ -109,12 +112,26 @@ public class HtmlReportIntegrationTest {
         assertNotNull(xmlFiles, "No XML files found in saved directory");
         assertTrue(xmlFiles.length > 0, "No XML files found in saved directory");
 
-        ImportAnnotation importer = new ImportAnnotation();
         for (File xmlFile : xmlFiles) {
             eXMLFile exml = ImportXML.readXMLContents(xmlFile);
             assertNotNull(exml, "Failed to parse XML file: " + xmlFile.getName());
             exml = importer.assignateAnnotationIndex(exml);
             importer.XMLExtractor(exml);
+        }
+
+        // Load adjudication annotations from adjudication/
+        File adjDir = new File(proj2Dir, "adjudication");
+        if (adjDir.exists()) {
+            File[] adjFiles = adjDir.listFiles((dir, name) -> name.endsWith(".knowtator.xml"));
+            if (adjFiles != null) {
+                for (File xmlFile : adjFiles) {
+                    eXMLFile exml = ImportXML.readXMLContents(xmlFile);
+                    if (exml != null) {
+                        exml = importer.assignateAnnotationIndex(exml);
+                        importer.XMLExtractor(exml);
+                    }
+                }
+            }
         }
     }
 
@@ -130,13 +147,13 @@ public class HtmlReportIntegrationTest {
     // ==================== ANALYSIS-LEVEL TESTS ====================
 
     @Test
-    @DisplayName("doc3: ADJ CONCEPT+CON2 at same span should be grouped in one row")
+    @DisplayName("doc3: ADJUDICATION CONCEPT+CON2 at overlapping span should be grouped in one row")
     public void testDoc3AdjOverlappingGroupedInOneRow() throws Exception {
         loadAnnotationsFromProj2();
 
         ArrayList<String> annotators = new ArrayList<>();
-        annotators.add("ADJ");
-        annotators.add("sjl");
+        annotators.add("ADJUDICATION");
+        annotators.add("a1");
 
         ArrayList<String> classes = new ArrayList<>();
         classes.add("CONCEPT");
@@ -144,15 +161,15 @@ public class HtmlReportIntegrationTest {
 
         runAnalysis(annotators, classes);
 
-        AnalyzedAnnotator adjAnnotator = findAnnotator("ADJ");
-        assertNotNull(adjAnnotator, "ADJ annotator not found in results");
+        AnalyzedAnnotator adjAnnotator = findAnnotator("ADJUDICATION");
+        assertNotNull(adjAnnotator, "ADJUDICATION annotator not found in results");
 
         AnalyzedArticle doc3 = findArticle(adjAnnotator, "doc3.txt");
-        assertNotNull(doc3, "doc3.txt not found in ADJ results");
+        assertNotNull(doc3, "doc3.txt not found in ADJUDICATION results");
 
-        // ADJ has CONCEPT and CON2 at span (746,754) — should be ONE row
+        // ADJUDICATION has CONCEPT@(746,754) and CON2@(746,760) — overlapping, should be ONE row
         assertEquals(1, doc3.rows.size(),
-                "ADJ's overlapping CONCEPT+CON2 at span (746,754) should be in 1 row, got " +
+                "ADJUDICATION's overlapping CONCEPT+CON2 should be in 1 row, got " +
                         doc3.rows.size());
 
         AnalyzedAnnotation row = doc3.rows.get(0);
@@ -168,13 +185,13 @@ public class HtmlReportIntegrationTest {
     }
 
     @Test
-    @DisplayName("doc3: sjl CONCEPT+CON2 at same span should be grouped in one row")
+    @DisplayName("doc3: a1 CONCEPT+CON2 at same span should be grouped in one row")
     public void testDoc3SjlOverlappingGroupedInOneRow() throws Exception {
         loadAnnotationsFromProj2();
 
         ArrayList<String> annotators = new ArrayList<>();
-        annotators.add("sjl");
-        annotators.add("ADJ");
+        annotators.add("a1");
+        annotators.add("ADJUDICATION");
 
         ArrayList<String> classes = new ArrayList<>();
         classes.add("CONCEPT");
@@ -182,14 +199,14 @@ public class HtmlReportIntegrationTest {
 
         runAnalysis(annotators, classes);
 
-        AnalyzedAnnotator sjlAnnotator = findAnnotator("sjl");
-        assertNotNull(sjlAnnotator, "sjl annotator not found in results");
+        AnalyzedAnnotator a1Annotator = findAnnotator("a1");
+        assertNotNull(a1Annotator, "a1 annotator not found in results");
 
-        AnalyzedArticle doc3 = findArticle(sjlAnnotator, "doc3.txt");
-        assertNotNull(doc3, "doc3.txt not found in sjl results");
+        AnalyzedArticle doc3 = findArticle(a1Annotator, "doc3.txt");
+        assertNotNull(doc3, "doc3.txt not found in a1 results");
 
         assertEquals(1, doc3.rows.size(),
-                "sjl's overlapping CONCEPT+CON2 should be in 1 row, got " + doc3.rows.size());
+                "a1's overlapping CONCEPT+CON2 should be in 1 row, got " + doc3.rows.size());
 
         AnalyzedAnnotation row = doc3.rows.get(0);
         assertEquals(2, row.mainAnnotations.size(),
@@ -202,9 +219,9 @@ public class HtmlReportIntegrationTest {
         loadAnnotationsFromProj2();
 
         ArrayList<String> annotators = new ArrayList<>();
-        annotators.add("ADJ");
-        annotators.add("test1");
-        annotators.add("sjl");
+        annotators.add("ADJUDICATION");
+        annotators.add("a2");
+        annotators.add("a1");
 
         ArrayList<String> classes = new ArrayList<>();
         classes.add("CONCEPT");
@@ -212,8 +229,8 @@ public class HtmlReportIntegrationTest {
 
         runAnalysis(annotators, classes);
 
-        AnalyzedAnnotator adjAnnotator = findAnnotator("ADJ");
-        assertNotNull(adjAnnotator, "ADJ annotator not found");
+        AnalyzedAnnotator adjAnnotator = findAnnotator("ADJUDICATION");
+        assertNotNull(adjAnnotator, "ADJUDICATION annotator not found");
 
         AnalyzedArticle doc1 = findArticle(adjAnnotator, "doc1.txt");
         assertNotNull(doc1, "doc1.txt not found");
@@ -241,19 +258,17 @@ public class HtmlReportIntegrationTest {
     // ==================== HTML GENERATION TESTS ====================
 
     @Test
-    @DisplayName("HTML: ADJ report should show CONCEPT and CON2 in one table for doc3")
+    @DisplayName("HTML: ADJUDICATION report should show CONCEPT and CON2 in one table for doc3")
     public void testHtmlAdjDoc3OverlappingInSameTable() throws Exception {
         loadAnnotationsFromProj2();
 
-        // doc3 has: sjl(CONCEPT+CON2 at 746,754) and ADJ(CONCEPT+CON2 at 746,754)
-        // Since both annotators have identical overlapping annotations,
-        // the "non-matched" report won't have entries (they match).
-        // But when we compare ADJ vs test1, ADJ's doc3 annotations are unmatched
-        // because test1 has NO doc3 annotations.
+        // doc3 has: a1(CONCEPT+CON2 at 746,754) and ADJUDICATION(CONCEPT@746,754+CON2@746,760)
+        // When we compare ADJUDICATION vs a2, ADJUDICATION's doc3 annotations are unmatched
+        // because a2 has matching annotations — but overlapping test is key.
         ArrayList<String> annotators = new ArrayList<>();
-        annotators.add("ADJ");
-        annotators.add("sjl");
-        annotators.add("test1");
+        annotators.add("ADJUDICATION");
+        annotators.add("a1");
+        annotators.add("a2");
 
         ArrayList<String> classes = new ArrayList<>();
         classes.add("CONCEPT");
@@ -264,17 +279,17 @@ public class HtmlReportIntegrationTest {
         GenHtmlForNonMatches htmlGen = new GenHtmlForNonMatches();
         htmlGen.genHtml(reportDir);
 
-        File adjReport = new File(reportDir, "ADJ-UNMATCHED-SUMMARY.html");
+        File adjReport = new File(reportDir, "ADJUDICATION-UNMATCHED-SUMMARY.html");
 
         if (!adjReport.exists()) {
-            // If ADJ has no unmatched annotations, that's valid — verify at analysis level
-            AnalyzedAnnotator adjAnnotator = findAnnotator("ADJ");
-            assertNotNull(adjAnnotator, "ADJ annotator not found");
+            // If ADJUDICATION has no unmatched annotations, that's valid — verify at analysis level
+            AnalyzedAnnotator adjAnnotator = findAnnotator("ADJUDICATION");
+            assertNotNull(adjAnnotator, "ADJUDICATION annotator not found");
             AnalyzedArticle doc3 = findArticle(adjAnnotator, "doc3.txt");
             if (doc3 != null) {
                 // If doc3 exists, verify grouping at analysis level
                 assertEquals(1, doc3.rows.size(),
-                        "ADJ doc3 should have 1 row for overlapping CONCEPT+CON2");
+                        "ADJUDICATION doc3 should have 1 row for overlapping CONCEPT+CON2");
                 assertEquals(2, doc3.rows.get(0).mainAnnotations.size(),
                         "Row should have 2 mainAnnotations (CONCEPT+CON2)");
             }
@@ -296,14 +311,14 @@ public class HtmlReportIntegrationTest {
     }
 
     @Test
-    @DisplayName("HTML: sjl report should show CONCEPT and CON2 in one table for doc3")
+    @DisplayName("HTML: a1 report should show CONCEPT and CON2 in one table for doc3")
     public void testHtmlSjlDoc3OverlappingInSameTable() throws Exception {
         loadAnnotationsFromProj2();
 
         ArrayList<String> annotators = new ArrayList<>();
-        annotators.add("sjl");
-        annotators.add("ADJ");
-        annotators.add("test1");
+        annotators.add("a1");
+        annotators.add("ADJUDICATION");
+        annotators.add("a2");
 
         ArrayList<String> classes = new ArrayList<>();
         classes.add("CONCEPT");
@@ -314,25 +329,25 @@ public class HtmlReportIntegrationTest {
         GenHtmlForNonMatches htmlGen = new GenHtmlForNonMatches();
         htmlGen.genHtml(reportDir);
 
-        File sjlReport = new File(reportDir, "sjl-UNMATCHED-SUMMARY.html");
-        if (!sjlReport.exists()) {
+        File a1Report = new File(reportDir, "a1-UNMATCHED-SUMMARY.html");
+        if (!a1Report.exists()) {
             // No unmatched — verify at analysis level
-            AnalyzedAnnotator sjlAnnotator = findAnnotator("sjl");
-            assertNotNull(sjlAnnotator, "sjl annotator not found");
-            AnalyzedArticle doc3 = findArticle(sjlAnnotator, "doc3.txt");
+            AnalyzedAnnotator a1Annotator = findAnnotator("a1");
+            assertNotNull(a1Annotator, "a1 annotator not found");
+            AnalyzedArticle doc3 = findArticle(a1Annotator, "doc3.txt");
             if (doc3 != null) {
-                assertEquals(1, doc3.rows.size(), "sjl doc3 should have 1 row");
+                assertEquals(1, doc3.rows.size(), "a1 doc3 should have 1 row");
                 assertEquals(2, doc3.rows.get(0).mainAnnotations.size(), "Should have 2 mainAnnotations");
             }
             return;
         }
 
-        String html = new String(Files.readAllBytes(sjlReport.toPath()));
+        String html = new String(Files.readAllBytes(a1Report.toPath()));
         String[] doc3Sections = extractDocSections(html, "doc3.txt");
 
         if (doc3Sections.length > 0) {
             assertEquals(1, doc3Sections.length,
-                    "Expected 1 table for doc3 in sjl report, found " + doc3Sections.length);
+                    "Expected 1 table for doc3 in a1 report, found " + doc3Sections.length);
             assertTrue(doc3Sections[0].contains("CONCEPT"), "Table should contain CONCEPT");
             assertTrue(doc3Sections[0].contains("CON2"), "Table should contain CON2");
         }
@@ -344,9 +359,9 @@ public class HtmlReportIntegrationTest {
         loadAnnotationsFromProj2();
 
         ArrayList<String> annotators = new ArrayList<>();
-        annotators.add("ADJ");
-        annotators.add("sjl");
-        annotators.add("test1");
+        annotators.add("ADJUDICATION");
+        annotators.add("a1");
+        annotators.add("a2");
 
         ArrayList<String> classes = new ArrayList<>();
         classes.add("CONCEPT");
@@ -357,7 +372,7 @@ public class HtmlReportIntegrationTest {
         GenHtmlForNonMatches htmlGen = new GenHtmlForNonMatches();
         htmlGen.genHtml(reportDir);
 
-        File adjReport = new File(reportDir, "ADJ-UNMATCHED-SUMMARY.html");
+        File adjReport = new File(reportDir, "ADJUDICATION-UNMATCHED-SUMMARY.html");
         if (!adjReport.exists()) return; // No unmatched annotations to validate
 
         String html = new String(Files.readAllBytes(adjReport.toPath()));
@@ -400,9 +415,9 @@ public class HtmlReportIntegrationTest {
         loadAnnotationsFromProj2();
 
         ArrayList<String> annotators = new ArrayList<>();
-        annotators.add("ADJ");
-        annotators.add("sjl");
-        annotators.add("test1");
+        annotators.add("ADJUDICATION");
+        annotators.add("a1");
+        annotators.add("a2");
 
         ArrayList<String> classes = new ArrayList<>();
         classes.add("CONCEPT");
@@ -417,14 +432,14 @@ public class HtmlReportIntegrationTest {
             GenHtmlForNonMatches2 htmlGen2 = new GenHtmlForNonMatches2();
             htmlGen2.genHtml(reportDir2);
 
-            File adjReport = new File(reportDir2, "ADJ-UNMATCHED-SUMMARY.html");
+            File adjReport = new File(reportDir2, "ADJUDICATION-UNMATCHED-SUMMARY.html");
             if (!adjReport.exists()) {
                 // Verify at analysis level
-                AnalyzedAnnotator adjAnnotator = findAnnotator("ADJ");
-                assertNotNull(adjAnnotator, "ADJ annotator not found");
+                AnalyzedAnnotator adjAnnotator = findAnnotator("ADJUDICATION");
+                assertNotNull(adjAnnotator, "ADJUDICATION annotator not found");
                 AnalyzedArticle doc3 = findArticle(adjAnnotator, "doc3.txt");
                 if (doc3 != null) {
-                    assertEquals(1, doc3.rows.size(), "ADJ doc3 should have 1 row");
+                    assertEquals(1, doc3.rows.size(), "ADJUDICATION doc3 should have 1 row");
                 }
                 return;
             }
@@ -486,6 +501,10 @@ public class HtmlReportIntegrationTest {
     }
 
     private File findProj2Dir() {
+        // Prefer test resources (stable copy) over data/proj2 (may be edited)
+        File testRes = new File("src/test/resources/proj2");
+        if (testRes.exists()) return testRes;
+
         File proj2 = new File("data/proj2");
         if (proj2.exists()) return proj2;
 
@@ -493,7 +512,9 @@ public class HtmlReportIntegrationTest {
         while (dir != null) {
             File pom = new File(dir, "pom.xml");
             if (pom.exists()) {
-                File candidate = new File(dir, "data/proj2");
+                File candidate = new File(dir, "src/test/resources/proj2");
+                if (candidate.exists()) return candidate;
+                candidate = new File(dir, "data/proj2");
                 if (candidate.exists()) return candidate;
             }
             dir = dir.getParentFile();
