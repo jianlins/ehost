@@ -57,6 +57,16 @@ public class AdjudicationLoader {
                 }
                 parsedXml = importer.assignateAnnotationIndex(parsedXml);
 
+                // Remove adjudicating elements (type=5) before extraction.
+                // These are duplicates of <annotation> elements created either
+                // by the backward compatibility fix or by <adjudicating> XML
+                // elements that mirror their <annotation> counterparts.
+                for (int k = parsedXml.annotations.size() - 1; k >= 0; k--) {
+                    if (parsedXml.annotations.get(k).type == 5) {
+                        parsedXml.annotations.remove(k);
+                    }
+                }
+
                 // Extract annotations without adding to Depot
                 Article article = importer.XMLExtractor(parsedXml, false);
                 if (article == null || article.annotations == null || article.annotations.isEmpty()) {

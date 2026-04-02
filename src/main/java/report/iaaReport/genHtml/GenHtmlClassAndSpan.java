@@ -149,13 +149,13 @@ public class GenHtmlClassAndSpan {
                     + "</td><td>"
                     + pw.true_positive
                     + "</td><td>"
-                    + pw.false_negatives
-                    + "</td><td>"
                     + pw.false_positives
                     + "</td><td>"
-                    + floatToString(pw.precision * 100)
+                    + pw.false_negatives
                     + "</td><td>"
                     + floatToString(pw.recall * 100)
+                    + "</td><td>"
+                    + floatToString(pw.precision * 100)
                     + "</td><td>"
                     + floatToString(pw.f_score * 100)
                     + "</td></tr>";

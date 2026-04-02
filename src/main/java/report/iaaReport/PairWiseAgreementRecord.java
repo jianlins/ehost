@@ -46,8 +46,8 @@ public class PairWiseAgreementRecord{
 
     public void calculPairWiseAgreement(){
         //printAll();
-        this.false_positives = this.subTotal_GoldStandard - true_positive;
-        this.false_negatives = this.subTotal_Compare - true_positive;
+        this.false_negatives = this.subTotal_GoldStandard - true_positive;
+        this.false_positives = this.subTotal_Compare - true_positive;
 
         precision = (float)this.true_positive/((float)this.true_positive+(float)this.false_positives);
         recall = (float)this.true_positive/((float)this.true_positive+(float)this.false_negatives);
