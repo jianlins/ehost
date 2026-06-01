@@ -12,6 +12,7 @@ import resultEditor.annotations.Depot;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Vector;
 import java.util.logging.Level;
 import org.jdom.*;
@@ -254,12 +255,36 @@ public class OutputToXML {
                 annotation.outputmentionid = "EHOST_Instance_"+ mentionid;
             }
 
+            HashSet<String> seenAdjudicationKeys = new HashSet<String>();
+
             for(resultEditor.annotations.Annotation annotation: article.annotations)
             {
                 if (is_outputing_adjudicated_annotations) {
                     if ((annotation.adjudicationStatus != Annotation.AdjudicationStatus.MATCHES_OK)
                             &&
                             (annotation.getFullAnnotator().compareTo("ADJUDICATION")!=0)) {
+                        continue;
+                    }
+                    // deduplicate: skip annotations with same span+class+text+attributes
+                    StringBuilder keyBuilder = new StringBuilder();
+                    if (annotation.spanset != null) {
+                        for (int si = 0; si < annotation.spanset.size(); si++) {
+                            SpanDef sd = annotation.spanset.getSpanAt(si);
+                            if (sd != null) {
+                                keyBuilder.append(sd.start).append('-').append(sd.end).append(';');
+                            }
+                        }
+                    }
+                    keyBuilder.append('|').append(annotation.annotationclass)
+                              .append('|').append(annotation.annotationText)
+                              .append('|');
+                    if (annotation.attributes != null) {
+                        for (AnnotationAttributeDef att : annotation.attributes) {
+                            keyBuilder.append(att.name).append('=').append(att.value).append(';');
+                        }
+                    }
+                    String key = keyBuilder.toString();
+                    if (!seenAdjudicationKeys.add(key)) {
                         continue;
                     }
                 }
