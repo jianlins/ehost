@@ -186,8 +186,32 @@ public class AdjudicationLoader {
 
                 importer.XMLExtractor(parsedXml);
 
-                // Restore original annotations to undo duplicate additions
+                // The <annotation> elements from adjudication XML (MATCHES_OK
+                // results) were routed to Depot by XMLExtractor. They need to
+                // also go into AdjudicationDepot so they survive the next save.
                 if (depotArticle != null && originalAnnotations != null) {
+                    Vector<Annotation> newlyAdded = new Vector<>(depotArticle.annotations);
+                    newlyAdded.removeAll(originalAnnotations);
+
+                    if (!newlyAdded.isEmpty()) {
+                        adjudication.data.AdjudicationDepot adjDepotInstance =
+                                new adjudication.data.AdjudicationDepot();
+                        adjDepotInstance.articleInsurance(textFilename);
+                        Article adjArticle = adjudication.data.AdjudicationDepot
+                                .getArticleByFilename(textFilename);
+                        if (adjArticle != null) {
+                            for (Annotation ann : newlyAdded) {
+                                ann.adjudicationStatus =
+                                        Annotation.AdjudicationStatus.MATCHES_OK;
+                                adjArticle.annotations.add(ann);
+                            }
+                        }
+                        log.LoggingToFile.log(Level.INFO, "Loaded " + newlyAdded.size()
+                                + " MATCHES_OK annotations into AdjudicationDepot from "
+                                + xmlFile.getName());
+                    }
+
+                    // Restore original annotations to undo duplicate additions
                     depotArticle.annotations = originalAnnotations;
                 }
             } catch (Exception ex) {

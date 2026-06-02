@@ -76,20 +76,26 @@ public class OutputToXML {
         
         // ##2## output to "adjudication" folder if under the adjudication mode
         if(GUI.reviewmode == GUI.ReviewMode.adjudicationMode){
-            latestUsedMentionID = getLatestUsedMentionID();
-            log.LoggingToFile.log(Level.INFO," + now we are try to build xml for text source: ["+ txtfile.getAbsolutePath() + "] (Adjudicated Results)");
-            
-            folder = "adjudication";        
-            savedpath = workspacepath + File.separator + folder + File.separator;
-            System.out.println("["+savedpath+"]");
-            prepareFolder( new File(savedpath) );
-            xmlpath = savedpath + txtfile.getName().trim() + ".knowtator.xml";
-            XMLfile = new File(xmlpath);
-            
-            // true: tell the method that we want to only output annotations whose status is matched_ok or annotator is "ADJUDICATION"
-            buildxml( XMLfile, true ); 
-            
-            env.Parameters.forceChangeLatestUsedMentionID(latestUsedMentionID);
+            if(!adjudication.data.AdjudicationDepot.articleExists(textsourcefilename)){
+                log.LoggingToFile.log(Level.INFO,
+                    " - skipping adjudication XML write for ["
+                    + textsourcefilename
+                    + "]: file not in AdjudicationDepot (preserving existing XML)");
+            } else {
+                latestUsedMentionID = getLatestUsedMentionID();
+                log.LoggingToFile.log(Level.INFO," + now we are try to build xml for text source: ["+ txtfile.getAbsolutePath() + "] (Adjudicated Results)");
+
+                folder = "adjudication";
+                savedpath = workspacepath + File.separator + folder + File.separator;
+                System.out.println("["+savedpath+"]");
+                prepareFolder( new File(savedpath) );
+                xmlpath = savedpath + txtfile.getName().trim() + ".knowtator.xml";
+                XMLfile = new File(xmlpath);
+
+                buildxml( XMLfile, true );
+
+                env.Parameters.forceChangeLatestUsedMentionID(latestUsedMentionID);
+            }
         }
     }
 
@@ -244,21 +250,25 @@ public class OutputToXML {
         }else
             article = source;
 
-        if( article == null )
+        if( article == null ) {
+            log.LoggingToFile.log(Level.WARNING,
+                "addAnnotations: no article found for textsource ["
+                + textsourcefilename + "], is_adjudicated="
+                + is_outputing_adjudicated_annotations);
             return root;
+        }
 
-        try
+        for( resultEditor.annotations.Annotation annotation: article.annotations ){
+            latestUsedMentionID++;
+            int mentionid = latestUsedMentionID;
+            annotation.outputmentionid = "EHOST_Instance_"+ mentionid;
+        }
+
+        HashSet<String> seenAdjudicationKeys = new HashSet<String>();
+
+        for(resultEditor.annotations.Annotation annotation: article.annotations)
         {
-            for( resultEditor.annotations.Annotation annotation: article.annotations ){
-                latestUsedMentionID++;
-                int mentionid = latestUsedMentionID;
-                annotation.outputmentionid = "EHOST_Instance_"+ mentionid;
-            }
-
-            HashSet<String> seenAdjudicationKeys = new HashSet<String>();
-
-            for(resultEditor.annotations.Annotation annotation: article.annotations)
-            {
+            try {
                 if (is_outputing_adjudicated_annotations) {
                     if ((annotation.adjudicationStatus != Annotation.AdjudicationStatus.MATCHES_OK)
                             &&
@@ -292,7 +302,7 @@ public class OutputToXML {
                 String annotator = "ADJUDICATION";
                 if(!is_outputing_adjudicated_annotations)
                     annotator = annotation.getFullAnnotator();
-                
+
                 root = buildAnnotationNode(
                         is_outputing_adjudicated_annotations,
                         root,
@@ -311,13 +321,14 @@ public class OutputToXML {
                         annotation,
                         false // false is default
                         );
+            } catch(Exception e) {
+                log.LoggingToFile.log(Level.SEVERE,
+                    "error::fail to pack annotation to XML, skipping annotation ["
+                    + annotation.annotationclass + " @ "
+                    + (annotation.spanset != null ? annotation.spanset.toString() : "null")
+                    + "]: " + e.toString());
             }
-        }catch(Exception e){
-            log.LoggingToFile.log(Level.SEVERE, "error 1102111931::fail to pack annotation to XML"
-                    + e.toString() );
-            return root;
         }
-        
 
         return root;
     }
@@ -337,33 +348,27 @@ public class OutputToXML {
         resultEditor.annotations.Depot depot = new resultEditor.annotations.Depot();
         Article article = adjudication.data.AdjudicationDepot.getArticleByFilename(textsourcefilename);                        
 
-        if( article == null )
+        if( article == null ) {
+            log.LoggingToFile.log(Level.WARNING,
+                "addAdjudicatingAnnotations: no article found for textsource ["
+                + textsourcefilename + "]");
             return root;
+        }
 
-        try
+        for( resultEditor.annotations.Annotation annotation: article.annotations ){
+            latestUsedMentionID++;
+            int mentionid = latestUsedMentionID;
+            annotation.outputmentionid = "EHOST_Instance_"+ mentionid;
+        }
+
+        for(resultEditor.annotations.Annotation annotation: article.annotations)
         {
-            for( resultEditor.annotations.Annotation annotation: article.annotations ){
-                latestUsedMentionID++;
-                int mentionid = latestUsedMentionID;
-                annotation.outputmentionid = "EHOST_Instance_"+ mentionid;
-            }
-
-            for(resultEditor.annotations.Annotation annotation: article.annotations)
-            {                                
-                // ========== Optimization: Skip already-resolved annotations ==========
-                // MATCHES_OK and MATCHES_DLETED annotations are already resolved:
-                // - MATCHES_OK is saved as <annotation> with annotator="ADJUDICATION"
-                // - MATCHES_DLETED can be reconstructed by comparing adjudication/ and saved/ folders
-                // No need to save them as <adjudicating> elements, which reduces redundancy.
-                // They remain visible in adjudication mode but are not saved redundantly.
-                if (annotation.adjudicationStatus == resultEditor.annotations.Annotation.AdjudicationStatus.MATCHES_OK ||
-                    annotation.adjudicationStatus == resultEditor.annotations.Annotation.AdjudicationStatus.MATCHES_DLETED) {
-                    continue;  // Skip - already resolved, no need to save as adjudicating
+            try {
+                if (annotation.adjudicationStatus == resultEditor.annotations.Annotation.AdjudicationStatus.MATCHES_OK) {
+                    continue;
                 }
-                // ========== End Optimization ==========
-                
+
                 root = buildAdjudicatingAnnotationNode(
-                        // is_outputing_adjudicated_annotations,
                         root,
                         annotation.outputmentionid,
                         annotation.annotationText,
@@ -379,13 +384,14 @@ public class OutputToXML {
                         annotation.verifierFound,
                         annotation
                         );
+            } catch(Exception e) {
+                log.LoggingToFile.log(Level.SEVERE,
+                    "error::fail to pack adjudicating annotation to XML, skipping ["
+                    + annotation.annotationclass + " @ "
+                    + (annotation.spanset != null ? annotation.spanset.toString() : "null")
+                    + "]: " + e.toString());
             }
-        }catch(Exception e){
-            log.LoggingToFile.log(Level.SEVERE, "error 1102111931::fail to pack annotation to XML"
-                    + e.toString() );
-            return root;
         }
-        
 
         return root;
     }
