@@ -8,3 +8,7 @@ markdown: kramdown
 # Optional: Configure kramdown for footnotes
 kramdown:
   footnote_backlink: '&#8617;'
+
+# minima's header nav defaults to listing every page on the site; keep it empty
+# so bug/enhancement/wiki pages don't flood the top navigation bar.
+header_pages: []
