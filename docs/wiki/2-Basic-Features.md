@@ -41,6 +41,8 @@
 1. Click ![](res/2.1-9.png)  button.
 
 2. Type in a name and click OK.
-   ![](res/2.1-10.png) 
+   ![](res/2.1-10.png)
+
+[^1]: Many of these instructions were based on https://github.com/chrisleng/ehost/wiki 
 
 

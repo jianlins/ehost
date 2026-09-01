@@ -49,3 +49,5 @@
 * [4.3 ConTEXT algorithm]
 
 5. Glossary
+
+[^1]: Many of these instructions were based on https://github.com/chrisleng/ehost/wiki

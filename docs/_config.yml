@@ -1,0 +1,10 @@
+theme: minima
+title: eHOST Documentation
+description: Extensible Human Oracle Suite of Tools - A comprehensive annotation platform
+
+# Markdown processor (GitHub Pages default - supports footnotes natively)
+markdown: kramdown
+
+# Optional: Configure kramdown for footnotes
+kramdown:
+  footnote_backlink: '&#8617;'
