@@ -39,6 +39,9 @@
 * [3.4 Oracle (Annotations Like Me)](https://github.com/chrisleng/ehost/wiki/3.4-Oracle-Mode)
 * [3.5 IAA Reports](https://github.com/chrisleng/ehost/wiki/3.5-IAA-Report)
 * [3.6 Adjudication Mode](https://github.com/chrisleng/ehost/wiki/3.6-Adjudication-Mode)
+* [3.6.1 Resume or Restart Adjudication](https://github.com/chrisleng/ehost/wiki/3.6.1-Resume-or-Restart-Adjudication)
+* [3.6.2 Adjudication Data Storage](https://github.com/chrisleng/ehost/wiki/3.6.2-Adjudication-Data-Storage)
+* [3.7 Viewing and Sharing Reports](https://github.com/chrisleng/ehost/wiki/3.7-Viewing-and-Sharing-Reports)
 
 4. Beyond Manual Annotation
 * [4.1 Generate Pre-annotations using Custom Dictionary]
