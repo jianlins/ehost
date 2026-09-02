@@ -38,6 +38,23 @@ $content-width: 1040px;
   min-width: 0;
 }
 
+// Keep the footer on a single row, like the header, instead of stacking the
+// heading above the columns and taking extra vertical space.
+.footer-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 1.5em;
+  row-gap: 0.3em;
+}
+
+.footer-line .footer-heading,
+.footer-line p,
+.footer-line .contact-list,
+.footer-line .social-media-list {
+  margin: 0;
+}
+
 @media screen and (max-width: 600px) {
   .layout-with-sidebar {
     flex-direction: column;

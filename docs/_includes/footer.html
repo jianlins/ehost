@@ -1,33 +1,25 @@
 <footer class="site-footer h-card">
   <data class="u-url" href="{{ "/" | relative_url }}"></data>
 
-  <div class="wrapper">
+  <div class="wrapper footer-line">
 
     <h2 class="footer-heading">{{ site.title | escape }}</h2>
 
-    <div class="footer-col-wrapper">
-      <div class="footer-col footer-col-1">
-        {%- if site.author or site.email -%}
-        <ul class="contact-list">
-            {%- if site.author -%}
-            <li class="p-name">{{ site.author | escape }}</li>
-            {%- endif -%}
-            {%- if site.email -%}
-            <li><a class="u-email" href="mailto:{{ site.email }}">{{ site.email }}</a></li>
-            {%- endif -%}
-        </ul>
+    {%- if site.author or site.email -%}
+    <ul class="contact-list">
+        {%- if site.author -%}
+        <li class="p-name">{{ site.author | escape }}</li>
         {%- endif -%}
-      </div>
+        {%- if site.email -%}
+        <li><a class="u-email" href="mailto:{{ site.email }}">{{ site.email }}</a></li>
+        {%- endif -%}
+    </ul>
+    {%- endif -%}
 
-      <div class="footer-col footer-col-2">
-        {%- include social.html -%}
-      </div>
+    {%- include social.html -%}
 
-      <div class="footer-col footer-col-3">
-        <p>{{- site.description | escape -}}</p>
-        <p>Most of these instructions are based on <a href="https://github.com/chrisleng/ehost/wiki">https://github.com/chrisleng/ehost/wiki</a></p>
-      </div>
-    </div>
+    <p>{{- site.description | escape -}}</p>
+    <p>Most of these instructions are based on <a href="https://github.com/chrisleng/ehost/wiki">https://github.com/chrisleng/ehost/wiki</a></p>
 
   </div>
 
