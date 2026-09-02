@@ -1,4 +1,4 @@
-# 2 Basic Features [^1]
+# 2 Basic Features
 ## 2.1	Workspace and Project
 
 *  Different annotation tasks and projects are accessed via Workspace and Project panel in eHOST. User could switch between two most recent workspace paths. There could be multiple projects within each workspace. This allows user to easily switch between different annotation projects.
@@ -42,7 +42,3 @@
 
 2. Type in a name and click OK.
    ![](res/2.1-10.png)
-
-[^1]: Many of these instructions were based on https://github.com/chrisleng/ehost/wiki 
-
-

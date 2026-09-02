@@ -1,7 +1,7 @@
 ---
 title: Welcome to the eHOST wiki!
 ---
-## Table of Content [^1]
+## Table of Content
 
 ### 1. Installation and Quick Start
 * [1.1 Prerequisites](wiki/1.1_Prerequisites.md)
@@ -51,5 +51,3 @@ title: Welcome to the eHOST wiki!
 * [4.3 ConTEXT algorithm]
 
 ### [5. Glossary]
-
-[^1]: Many of these instructions were based on https://github.com/chrisleng/ehost/wiki
