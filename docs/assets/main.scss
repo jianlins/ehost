@@ -1,6 +1,10 @@
 ---
 # Only the main Sass file needs front matter (the dashes are enough)
 ---
+// Widen the page 1.3x from minima's 800px default (must be set before the
+// import since minima declares it with !default).
+$content-width: 1040px;
+
 @import "minima";
 
 .layout-with-sidebar {
