@@ -3,8 +3,6 @@
 
   <div class="wrapper footer-line">
 
-    <h2 class="footer-heading">{{ site.title | escape }}</h2>
-
     {%- if site.author or site.email -%}
     <ul class="contact-list">
         {%- if site.author -%}
@@ -18,7 +16,7 @@
 
     {%- include social.html -%}
 
-    <p>{{- site.description | escape -}}</p>
+    <p>eHOST: {{- site.description | escape -}}</p>
     <p>Most of these instructions are based on <a href="https://github.com/chrisleng/ehost/wiki">https://github.com/chrisleng/ehost/wiki</a></p>
 
   </div>
