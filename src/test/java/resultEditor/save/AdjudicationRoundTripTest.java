@@ -615,6 +615,125 @@ public class AdjudicationRoundTripTest {
     }
 
     /**
+     * The upgrade path: a user who saved in-progress adjudication work with the
+     * <em>buggy</em> build already has the duplicate pair on disk — the same
+     * annotation as an {@code <annotation>} with no status <b>and</b> as an
+     * {@code <adjudicating>} carrying the real one. Installing the fix must heal
+     * that file, not preserve the duplicate forever.
+     *
+     * <p>The XML below is a verbatim capture of what the pre-fix build writes,
+     * produced by running the old writer against three annotations: an
+     * adjudicator-authored unresolved one (duplicated), an agreed match, and a
+     * normal annotator's unresolved one.
+     */
+    @Test
+    @DisplayName("In-flight work saved by the pre-fix build heals on resume")
+    void preFixDuplicatePair_healsOnResume() throws Exception {
+        final String doc = "inflight.txt";
+        createCorpusFile(doc);
+        writePreFixAdjudicationXml(doc);
+
+        restartAndResumeAdjudication();
+
+        Article article = AdjudicationDepot.getArticleByFilename(doc);
+        assertNotNull(article, "pre-fix adjudication folder must still load");
+
+        Vector<String> texts = new Vector<>();
+        for (Annotation ann : article.annotations) {
+            texts.add(ann.annotationText);
+        }
+
+        assertEquals(3, article.annotations.size(),
+                "the pre-fix file holds 3 annotations across 4 elements ('chest pain' is"
+                        + " written twice). Resuming must collapse that pair back into one"
+                        + " annotation, otherwise upgrading preserves the duplicate; got " + texts);
+
+        assertEquals(Annotation.AdjudicationStatus.NON_MATCHES,
+                statusOf(article, "chest pain"),
+                "the <adjudicating> twin carries the true in-progress status; the"
+                        + " status-less <annotation> must not override it with MATCHES_OK");
+        assertEquals(Annotation.AdjudicationStatus.MATCHES_OK,
+                statusOf(article, "fever"),
+                "an agreed match has no twin and must keep defaulting to MATCHES_OK");
+        assertEquals(Annotation.AdjudicationStatus.NON_MATCHES,
+                statusOf(article, "cough"),
+                "a normal annotator's unresolved annotation is unaffected");
+
+        // and saving again must now produce the healed, one-element-per-annotation file
+        save(doc);
+        Element root = parseXml(adjudicationXml(doc)).getRootElement();
+        int elements = root.getChildren("annotation").size()
+                + root.getChildren("adjudicating").size();
+        assertEquals(3, elements,
+                "after the healing save the file must hold exactly 3 elements");
+    }
+
+    private Annotation.AdjudicationStatus statusOf(Article article, String annotationText) {
+        for (Annotation ann : article.annotations) {
+            if (annotationText.equals(ann.annotationText)) {
+                return ann.adjudicationStatus;
+            }
+        }
+        throw new AssertionError("no annotation '" + annotationText + "' was restored");
+    }
+
+    /** Verbatim output of the pre-fix build; see {@link #preFixDuplicatePair_healsOnResume}. */
+    private void writePreFixAdjudicationXml(String txtFilename) throws Exception {
+        File adjudicationDir = new File(tempDir.toFile(), "adjudication");
+        adjudicationDir.mkdirs();
+        File xml = new File(adjudicationDir, txtFilename + ".knowtator.xml");
+        try (FileWriter w = new FileWriter(xml)) {
+            w.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                + "<annotations textSource=\"" + txtFilename + "\">\n"
+                + "    <annotation>\n"
+                + "        <mention id=\"EHOST_Instance_50001\" />\n"
+                + "        <annotator id=\"Anonymous\">ADJUDICATION</annotator>\n"
+                + "        <span start=\"20\" end=\"30\" />\n"
+                + "        <spannedText>chest pain</spannedText>\n"
+                + "        <creationDate>Mon Jan 01 00:00:00 MST 2024</creationDate>\n"
+                + "    </annotation>\n"
+                + "    <classMention id=\"EHOST_Instance_50001\">\n"
+                + "        <mentionClass id=\"SYMPTOM\">chest pain</mentionClass>\n"
+                + "    </classMention>\n"
+                + "    <annotation>\n"
+                + "        <mention id=\"EHOST_Instance_50002\" />\n"
+                + "        <annotator id=\"Anonymous\">ADJUDICATION</annotator>\n"
+                + "        <span start=\"0\" end=\"5\" />\n"
+                + "        <spannedText>fever</spannedText>\n"
+                + "        <creationDate>Mon Jan 01 00:00:00 MST 2024</creationDate>\n"
+                + "    </annotation>\n"
+                + "    <classMention id=\"EHOST_Instance_50002\">\n"
+                + "        <mentionClass id=\"SYMPTOM\">fever</mentionClass>\n"
+                + "    </classMention>\n"
+                + "    <adjudicating>\n"
+                + "        <mention id=\"EHOST_Instance_50004\" />\n"
+                + "        <annotator id=\"Anonymous\">ADJUDICATION</annotator>\n"
+                + "        <span start=\"20\" end=\"30\" />\n"
+                + "        <spannedText>chest pain</spannedText>\n"
+                + "        <creationDate>Mon Jan 01 00:00:00 MST 2024</creationDate>\n"
+                + "        <processed>false</processed>\n"
+                + "        <AdjudicationStatus>NON_MATCHES</AdjudicationStatus>\n"
+                + "    </adjudicating>\n"
+                + "    <classMention id=\"EHOST_Instance_50004\">\n"
+                + "        <mentionClass id=\"SYMPTOM\">chest pain</mentionClass>\n"
+                + "    </classMention>\n"
+                + "    <adjudicating>\n"
+                + "        <mention id=\"EHOST_Instance_50006\" />\n"
+                + "        <annotator id=\"Anonymous\">annotatorA</annotator>\n"
+                + "        <span start=\"10\" end=\"15\" />\n"
+                + "        <spannedText>cough</spannedText>\n"
+                + "        <creationDate>Mon Jan 01 00:00:00 MST 2024</creationDate>\n"
+                + "        <processed>false</processed>\n"
+                + "        <AdjudicationStatus>NON_MATCHES</AdjudicationStatus>\n"
+                + "    </adjudicating>\n"
+                + "    <classMention id=\"EHOST_Instance_50006\">\n"
+                + "        <mentionClass id=\"SYMPTOM\">cough</mentionClass>\n"
+                + "    </classMention>\n"
+                + "</annotations>\n");
+        }
+    }
+
+    /**
      * Writes an {@code adjudication/} XML in the pre-{@code <adjudicating>}
      * format: plain {@code <annotation>} elements with no adjudication
      * bookkeeping at all.

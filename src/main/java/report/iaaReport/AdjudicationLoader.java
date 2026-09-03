@@ -10,6 +10,7 @@ import resultEditor.annotations.ImportAnnotation;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -184,6 +185,9 @@ public class AdjudicationLoader {
      * end up in AdjudicationDepot so the session can resume exactly as it was
      * left.
      *
+     * <p>Files written by older builds are normalised first — see
+     * {@link #healLegacyNodes(eXMLFile, File)}.
+     *
      * @return true if any adjudication working state was loaded
      */
     public static boolean loadWorkingState() {
@@ -207,18 +211,7 @@ public class AdjudicationLoader {
                     continue;
                 }
                 parsedXml = importer.assignateAnnotationIndex(parsedXml);
-
-                // Legacy compatibility: adjudication XMLs written before
-                // <AdjudicationStatus> existed carried only final results, so a
-                // missing status means "agreed match". "NOBODY" is the sentinel
-                // ImportXML uses when the element is absent.
-                for (imports.importedXML.eAnnotationNode node : parsedXml.annotations) {
-                    if (node != null && node.type != 5
-                            && node.__adjudication_status != null
-                            && "NOBODY".equals(node.__adjudication_status.trim())) {
-                        node.__adjudication_status = "MATCHES_OK";
-                    }
-                }
+                healLegacyNodes(parsedXml, xmlFile);
 
                 // Derive text filename (mirrors ImportAnnotation.getXMLTextSource)
                 String textFilename = parsedXml.filename.trim()
@@ -275,6 +268,93 @@ public class AdjudicationLoader {
         log.LoggingToFile.log(Level.INFO,
                 "Loaded adjudication working state from " + xmlFiles.size() + " file(s).");
         return true;
+    }
+
+    /**
+     * Brings an adjudication XML written by an older build into the current
+     * format, in place.
+     *
+     * <p>An {@code <annotation>} in the adjudication folder with no
+     * {@code <AdjudicationStatus>} child can only have come from an older build
+     * — the current writer always emits one. Two such legacy shapes exist, and
+     * the presence of an {@code <adjudicating>} twin tells them apart:
+     *
+     * <ul>
+     *   <li><b>No twin</b> — the annotation is a final adjudicated result from a
+     *       build that did not record status. Every such element was, by
+     *       definition, an agreed match, so it defaults to {@code MATCHES_OK}.</li>
+     *   <li><b>Twin present</b> — the double-write defect: builds between the
+     *       {@code <adjudicating>} introduction and this fix emitted
+     *       adjudicator-authored unresolved annotations as <em>both</em> an
+     *       {@code <annotation>} and an {@code <adjudicating>}. They are one
+     *       annotation, and only the twin carries the true status, so the
+     *       status-less {@code <annotation>} is dropped. Without this the
+     *       duplicate would survive the upgrade permanently, since the current
+     *       writer routes both copies to the {@code <annotation>} side.</li>
+     * </ul>
+     */
+    private static void healLegacyNodes(eXMLFile parsedXml, File xmlFile) {
+        if (parsedXml == null || parsedXml.annotations == null) {
+            return;
+        }
+
+        HashSet<String> adjudicatingKeys = new HashSet<String>();
+        for (imports.importedXML.eAnnotationNode node : parsedXml.annotations) {
+            if (node != null && node.type == 5) {
+                adjudicatingKeys.add(legacyTwinKey(node));
+            }
+        }
+
+        int dropped = 0;
+        int defaulted = 0;
+        for (int i = parsedXml.annotations.size() - 1; i >= 0; i--) {
+            imports.importedXML.eAnnotationNode node = parsedXml.annotations.get(i);
+            if (node == null || node.type == 5
+                    || node.__adjudication_status == null
+                    || !"NOBODY".equals(node.__adjudication_status.trim())) {
+                continue;
+            }
+
+            if (adjudicatingKeys.contains(legacyTwinKey(node))) {
+                parsedXml.annotations.remove(i);
+                dropped++;
+            } else {
+                node.__adjudication_status = "MATCHES_OK";
+                defaulted++;
+            }
+        }
+
+        if (dropped > 0) {
+            log.LoggingToFile.log(Level.INFO, "Healed " + dropped
+                    + " duplicated <annotation>/<adjudicating> pair(s) written by an older"
+                    + " build in " + xmlFile.getName());
+        }
+        if (defaulted > 0) {
+            log.LoggingToFile.log(Level.INFO, "Defaulted " + defaulted
+                    + " status-less <annotation> element(s) to MATCHES_OK in "
+                    + xmlFile.getName());
+        }
+    }
+
+    /**
+     * Identity of an annotation for legacy twin detection: the fields the two
+     * writers copied verbatim from the same in-memory object. Mention ids are
+     * regenerated on every save and so cannot be used.
+     */
+    private static String legacyTwinKey(imports.importedXML.eAnnotationNode node) {
+        StringBuilder key = new StringBuilder();
+        if (node.spanset != null) {
+            for (int i = 0; i < node.spanset.size(); i++) {
+                resultEditor.annotations.SpanDef span = node.spanset.getSpanAt(i);
+                if (span != null) {
+                    key.append(span.start).append('-').append(span.end).append(';');
+                }
+            }
+        }
+        key.append('|').append(node.annotationText)
+           .append('|').append(node.annotator)
+           .append('|').append(node.creationDate);
+        return key.toString();
     }
 
     private static File getAdjudicationDir() {
