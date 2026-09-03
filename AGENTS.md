@@ -25,6 +25,14 @@ mvn clean package -DskipTests
 # Windows: script\mvn_install_jar.bat
 ```
 
+> **Requires JDK 8.** The project targets 1.8 and CI builds on Corretto 8. `src/main` does **not**
+> compile on JDK 11+: `umls/GetCUI.java` uses `javax.xml.ws.Service`, which was removed from the JDK
+> in 11, so the build fails with `cannot access javax.xml.ws.Service`.
+>
+> Maven picks its JDK from `JAVA_HOME`, **not** from whichever `java` is on `PATH`. A `JAVA_HOME`
+> left pointing at a newer JDK will fail the build even when `java -version` reports 1.8. Check with
+> `mvn -version` (not `java -version`) and either unset `JAVA_HOME` or point it at a JDK 8.
+
 ### Test Commands
 ```bash
 # Run all tests
@@ -150,6 +158,8 @@ mvn test
 - Custom JAR dependencies in `/lib` must be installed first via Maven
 - GUI requires display; use Xvfb for headless CI/CD environments
 - Port 8001 used by default for REST server (auto-increments if in use)
+- `cannot access javax.xml.ws.Service` means Maven is on JDK 11+; see the JDK 8 note under
+  [Build Commands](#build-commands)
 
 ---
 
