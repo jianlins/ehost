@@ -1344,6 +1344,43 @@ public class Annotation implements Comparable {
         return true;
     }
 
+    /**Consistent with {@link #equals(Object)}: two annotations that compare
+     * equal must hash equal, otherwise value-based lookups and identity-based
+     * collections silently disagree about what "the same annotation" means.
+     *
+     * <p>Uses exactly the fields {@code equals()} compares: annotation text
+     * (case-insensitively), class, annotator, creation date and span set.
+     * {@code SpanSetDef} only overloads {@code equals(SpanSetDef)} rather than
+     * overriding {@code Object.equals}, and its comparison ignores span order,
+     * so the spans are folded in with an order-independent sum.
+     */
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result
+                + (annotationText == null ? 0 : annotationText.toLowerCase().hashCode());
+        result = 31 * result + (annotationclass == null ? 0 : annotationclass.hashCode());
+        result = 31 * result + (annotator == null ? 0 : annotator.hashCode());
+        result = 31 * result + (creationDate == null ? 0 : creationDate.hashCode());
+        result = 31 * result + spansetHashCode();
+        return result;
+    }
+
+    private int spansetHashCode() {
+        if (spanset == null) {
+            return 0;
+        }
+        int spansHash = 0;
+        for (int i = 0; i < spanset.size(); i++) {
+            SpanDef span = spanset.getSpanAt(i);
+            if (span == null) {
+                continue;
+            }
+            spansHash += 31 * span.start + span.end;
+        }
+        return spansHash;
+    }
+
     /**Prepare the list that will be listed on the editor. It contains the
      * attribute names and their values.*/
     public Vector<iListable> getAttributesForShow() {

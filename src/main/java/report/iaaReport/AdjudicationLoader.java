@@ -9,6 +9,8 @@ import resultEditor.annotations.ImportAnnotation;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.IdentityHashMap;
 import java.util.Vector;
 import java.util.logging.Level;
 
@@ -112,15 +114,52 @@ public class AdjudicationLoader {
         Depot depot = new Depot();
         ArrayList<Article> articles = depot.getAllArticles();
         if (articles != null) {
+            // Identity, not Annotation.equals(): value equality would also drop
+            // annotations this loader never added.
+            IdentityHashMap<Annotation, Boolean> added =
+                    new IdentityHashMap<Annotation, Boolean>();
+            for (Annotation ann : loadedAnnotations) {
+                added.put(ann, Boolean.TRUE);
+            }
             for (Article article : articles) {
                 if (article == null || article.annotations == null) {
                     continue;
                 }
-                article.annotations.removeAll(loadedAnnotations);
+                // Removed in place so any other holder of this Vector sees it.
+                for (int i = article.annotations.size() - 1; i >= 0; i--) {
+                    if (added.containsKey(article.annotations.get(i))) {
+                        article.annotations.remove(i);
+                    }
+                }
             }
         }
         loadedAnnotations.clear();
         log.LoggingToFile.log(Level.INFO, "Adjudication annotations cleaned up from Depot.");
+    }
+
+    /**
+     * Returns the members of {@code candidates} that are not the very same
+     * object as any member of {@code exclude}.
+     *
+     * <p>{@code Annotation} overrides {@code equals()} with value semantics, so
+     * {@code List.removeAll} would discard distinct annotations that merely look
+     * alike. The caller compares two snapshots of the same object graph, for
+     * which reference identity is the correct — and unambiguous — test.
+     */
+    private static Vector<Annotation> removeByIdentity(
+            Vector<Annotation> candidates, Collection<Annotation> exclude) {
+        IdentityHashMap<Annotation, Boolean> excluded =
+                new IdentityHashMap<Annotation, Boolean>();
+        for (Annotation ann : exclude) {
+            excluded.put(ann, Boolean.TRUE);
+        }
+        Vector<Annotation> kept = new Vector<Annotation>();
+        for (Annotation ann : candidates) {
+            if (!excluded.containsKey(ann)) {
+                kept.add(ann);
+            }
+        }
+        return kept;
     }
 
     /**
@@ -137,12 +176,13 @@ public class AdjudicationLoader {
 
     /**
      * Loads adjudication working state from the adjudication/ folder.
-     * The XMLs there contain {@code <adjudicating>} elements (type=5)
-     * which are routed to AdjudicationDepot by
-     * {@link ImportAnnotation#XMLExtractor(eXMLFile)}, preserving their
-     * AdjudicationStatus. Regular {@code <annotation>} elements in the
-     * same files are routed to the regular Depot — callers should ensure
-     * those annotations already exist to avoid duplicates.
+     *
+     * <p>Those XMLs hold two element types, and after the disjoint-writer fix
+     * each annotation appears as exactly one of them: {@code <adjudicating>}
+     * (type=5, in-progress working state) and {@code <annotation>} (the final
+     * adjudicated result). Both carry an {@code <AdjudicationStatus>}, and both
+     * end up in AdjudicationDepot so the session can resume exactly as it was
+     * left.
      *
      * @return true if any adjudication working state was loaded
      */
@@ -168,6 +208,18 @@ public class AdjudicationLoader {
                 }
                 parsedXml = importer.assignateAnnotationIndex(parsedXml);
 
+                // Legacy compatibility: adjudication XMLs written before
+                // <AdjudicationStatus> existed carried only final results, so a
+                // missing status means "agreed match". "NOBODY" is the sentinel
+                // ImportXML uses when the element is absent.
+                for (imports.importedXML.eAnnotationNode node : parsedXml.annotations) {
+                    if (node != null && node.type != 5
+                            && node.__adjudication_status != null
+                            && "NOBODY".equals(node.__adjudication_status.trim())) {
+                        node.__adjudication_status = "MATCHES_OK";
+                    }
+                }
+
                 // Derive text filename (mirrors ImportAnnotation.getXMLTextSource)
                 String textFilename = parsedXml.filename.trim()
                         .replaceAll("\\.knowtator\\.xml", " ").trim();
@@ -186,12 +238,13 @@ public class AdjudicationLoader {
 
                 importer.XMLExtractor(parsedXml);
 
-                // The <annotation> elements from adjudication XML (MATCHES_OK
-                // results) were routed to Depot by XMLExtractor. They need to
-                // also go into AdjudicationDepot so they survive the next save.
+                // The <annotation> elements of the adjudication XML are the
+                // final adjudicated results; XMLExtractor routed them to Depot.
+                // They also belong in AdjudicationDepot so they survive the next
+                // save, carrying the status parsed from the XML.
                 if (depotArticle != null && originalAnnotations != null) {
-                    Vector<Annotation> newlyAdded = new Vector<>(depotArticle.annotations);
-                    newlyAdded.removeAll(originalAnnotations);
+                    Vector<Annotation> newlyAdded =
+                            removeByIdentity(depotArticle.annotations, originalAnnotations);
 
                     if (!newlyAdded.isEmpty()) {
                         adjudication.data.AdjudicationDepot adjDepotInstance =
@@ -201,13 +254,11 @@ public class AdjudicationLoader {
                                 .getArticleByFilename(textFilename);
                         if (adjArticle != null) {
                             for (Annotation ann : newlyAdded) {
-                                ann.adjudicationStatus =
-                                        Annotation.AdjudicationStatus.MATCHES_OK;
                                 adjArticle.annotations.add(ann);
                             }
                         }
                         log.LoggingToFile.log(Level.INFO, "Loaded " + newlyAdded.size()
-                                + " MATCHES_OK annotations into AdjudicationDepot from "
+                                + " adjudicated annotations into AdjudicationDepot from "
                                 + xmlFile.getName());
                     }
 
