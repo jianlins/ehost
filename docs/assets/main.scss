@@ -1,0 +1,67 @@
+---
+# Only the main Sass file needs front matter (the dashes are enough)
+---
+// Widen the page 1.3x from minima's 800px default (must be set before the
+// import since minima declares it with !default).
+$content-width: 1040px;
+
+@import "minima";
+
+.layout-with-sidebar {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-unit;
+}
+
+.sidebar {
+  flex: 0 0 240px;
+  max-width: 240px;
+  font-size: $small-font-size;
+}
+
+.sidebar nav ul {
+  list-style: none;
+  margin: 0 0 0 0.75em;
+  padding: 0;
+}
+
+.sidebar nav > ul {
+  margin-left: 0;
+}
+
+.sidebar nav p {
+  margin-bottom: 0.3em;
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+}
+
+// Keep the footer on a single row, like the header, instead of stacking the
+// heading above the columns and taking extra vertical space.
+.footer-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 1.5em;
+  row-gap: 0.3em;
+}
+
+.footer-line .footer-heading,
+.footer-line p,
+.footer-line .contact-list,
+.footer-line .social-media-list {
+  margin: 0;
+}
+
+@media screen and (max-width: 600px) {
+  .layout-with-sidebar {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    max-width: 100%;
+    flex-basis: auto;
+  }
+}

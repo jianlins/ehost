@@ -279,23 +279,23 @@ public class ImportXML{
                             //System.out.println(" - " + commentText);
                         }
 
-                        // get adjudicationstatus
+                        // get adjudicationstatus; "NOBODY" means the element is
+                        // absent, which is how every pre-adjudication-status
+                        // file (and every saved/ file) looks.
                         String adjudication_status = "NOBODY";
-                        //Element element_adjudicationStatus = annotations.getChild("AdjudicationStatus");
-                        //if( element_adjudicationStatus != null ){
-                        //    adjudication_status = element_adjudicationStatus.getText();
-                        //    //System.out.println(" - " + commentText);
-                        //}
-                        
+                        Element element_adjudicationStatus = annotations.getChild("AdjudicationStatus");
+                        if( element_adjudicationStatus != null ){
+                            adjudication_status = element_adjudicationStatus.getText();
+                        }
+
                         //System.out.println(" adjudication_status = " + adjudication_status);
                         
-                        // get adjudicationstatus
+                        // get processed flag
                         String isProcessed = "false";
-                        //Element element_isProcessed = annotations.getChild("processed");
-                        //if( element_isProcessed != null ){
-                        //    isProcessed = element_isProcessed.getText();
-                            
-                        //}
+                        Element element_isProcessed = annotations.getChild("processed");
+                        if( element_isProcessed != null ){
+                            isProcessed = element_isProcessed.getText();
+                        }
                         //System.out.println("isprocessed = " + isProcessed );
                         
                         
@@ -662,75 +662,11 @@ public class ImportXML{
                 logs.ShowLogs.printWarningLog(errorstr);
             }
 
-            // ========== Backward Compatibility Fix ==========
-            // Handle adjudication XML files from older versions that may be missing
-            // <adjudicating> elements. If we detect that:
-            // 1. We have <annotation> elements (regular annotations)
-            // 2. We have NO <adjudicating> elements
-            // 3. The file appears to be from adjudication/ folder OR has adjudication settings
-            // Then automatically create <adjudicating> copies with MATCHES_OK status
-            // to maintain compatibility with the resume adjudication workflow.
-            try {
-                // Check if this is likely an adjudication file
-                Element elementAdj_root = root.getChild("eHOST_Adjudication_Status");
-                boolean hasAdjudicationSettings = (elementAdj_root != null);
-                boolean isFromAdjudicationFolder = (_file.getAbsolutePath().contains("adjudication"));
-                boolean isAdjudicationFile = hasAdjudicationSettings || isFromAdjudicationFolder;
-                
-                // Count how many adjudicating elements we loaded
-                int adjudicatingCount = 0;
-                int regularAnnotationCount = 0;
-                for (eAnnotationNode node : eas.annotations) {
-                    if (node.type == 5) {  // type 5 = adjudicating element
-                        adjudicatingCount++;
-                    } else {
-                        regularAnnotationCount++;
-                    }
-                }
-                
-                // If this is an adjudication file with annotations but no adjudicating elements,
-                // create adjudicating copies from the regular annotations
-                if (isAdjudicationFile && regularAnnotationCount > 0 && adjudicatingCount == 0) {
-                    log.LoggingToFile.log(Level.INFO, 
-                        "Backward compatibility: Detected adjudication XML without <adjudicating> elements. " +
-                        "Creating adjudicating copies with MATCHES_OK status for " + regularAnnotationCount + 
-                        " annotations in file: " + eas.filename);
-                    
-                    // Create a copy of each regular annotation as an adjudicating element
-                    Vector<eAnnotationNode> adjudicatingCopies = new Vector<eAnnotationNode>();
-                    for (eAnnotationNode originalNode : eas.annotations) {
-                        if (originalNode.type != 5) {  // Only copy regular annotations
-                            // Create adjudicating copy with MATCHES_OK status
-                            eAnnotationNode adjudicatingCopy = new eAnnotationNode(
-                                originalNode.mention_id,
-                                originalNode.annotationText,
-                                originalNode.spanset,
-                                originalNode.annotator,
-                                originalNode.annotator_id,
-                                originalNode.creationDate,
-                                originalNode.annotationComments,
-                                "true",           // isProcessed = true (already adjudicated)
-                                "MATCHES_OK",     // adjudicationStatus = MATCHES_OK
-                                5                 // type = 5 (adjudicating element)
-                            );
-                            adjudicatingCopies.add(adjudicatingCopy);
-                        }
-                    }
-                    
-                    // Add all adjudicating copies to the annotations list
-                    eas.annotations.addAll(adjudicatingCopies);
-                    
-                    log.LoggingToFile.log(Level.INFO, 
-                        "Backward compatibility: Successfully created " + adjudicatingCopies.size() + 
-                        " adjudicating elements with MATCHES_OK status.");
-                }
-            } catch (Exception e) {
-                log.LoggingToFile.log(Level.WARNING, 
-                    "Backward compatibility: Failed to create adjudicating elements from annotations: " + 
-                    e.getMessage());
-                // Don't fail the entire import if backward compatibility processing fails
-            }
-            // ========== End Backward Compatibility Fix ==========
+            // NOTE: older adjudication XMLs contain only <annotation> elements
+            // with no <AdjudicationStatus>. They are handled natively by
+            // AdjudicationLoader.loadWorkingState(), which treats a missing
+            // status as MATCHES_OK. Synthesising <adjudicating> twins here as a
+            // previous build did would make every such annotation load twice.
 
             recordAnnotation(eas);
 

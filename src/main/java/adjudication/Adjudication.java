@@ -1221,8 +1221,6 @@ public class Adjudication extends javax.swing.JFrame {
 
                 // System.out.println("size of sames = " + sames.size() );
 
-                boolean foundDifference = false;
-
                 // #### compare the objective annotation from gold standard
                 for (int s = 0; s < size; s++) {
                     if (i == s) {
@@ -1361,30 +1359,21 @@ public class Adjudication extends javax.swing.JFrame {
 
                     if (addtionalConditions) {
                         sames.add(objectAnnotation);
-                    } else {
-                        foundDifference = true;
                     }
-
+                    // An overlapping annotation that fails the class/attribute
+                    // /relationship/comment comparison is simply a *different*
+                    // annotation, not evidence that this one is disputed. Two
+                    // annotators may each tag one span under two classes, which
+                    // is two agreements, not two disagreements. Whether every
+                    // annotator actually agreed is decided below by
+                    // checkAnnotators(), which requires each of them to be
+                    // represented in "sames"; short-circuiting to a non-match
+                    // here would pre-empt that and wrongly flag the pairs that
+                    // did agree.
                 }
 
-                // System.out.println("diff = " + foundDifference);
-
-                // there are non-matches as we find at least a different one
-                if (foundDifference) {
-                    for (Annotation ann : sames) {
-                        if (ann == null) {
-                            continue;
-                        }
-                        ann.adjudicationStatus = Annotation.AdjudicationStatus.NON_MATCHES;
-                        ann.setProcessed();
-
-                        // if(debug) System.out.println("----> diff: (" +
-                        // ann.spanstart + ", " + ann.spanend + " ) - " +
-                        // ann.annotationText );
-                    }
-                    recordNonMatches(sames, article.filename);
-                } // matches if we found all annotator
-                else {
+                // matches only if every selected annotator is represented
+                {
                     // if the source annotation is created under the
                     // adjudication mode,
                     // (they have anntator "ADJUDICATION")

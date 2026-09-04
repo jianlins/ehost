@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <annotations textSource="doc3.txt">
     <annotation>
-        <mention id="EHOST_Instance_91" />
+        <mention id="EHOST_Instance_23" />
         <annotator id="eHOST_2010">a1</annotator>
         <span start="746" end="754" />
         <spannedText>Eltroxin</spannedText>
         <creationDate>Sat Apr 19 00:02:17 MDT 2025</creationDate>
     </annotation>
-    <classMention id="EHOST_Instance_91">
+    <classMention id="EHOST_Instance_23">
         <mentionClass id="CONCEPT">Eltroxin</mentionClass>
     </classMention>
     <annotation>
-        <mention id="EHOST_Instance_92" />
+        <mention id="EHOST_Instance_24" />
         <annotator id="eHOST_2010">a1</annotator>
         <span start="746" end="754" />
         <spannedText>Eltroxin</spannedText>
         <creationDate>Sat Apr 19 00:02:18 MDT 2025</creationDate>
     </annotation>
-    <classMention id="EHOST_Instance_92">
+    <classMention id="EHOST_Instance_24">
         <mentionClass id="CON2">Eltroxin</mentionClass>
     </classMention>
     <annotation>
-        <mention id="EHOST_Instance_93" />
+        <mention id="EHOST_Instance_25" />
         <annotator id="eHOST_2010">a2</annotator>
         <span start="746" end="754" />
         <spannedText>Eltroxin</spannedText>
         <creationDate>Sat Apr 19 00:02:19 MDT 2025</creationDate>
     </annotation>
-    <classMention id="EHOST_Instance_93">
+    <classMention id="EHOST_Instance_25">
         <mentionClass id="CONCEPT">Eltroxin</mentionClass>
     </classMention>
     <annotation>
-        <mention id="EHOST_Instance_94" />
+        <mention id="EHOST_Instance_26" />
         <annotator id="eHOST_2010">a2</annotator>
         <span start="746" end="754" />
         <spannedText>Eltroxin</spannedText>
         <creationDate>Sat Apr 19 00:02:20 MDT 2025</creationDate>
     </annotation>
-    <classMention id="EHOST_Instance_94">
+    <classMention id="EHOST_Instance_26">
         <mentionClass id="CON2">Eltroxin</mentionClass>
     </classMention>
 </annotations>

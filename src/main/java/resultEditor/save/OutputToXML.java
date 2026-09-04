@@ -75,20 +75,26 @@ public class OutputToXML {
         
         // ##2## output to "adjudication" folder if under the adjudication mode
         if(GUI.reviewmode == GUI.ReviewMode.adjudicationMode){
-            latestUsedMentionID = getLatestUsedMentionID();
-            log.LoggingToFile.log(Level.INFO," + now we are try to build xml for text source: ["+ txtfile.getAbsolutePath() + "] (Adjudicated Results)");
-            
-            folder = "adjudication";        
-            savedpath = workspacepath + File.separator + folder + File.separator;
-            System.out.println("["+savedpath+"]");
-            prepareFolder( new File(savedpath) );
-            xmlpath = savedpath + txtfile.getName().trim() + ".knowtator.xml";
-            XMLfile = new File(xmlpath);
-            
-            // true: tell the method that we want to only output annotations whose status is matched_ok or annotator is "ADJUDICATION"
-            buildxml( XMLfile, true ); 
-            
-            env.Parameters.forceChangeLatestUsedMentionID(latestUsedMentionID);
+            if(!adjudication.data.AdjudicationDepot.articleExists(textsourcefilename)){
+                log.LoggingToFile.log(Level.INFO,
+                    " - skipping adjudication XML write for ["
+                    + textsourcefilename
+                    + "]: file not in AdjudicationDepot (preserving existing XML)");
+            } else {
+                latestUsedMentionID = getLatestUsedMentionID();
+                log.LoggingToFile.log(Level.INFO," + now we are try to build xml for text source: ["+ txtfile.getAbsolutePath() + "] (Adjudicated Results)");
+
+                folder = "adjudication";
+                savedpath = workspacepath + File.separator + folder + File.separator;
+                System.out.println("["+savedpath+"]");
+                prepareFolder( new File(savedpath) );
+                xmlpath = savedpath + txtfile.getName().trim() + ".knowtator.xml";
+                XMLfile = new File(xmlpath);
+
+                buildxml( XMLfile, true );
+
+                env.Parameters.forceChangeLatestUsedMentionID(latestUsedMentionID);
+            }
         }
     }
 
@@ -243,20 +249,27 @@ public class OutputToXML {
         }else
             article = source;
 
-        if( article == null )
+        if( article == null ) {
+            log.LoggingToFile.log(Level.WARNING,
+                "addAnnotations: no article found for textsource ["
+                + textsourcefilename + "], is_adjudicated="
+                + is_outputing_adjudicated_annotations);
             return root;
+        }
 
-        try
+        for( resultEditor.annotations.Annotation annotation: article.annotations ){
+            latestUsedMentionID++;
+            int mentionid = latestUsedMentionID;
+            annotation.outputmentionid = "EHOST_Instance_"+ mentionid;
+        }
+
+        for(resultEditor.annotations.Annotation annotation: article.annotations)
         {
-            for( resultEditor.annotations.Annotation annotation: article.annotations ){
-                latestUsedMentionID++;
-                int mentionid = latestUsedMentionID;
-                annotation.outputmentionid = "EHOST_Instance_"+ mentionid;
-            }
-
-            for(resultEditor.annotations.Annotation annotation: article.annotations)
-            {
+            try {
                 if (is_outputing_adjudicated_annotations) {
+                    // Final adjudicated results only. The complementary filter
+                    // lives in addAdjudicatingAnnotations(); the two must never
+                    // both claim the same annotation.
                     if ((annotation.adjudicationStatus != Annotation.AdjudicationStatus.MATCHES_OK)
                             &&
                             (annotation.getFullAnnotator().compareTo("ADJUDICATION")!=0)) {
@@ -267,7 +280,7 @@ public class OutputToXML {
                 String annotator = "ADJUDICATION";
                 if(!is_outputing_adjudicated_annotations)
                     annotator = annotation.getFullAnnotator();
-                
+
                 root = buildAnnotationNode(
                         is_outputing_adjudicated_annotations,
                         root,
@@ -286,13 +299,14 @@ public class OutputToXML {
                         annotation,
                         false // false is default
                         );
+            } catch(Exception e) {
+                log.LoggingToFile.log(Level.SEVERE,
+                    "error::fail to pack annotation to XML, skipping annotation ["
+                    + annotation.annotationclass + " @ "
+                    + (annotation.spanset != null ? annotation.spanset.toString() : "null")
+                    + "]: " + e.toString());
             }
-        }catch(Exception e){
-            log.LoggingToFile.log(Level.SEVERE, "error 1102111931::fail to pack annotation to XML"
-                    + e.toString() );
-            return root;
         }
-        
 
         return root;
     }
@@ -301,10 +315,21 @@ public class OutputToXML {
      * Record annotations that are working in the mirror memory for adjudication 
      * mode, so next time we can continue previous unfinished adjudication process.
      * 
-     * NOTE: MATCHES_OK annotations are NOT saved as <adjudicating> elements
-     * because they are already saved as <annotation> elements (final results).
-     * This reduces file size and redundancy while keeping them visible in
-     * adjudication mode.
+     * NOTE: this writer and {@link #addAnnotations(Element, boolean)} with
+     * {@code is_outputing_adjudicated_annotations == true} must stay mutually
+     * exclusive: anything the latter already emitted as a final
+     * {@code <annotation>} is skipped here. Otherwise the same annotation is
+     * serialized twice into the same file and read back as two entries when the
+     * adjudication session is resumed.
+     *
+     * <p>Only genuinely unfinished work is recorded. {@code MATCHES_DLETED}
+     * marks the partner that an <em>agreed</em> match absorbed: it is derived
+     * entirely from the surviving {@code MATCHES_OK} annotation, is hidden in
+     * the editor, and needs no decision. Writing it produced adjudication files
+     * holding twice as many entries as the editor showed. It is therefore not
+     * persisted — the accepted result alone records the outcome. Rejections
+     * ({@code NONMATCHES_DLETED}) and open disagreements ({@code NON_MATCHES})
+     * are real decisions and are still written.
      */
     private Element addAdjudicatingAnnotations(Element root )
     {
@@ -312,33 +337,33 @@ public class OutputToXML {
         resultEditor.annotations.Depot depot = new resultEditor.annotations.Depot();
         Article article = adjudication.data.AdjudicationDepot.getArticleByFilename(textsourcefilename);                        
 
-        if( article == null )
+        if( article == null ) {
+            log.LoggingToFile.log(Level.WARNING,
+                "addAdjudicatingAnnotations: no article found for textsource ["
+                + textsourcefilename + "]");
             return root;
+        }
 
-        try
+        for( resultEditor.annotations.Annotation annotation: article.annotations ){
+            latestUsedMentionID++;
+            int mentionid = latestUsedMentionID;
+            annotation.outputmentionid = "EHOST_Instance_"+ mentionid;
+        }
+
+        for(resultEditor.annotations.Annotation annotation: article.annotations)
         {
-            for( resultEditor.annotations.Annotation annotation: article.annotations ){
-                latestUsedMentionID++;
-                int mentionid = latestUsedMentionID;
-                annotation.outputmentionid = "EHOST_Instance_"+ mentionid;
-            }
-
-            for(resultEditor.annotations.Annotation annotation: article.annotations)
-            {                                
-                // ========== Optimization: Skip already-resolved annotations ==========
-                // MATCHES_OK and MATCHES_DLETED annotations are already resolved:
-                // - MATCHES_OK is saved as <annotation> with annotator="ADJUDICATION"
-                // - MATCHES_DLETED can be reconstructed by comparing adjudication/ and saved/ folders
-                // No need to save them as <adjudicating> elements, which reduces redundancy.
-                // They remain visible in adjudication mode but are not saved redundantly.
-                if (annotation.adjudicationStatus == resultEditor.annotations.Annotation.AdjudicationStatus.MATCHES_OK ||
-                    annotation.adjudicationStatus == resultEditor.annotations.Annotation.AdjudicationStatus.MATCHES_DLETED) {
-                    continue;  // Skip - already resolved, no need to save as adjudicating
+            try {
+                if (annotation.adjudicationStatus == resultEditor.annotations.Annotation.AdjudicationStatus.MATCHES_OK
+                        || "ADJUDICATION".equals(annotation.getFullAnnotator())) {
+                    continue;
                 }
-                // ========== End Optimization ==========
-                
+
+                if (annotation.adjudicationStatus
+                        == resultEditor.annotations.Annotation.AdjudicationStatus.MATCHES_DLETED) {
+                    continue;
+                }
+
                 root = buildAdjudicatingAnnotationNode(
-                        // is_outputing_adjudicated_annotations,
                         root,
                         annotation.outputmentionid,
                         annotation.annotationText,
@@ -354,13 +379,14 @@ public class OutputToXML {
                         annotation.verifierFound,
                         annotation
                         );
+            } catch(Exception e) {
+                log.LoggingToFile.log(Level.SEVERE,
+                    "error::fail to pack adjudicating annotation to XML, skipping ["
+                    + annotation.annotationclass + " @ "
+                    + (annotation.spanset != null ? annotation.spanset.toString() : "null")
+                    + "]: " + e.toString());
             }
-        }catch(Exception e){
-            log.LoggingToFile.log(Level.SEVERE, "error 1102111931::fail to pack annotation to XML"
-                    + e.toString() );
-            return root;
         }
-        
 
         return root;
     }
@@ -602,8 +628,12 @@ public class OutputToXML {
             
             
             
-            if(outputAnnotationInMirrorMemeory){                
-                
+            // Adjudication bookkeeping. Written for <adjudicating> elements and
+            // for the <annotation> elements of the adjudication/ folder, whose
+            // status is no longer implicitly MATCHES_OK. Never written to the
+            // saved/ folder, which is the plain annotation-mode deliverable.
+            if(outputAnnotationInMirrorMemeory || is_outputing_adjudicated_annotations){
+
                 // record: annotation.isProcessed for adjudication mode
                 String str = _annotation.isProcessed()? "true" : "false";
                 Element isProcessed = new Element("processed");

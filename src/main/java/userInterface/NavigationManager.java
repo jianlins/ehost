@@ -3,6 +3,7 @@ package userInterface;
 import env.Parameters;
 import main.eHOST;
 import org.apache.commons.io.comparator.NameFileComparator;
+import resultEditor.save.Save;
 
 import userInterface.GUI.ReviewMode;
 import userInterface.structure.FileObj;
@@ -153,6 +154,7 @@ public class NavigationManager {
                         selectProject(gui.projectIdMap.get(projectName), fileName);
                         response = "success";
                     } else {
+                        autoSaveIfModified();
                         gui.showFileContextInTextPane(fileName);
                         response = projectName + " / " + fileName + " loaded";
                     }
@@ -250,6 +252,7 @@ public class NavigationManager {
             env.Parameters.WorkSpace.CurrentProject = projectFolder;
             env.Parameters.previousProjectPath = projectFolder.getAbsolutePath();
 
+            autoSaveIfModified();
             gui.modified = false;
 
             // #### load configure settings of this project
@@ -407,6 +410,27 @@ public class NavigationManager {
      */
     public HashMap<String, Integer> getFileIdMap() {
         return gui.fileIdMap;
+    }
+
+    /**
+     * Auto-saves annotations if there are unsaved changes.
+     * Used by REST API file/project switching paths where no UI prompt is available.
+     */
+    private void autoSaveIfModified() {
+        if (gui.modified || gui.adjudicationModified) {
+            try {
+                log.LoggingToFile.log(Level.INFO,
+                        "Auto-saving before file/project switch (modified="
+                                + gui.modified + ", adjudicationModified="
+                                + gui.adjudicationModified + ")");
+                new Save().quickXMLSaving();
+                gui.modified = false;
+                gui.adjudicationModified = false;
+            } catch (Exception ex) {
+                log.LoggingToFile.log(Level.WARNING,
+                        "Auto-save failed before file/project switch: " + ex.getMessage());
+            }
+        }
     }
 
     protected void goBackToProjectList() {

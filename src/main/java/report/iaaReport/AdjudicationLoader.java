@@ -9,6 +9,11 @@ import resultEditor.annotations.ImportAnnotation;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Vector;
 import java.util.logging.Level;
 
@@ -57,6 +62,16 @@ public class AdjudicationLoader {
                 }
                 parsedXml = importer.assignateAnnotationIndex(parsedXml);
 
+                // Remove adjudicating elements (type=5) before extraction.
+                // These are duplicates of <annotation> elements created either
+                // by the backward compatibility fix or by <adjudicating> XML
+                // elements that mirror their <annotation> counterparts.
+                for (int k = parsedXml.annotations.size() - 1; k >= 0; k--) {
+                    if (parsedXml.annotations.get(k).type == 5) {
+                        parsedXml.annotations.remove(k);
+                    }
+                }
+
                 // Extract annotations without adding to Depot
                 Article article = importer.XMLExtractor(parsedXml, false);
                 if (article == null || article.annotations == null || article.annotations.isEmpty()) {
@@ -102,15 +117,52 @@ public class AdjudicationLoader {
         Depot depot = new Depot();
         ArrayList<Article> articles = depot.getAllArticles();
         if (articles != null) {
+            // Identity, not Annotation.equals(): value equality would also drop
+            // annotations this loader never added.
+            IdentityHashMap<Annotation, Boolean> added =
+                    new IdentityHashMap<Annotation, Boolean>();
+            for (Annotation ann : loadedAnnotations) {
+                added.put(ann, Boolean.TRUE);
+            }
             for (Article article : articles) {
                 if (article == null || article.annotations == null) {
                     continue;
                 }
-                article.annotations.removeAll(loadedAnnotations);
+                // Removed in place so any other holder of this Vector sees it.
+                for (int i = article.annotations.size() - 1; i >= 0; i--) {
+                    if (added.containsKey(article.annotations.get(i))) {
+                        article.annotations.remove(i);
+                    }
+                }
             }
         }
         loadedAnnotations.clear();
         log.LoggingToFile.log(Level.INFO, "Adjudication annotations cleaned up from Depot.");
+    }
+
+    /**
+     * Returns the members of {@code candidates} that are not the very same
+     * object as any member of {@code exclude}.
+     *
+     * <p>{@code Annotation} overrides {@code equals()} with value semantics, so
+     * {@code List.removeAll} would discard distinct annotations that merely look
+     * alike. The caller compares two snapshots of the same object graph, for
+     * which reference identity is the correct — and unambiguous — test.
+     */
+    private static Vector<Annotation> removeByIdentity(
+            Vector<Annotation> candidates, Collection<Annotation> exclude) {
+        IdentityHashMap<Annotation, Boolean> excluded =
+                new IdentityHashMap<Annotation, Boolean>();
+        for (Annotation ann : exclude) {
+            excluded.put(ann, Boolean.TRUE);
+        }
+        Vector<Annotation> kept = new Vector<Annotation>();
+        for (Annotation ann : candidates) {
+            if (!excluded.containsKey(ann)) {
+                kept.add(ann);
+            }
+        }
+        return kept;
     }
 
     /**
@@ -127,12 +179,16 @@ public class AdjudicationLoader {
 
     /**
      * Loads adjudication working state from the adjudication/ folder.
-     * The XMLs there contain {@code <adjudicating>} elements (type=5)
-     * which are routed to AdjudicationDepot by
-     * {@link ImportAnnotation#XMLExtractor(eXMLFile)}, preserving their
-     * AdjudicationStatus. Regular {@code <annotation>} elements in the
-     * same files are routed to the regular Depot — callers should ensure
-     * those annotations already exist to avoid duplicates.
+     *
+     * <p>Those XMLs hold two element types, and after the disjoint-writer fix
+     * each annotation appears as exactly one of them: {@code <adjudicating>}
+     * (type=5, in-progress working state) and {@code <annotation>} (the final
+     * adjudicated result). Both carry an {@code <AdjudicationStatus>}, and both
+     * end up in AdjudicationDepot so the session can resume exactly as it was
+     * left.
+     *
+     * <p>Files written by older builds are normalised first — see
+     * {@link #healLegacyNodes(eXMLFile, File)}.
      *
      * @return true if any adjudication working state was loaded
      */
@@ -157,6 +213,7 @@ public class AdjudicationLoader {
                     continue;
                 }
                 parsedXml = importer.assignateAnnotationIndex(parsedXml);
+                healLegacyNodes(parsedXml, xmlFile);
 
                 // Derive text filename (mirrors ImportAnnotation.getXMLTextSource)
                 String textFilename = parsedXml.filename.trim()
@@ -176,8 +233,31 @@ public class AdjudicationLoader {
 
                 importer.XMLExtractor(parsedXml);
 
-                // Restore original annotations to undo duplicate additions
+                // The <annotation> elements of the adjudication XML are the
+                // final adjudicated results; XMLExtractor routed them to Depot.
+                // They also belong in AdjudicationDepot so they survive the next
+                // save, carrying the status parsed from the XML.
                 if (depotArticle != null && originalAnnotations != null) {
+                    Vector<Annotation> newlyAdded =
+                            removeByIdentity(depotArticle.annotations, originalAnnotations);
+
+                    if (!newlyAdded.isEmpty()) {
+                        adjudication.data.AdjudicationDepot adjDepotInstance =
+                                new adjudication.data.AdjudicationDepot();
+                        adjDepotInstance.articleInsurance(textFilename);
+                        Article adjArticle = adjudication.data.AdjudicationDepot
+                                .getArticleByFilename(textFilename);
+                        if (adjArticle != null) {
+                            for (Annotation ann : newlyAdded) {
+                                adjArticle.annotations.add(ann);
+                            }
+                        }
+                        log.LoggingToFile.log(Level.INFO, "Loaded " + newlyAdded.size()
+                                + " adjudicated annotations into AdjudicationDepot from "
+                                + xmlFile.getName());
+                    }
+
+                    // Restore original annotations to undo duplicate additions
                     depotArticle.annotations = originalAnnotations;
                 }
             } catch (Exception ex) {
@@ -190,6 +270,116 @@ public class AdjudicationLoader {
         log.LoggingToFile.log(Level.INFO,
                 "Loaded adjudication working state from " + xmlFiles.size() + " file(s).");
         return true;
+    }
+
+    /**
+     * Brings an adjudication XML written by an older build into the current
+     * format, in place.
+     *
+     * <p>An {@code <annotation>} in the adjudication folder with no
+     * {@code <AdjudicationStatus>} child can only have come from an older build
+     * — the current writer always emits one. Two such legacy shapes exist, and
+     * the presence of an {@code <adjudicating>} twin tells them apart:
+     *
+     * <ul>
+     *   <li><b>No twin</b> — the annotation is a final adjudicated result from a
+     *       build that did not record status. Every such element was, by
+     *       definition, an agreed match, so it defaults to {@code MATCHES_OK}.</li>
+     *   <li><b>Twin present</b> — the double-write defect: builds between the
+     *       {@code <adjudicating>} introduction and this fix emitted
+     *       adjudicator-authored unresolved annotations as <em>both</em> an
+     *       {@code <annotation>} and an {@code <adjudicating>}. They are one
+     *       annotation, and only the twin carries the true status, so the
+     *       status-less {@code <annotation>} is dropped. Without this the
+     *       duplicate would survive the upgrade permanently, since the current
+     *       writer routes both copies to the {@code <annotation>} side.</li>
+     * </ul>
+     */
+    private static void healLegacyNodes(eXMLFile parsedXml, File xmlFile) {
+        if (parsedXml == null || parsedXml.annotations == null) {
+            return;
+        }
+
+        HashSet<String> adjudicatingKeys = new HashSet<String>();
+        Map<String, String> classByMentionId = classesByMentionId(parsedXml);
+        for (imports.importedXML.eAnnotationNode node : parsedXml.annotations) {
+            if (node != null && node.type == 5) {
+                adjudicatingKeys.add(legacyTwinKey(node, classByMentionId));
+            }
+        }
+
+        int dropped = 0;
+        int defaulted = 0;
+        for (int i = parsedXml.annotations.size() - 1; i >= 0; i--) {
+            imports.importedXML.eAnnotationNode node = parsedXml.annotations.get(i);
+            if (node == null || node.type == 5
+                    || node.__adjudication_status == null
+                    || !"NOBODY".equals(node.__adjudication_status.trim())) {
+                continue;
+            }
+
+            if (adjudicatingKeys.contains(legacyTwinKey(node, classByMentionId))) {
+                parsedXml.annotations.remove(i);
+                dropped++;
+            } else {
+                node.__adjudication_status = "MATCHES_OK";
+                defaulted++;
+            }
+        }
+
+        if (dropped > 0) {
+            log.LoggingToFile.log(Level.INFO, "Healed " + dropped
+                    + " duplicated <annotation>/<adjudicating> pair(s) written by an older"
+                    + " build in " + xmlFile.getName());
+        }
+        if (defaulted > 0) {
+            log.LoggingToFile.log(Level.INFO, "Defaulted " + defaulted
+                    + " status-less <annotation> element(s) to MATCHES_OK in "
+                    + xmlFile.getName());
+        }
+    }
+
+    /**
+     * Identity of an annotation for legacy twin detection: the fields the two
+     * writers copied verbatim from the same in-memory object. Mention ids are
+     * regenerated on every save and so cannot be used.
+     *
+     * <p>The annotation class is part of the identity because overlapping
+     * annotations of different classes on one span are a normal adjudication
+     * shape, and {@code creationDate} has only one-second resolution — two such
+     * annotations created in the same second are otherwise indistinguishable,
+     * and one would be wrongly dropped as a duplicate.
+     */
+    private static String legacyTwinKey(imports.importedXML.eAnnotationNode node,
+            Map<String, String> classByMentionId) {
+        StringBuilder key = new StringBuilder();
+        if (node.spanset != null) {
+            for (int i = 0; i < node.spanset.size(); i++) {
+                resultEditor.annotations.SpanDef span = node.spanset.getSpanAt(i);
+                if (span != null) {
+                    key.append(span.start).append('-').append(span.end).append(';');
+                }
+            }
+        }
+        key.append('|').append(node.annotationText)
+           .append('|').append(node.annotator)
+           .append('|').append(node.creationDate)
+           .append('|').append(classByMentionId.get(node.mention_id));
+        return key.toString();
+    }
+
+    /** Maps each {@code <classMention>} id to the class it declares. */
+    private static Map<String, String> classesByMentionId(eXMLFile parsedXml) {
+        Map<String, String> classes = new HashMap<String, String>();
+        if (parsedXml.classMentions == null) {
+            return classes;
+        }
+        for (imports.importedXML.eClassMention classMention : parsedXml.classMentions) {
+            if (classMention != null && classMention.classMentionID != null) {
+                classes.put(classMention.classMentionID, classMention.mentionClassID);
+            }
+        }
+        return classes;
     }
 
     private static File getAdjudicationDir() {
