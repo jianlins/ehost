@@ -1,10 +1,13 @@
 # 修复方案：恢复裁决工作时出现重复标注
 
 **日期**：2026-09-03
-**状态**：✅ 已实施 —— `mvn clean test` → 86 个测试，0 个失败
+**状态**：✅ 已实施并通过手工验证 —— `mvn test` → 111 个测试，0 个失败
 **缺陷**：重新打开 eHOST → 继续之前的裁决工作 → 保存，会产生重复标注
 **分析文档**：[adjudication-duplicate-annotations-analysis.md](./adjudication-duplicate-annotations-analysis.md)
 **English version**: [adjudication-duplicate-fix-plan.md](./adjudication-duplicate-fix-plan.md)
+
+> 手工 GUI 验证（§7）在最初的重复写入之外又发现两处缺陷，均已修复：重叠的**一致**标注被误报为
+> 分歧；被一致匹配吸收掉的搭档仍被持久化，导致文件条目数是界面显示的两倍。详见 **§7.3**。
 
 ---
 
@@ -27,10 +30,13 @@
 | 元素 | 含义 | 写入方 | 读取方 |
 |---|---|---|---|
 | `<annotation>` | **最终裁决结果**（交付物） | `addAnnotations(root, true)` | IAA 报告，经由 `AdjudicationLoader.load()`——该方法会先显式剔除 `type == 5` |
-| `<adjudicating>` | **进行中的工作状态**（用于恢复会话） | `addAdjudicatingAnnotations(root)` | 恢复流程，经由 `AdjudicationLoader.loadWorkingState()` |
+| `<adjudicating>` | **尚未了结的工作状态**（用于恢复会话）：未决分歧与驳回 | `addAdjudicatingAnnotations(root)` | 恢复流程，经由 `AdjudicationLoader.loadWorkingState()` |
 
 `docs/bugs/EHOST-001` 曾尝试删除 `<adjudicating>` 写入器；结果引发了
 `docs/bugs/EHOST-003`（重启后裁决状态完全丢失），最终被回退。**请勿重复该做法。**
+
+> §7.3 对此作了收窄：`<adjudicating>` 只保存仍带有*决策*的标注。被一致匹配吸收掉的搭档
+> （`MATCHES_DLETED`）可由存活的结果推导得出，不再写入。
 
 ---
 
@@ -38,10 +44,11 @@
 
 下表中目前只有一行是错误的。
 
-| 状态 | 标注者 | 当前 | 目标 |
+| 状态 | 标注者 | 修复前 | 现在 |
 |---|---|---|---|
 | `MATCHES_OK` | 任意 | `<annotation>` | `<annotation>` |
 | 非 `MATCHES_OK` | `ADJUDICATION` | 🔴 **`<annotation>` + `<adjudicating>`** | `<annotation>` |
+| `MATCHES_DLETED` | 其他任何人 | `<adjudicating>` | *不再写入*（§7.3） |
 | 非 `MATCHES_OK` | 其他任何人 | `<adjudicating>` | `<adjudicating>` |
 
 ```
@@ -350,6 +357,112 @@ ann.adjudicationStatus = Annotation.AdjudicationStatus.MATCHES_OK;   // 删除
    输出的原样捕获执行恢复。正是这一步最初揭示了仅有 B.1–B.5 无法消除重复 —— 手工验证时
    仍建议保留此步作为兜底检查。*
 8. 生成一次 IAA 报告，确认裁决结果仍能正常显示。
+9. **重叠检查**（§7.3 之后新增）：让两名标注者在同一 span 上标注两个不同类别，进入裁决模式，
+   确认两条都渲染为已裁决——都不应带有表示分歧的波浪下划线。再调整其中一条的 span 边界并保存，
+   确认文件中的条目与界面显示完全一致。
+
+> **状态：已完成。** 第 1–9 步均已在 GUI 中走查。第 1–8 步通过；第 9 步两次失败，暴露出 §7.3
+> 中修复的两个缺陷。修复后的复测已由报告者确认正确。
+>
+> ⚠️ 手工验证请针对项目的**副本**进行，切勿直接使用 `src/test/resources/`——原因见 §7.2 第二条。
+
+### 7.1 面向真实项目的无界面端到端覆盖
+
+`src/test/java/adjudication/TwoAnnotatorProjectAdjudicationTest.java`（12 个测试）在无显示环境下
+覆盖第 2–8 步，且基于两个**真实**的 eHOST 项目目录，而非手工填充的 depot：
+
+- `testsupport/EhostProjectFixture` 生成含 `config/ corpus/ saved/` 的项目与双文档临床语料，随后
+  **整目录复制**并以第二名标注者的身份重新标注——这正是真实双标注者研究产生的文件形态。span 通过
+  `indexOf` 在正文中定位，因此每个 `<span>` 都可证明覆盖其自身的 `<spannedText>`。
+- 两组标注覆盖了比对引擎能区分的全部关系：完全一致、部分跨度重叠、同一 span 不同类别、以及仅由
+  单个标注者标注的跨度。
+- 流程使用 eHOST 自身的实现：`ImportAnnotation.XMLImporter` → `AdjudicationDepot.copyAnnotations`
+  → `Adjudication.searchDifferenceinArticle` → `OutputToXML.directsave` →
+  `AdjudicationLoader.loadWorkingState`。裁决者操作调用生产代码中的修改方法
+  （`Depot.setAnnotationToMatchedOK_byUID`、`deleteAnnotation_byUID_onAdjudicationMode`、
+  `AdjudicationDepot.deleteAnnotation_byUID`），而非直接赋值字段。
+- 核心断言是磁盘上的 XML 与内存工作集构成精确的多重集镜像——这才是防重复的准确不变式，而不是
+  启发式的重复扫描。
+
+**已针对缺陷代码验证**：将四个已修复的源文件回退到 `70606f4` 后，12 个测试中有 4 个失败，包括
+`substernal chest pain` 在同一文件中出现两次、以及重启后 `MATCHES_OK` 计数由 7 漂移到 8。
+
+此外还厘清了两点既有行为，避免被误认为重复：
+
+- **完全一致的标注由比对引擎自动了结**，无需裁决者介入：一份变为 `MATCHES_OK`，其搭档变为
+  `MATCHES_DLETED`。两者都保留在工作集中，但只有被接受的那份会被持久化（§7.3），因此重启后需要
+  保持的是「该一致结论仍然成立」——恰好返回一条、且仍为 `MATCHES_OK`
+  （`autoResolvedMatch_survivesRestart`）。
+- `addAnnotations(root, true)` 会把 `adjudication/` 中所有最终 `<annotation>` 的标注者
+  **一律改写为 `ADJUDICATION`**，`setAnnotationToMatchedOK_byUID` 同样如此。因此对已解决的标注而言，
+  原始作者信息无法从裁决目录中恢复——只有 `<adjudicating>` 条目保留作者。本次修复未改变该行为。
+
+### 7.2 首次报告：2 个 `<annotation>` + 2 个 `<adjudicating>`
+
+> ⚠️ **以下结论是错的** —— 见 §7.3。该文件内部是自洽的，但它本就不该包含那两个 `<adjudicating>`
+> 条目，而产生它的状态本身还是一个匹配缺陷的结果。保留此节是因为其中两项旁支发现依然成立。
+
+手工验证提出了 `proj2/adjudication/doc3.txt.knowtator.xml`：编辑两条重叠标注之一并接受两者后，
+界面显示两条标注，文件却有四个条目。两名标注者在*同一 span* 上标注了*两个不同类别*，因此裁决中
+确实承载四条标注：
+
+| 条目 | 标注者 | 类别 | 状态 | 界面显示 |
+|---|---|---|---|---|
+| `<annotation>` | `ADJUDICATION` | CONCEPT | `MATCHES_OK` | 是（已编辑的 span） |
+| `<annotation>` | `ADJUDICATION` | CON2 | `MATCHES_OK` | 是 |
+| `<adjudicating>` | `a2` | CONCEPT | `MATCHES_DLETED` | 否 |
+| `<adjudicating>` | `a2` | CON2 | `MATCHES_DLETED` | 否 |
+
+两个写入器按构造互斥（§B.1），所以四条标注产生四个元素；而 `GUI.reloadAnnotationsToScreen` 会跳过
+`*_DLETED`，所以界面画出两条。这部分分析是准确的。遗漏之处在于：被吸收的搭档根本没有理由留在磁盘上
+——「墓碑记录可让恢复流程重建配对关系」这一论据并不成立，因为已了结的一致结论压根不存在待重建的配对。
+§7.3 已将其移除。
+
+在核查过程中还发现两个真实问题，二者依然成立：
+
+- **旧格式修复逻辑会误删真实标注。** `legacyTwinKey` 用 span + 文本 + 标注者 + `creationDate`
+  标识一条标注，这些字段都无法区分「同一 span、仅类别不同」的两条标注。`creationDate` 只精确到秒，
+  同一秒内对一个 span 标注两次即会撞键，导致一条没有状态的历史结果被当作「重复」悄悄丢弃。现已将
+  类别（通过 `classMentions` 解析）纳入标识。单独回退该改动会使
+  `legacyHealer_keepsDifferentClassesOnTheSameSpan` 失败（工作集为 1 而非 2）。
+- **手工验证覆盖了受版本控制的夹具。** GUI 会话直接指向 `src/test/resources/proj2`，就地重写了其
+  `saved/`、`adjudication/` 与 `reports/` 文件（提交 `a0d226f`），破坏了 `IAACalculationTest`
+  据以核对期望值的 `att1`/`att2` 属性数据，导致 HEAD 上有 11 个测试变红。夹具已恢复到 `e7e838f`
+  的内容。**请勿让 eHOST 手工会话直接指向 `src/test/resources/`** —— 先把项目复制到别处。新测试
+  应像 `OverlappingClassAdjudicationTest` 那样在临时目录自建夹具，而不是读取其他测试所依赖的共享夹具。
+
+### 7.3 后续报告：一致被显示为分歧，以及与界面不符的文件
+
+§7.2 中「四个元素是正确的」这一结论，就*写入器*而言成立；但第二轮手工验证表明，该形态其实是两个
+更深层问题的表征。
+
+**一致被报告为分歧（既有缺陷，`Adjudication.java`）。** 在 `searchDifferenceinArticle` 中，只要有
+一条重叠标注未通过类别/属性比对，就会置 `foundDifference = true`，从而把整组候选标记为
+`NON_MATCHES`。于是当两名标注者在同一 span 上标注两个类别（即**两次一致**）时，第一对被解决，
+第二对却带着分歧波浪线呈现给裁决者，尽管两人写的内容完全相同。
+
+重叠但比对结果不同的标注只是**另一条标注**，不能作为「这条有争议」的证据。是否真的一致，下方的
+`checkAnnotators()` 早已负责判断——它要求每位选定标注者都出现在匹配集合中；该短路把它跳过了。
+现已移除该标志。真实分歧仍由 `checkAnnotators()` 报出：
+
+| 场景 | 修复前 | 修复后 |
+|---|---|---|
+| a1{CONCEPT}, a2{CONCEPT} | OK + DLETED | 不变 |
+| a1{CONCEPT, CON2}, a2{CONCEPT, CON2} | OK + DLETED + **2 个 NON_MATCHES** | OK×2 + DLETED×2 |
+| a1{CONCEPT}, a2{CON2} | 2 个 NON_MATCHES | 不变 |
+| a1{CONCEPT, CON2}, a2{CONCEPT} | — | OK + DLETED + NON_MATCHES（a1 多出的 CON2） |
+
+已针对 `70606f4` 验证，说明该问题早于本次重复修复即存在。`OverlappingAgreementMatchingTest`
+覆盖了两个方向；单独回退 `Adjudication.java` 会使其 7 个测试中的 3 个失败。
+
+**不再持久化被吸收的搭档（`OutputToXML.addAdjudicatingAnnotations`）。** `MATCHES_DLETED` 标记的是
+被*一致*匹配吸收掉的搭档。它完全由存活的 `MATCHES_OK` 标注推导而来，被 `GUI.reloadAnnotationsToScreen`
+隐藏，且不承载任何决策——写入它只会让裁决文件的条目数是界面显示的两倍，这正是看起来像重复的原因。
+现已跳过。驳回（`NONMATCHES_DLETED`）与未决分歧（`NON_MATCHES`）是真实决策，照常写入。
+
+这样做是安全的：`loadWorkingState()` **仅**从裁决目录重建 `AdjudicationDepot`，所以未写入的搭档
+就是单纯不存在，不会以新分歧的形式重新出现。仍包含搭档的旧文件可正常加载，并在下次保存时自动规整。
+重新运行比对则会从 `saved/` 完整重建。
 
 ---
 
@@ -362,6 +475,8 @@ ann.adjudicationStatus = Annotation.AdjudicationStatus.MATCHES_OK;   // 删除
 | 裁决者创建的工作被静默丢弃 | B.1 改动的是 `<adjudicating>` 一侧，绝不触碰 `<annotation>` 一侧——参见 B.1 的警告 |
 | `hashCode()` 影响其他位置的行为 | `Annotation` 目前未在任何地方用作哈希键；提交前需先做用法检索确认 |
 | 裁决 XML 文件体积增大 | 影响中性：每条重叠标注减少一个元素，每个 `<annotation>` 增加两个小的子元素 |
+| 丢弃 `MATCHES_DLETED` 导致状态丢失（§7.3） | `loadWorkingState()` 仅从 `adjudication/` 重建工作集，未写入的搭档只是缺席，不会变成新的分歧；它被吸收进的那条已接受结果仍会写入。由 `save_writesOnlyTheAcceptedResults` 与 `layoutIsStableAcrossResume` 锁定 |
+| 放宽匹配规则掩盖真实分歧（§7.3） | `checkAnnotators()` 仍要求每位选定标注者都有匹配。`OverlappingAgreementMatchingTest` 对两个方向都做了断言：类别分歧、单标注者独有标注、以及一方多出的类别，均仍为 `NON_MATCHES` |
 
 ---
 
@@ -371,3 +486,16 @@ ann.adjudicationStatus = Annotation.AdjudicationStatus.MATCHES_OK;   // 删除
 - 已失效的 `adjudicationParameters()` / `getAdjudicationSetting()` 方法（分支评估 §4.9）——
   相关但独立，另行处理。
 - 对 `saved/`（标注模式）输出路径的任何改动。
+
+---
+
+## 10. 最终状态
+
+| | |
+|---|---|
+| 测试套件 | 111 个测试，0 个失败（`mvn test`） |
+| 改动的源文件 | `Adjudication.java`、`ImportXML.java`、`AdjudicationLoader.java`、`Annotation.java`、`OutputToXML.java` |
+| 已修复的缺陷 | 标注被写入两次（§1）；旧格式孪生标识忽略类别（§7.2）；重叠的一致被报为分歧（§7.3）；被吸收的搭档仍被持久化（§7.3） |
+| 手工 GUI 验证 | §7 第 1–9 步，已由报告者确认 |
+
+每项修复都有对应测试守护：单独回退该项修复即会失败——四项均已逐一验证。

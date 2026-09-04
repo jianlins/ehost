@@ -56,9 +56,28 @@ Annotations that exist in both the regular Depot and AdjudicationDepot are saved
 Remove the call to `addAdjudicatingAnnotations()` when saving to the "saved" folder. The annotations in AdjudicationDepot are copies of the original annotations, and any accepted/rejected changes should be handled through the regular Depot mechanism.
 
 ## Status
-**REVERTED** - 2026-03-20
+**REVERTED** - 2026-03-20 · **superseded and resolved** - 2026-09-03
 
 The fix for EHOST-001 was reverted because it caused a more severe regression (EHOST-003): complete loss of adjudication state on app restart. The `<adjudicating>` elements use a different XML tag from `<annotation>` and are loaded into a separate data store (`AdjudicationDepot`), so they are not true duplicates in terms of application behavior. See `docs/bugs/EHOST-003-adjudication-resume-failure.md` and `docs/enhancements/005-adjudication-resume-robustness.md` for details.
+
+### Resolved properly — 2026-09-03
+
+The underlying complaint was real; deleting the writer was simply the wrong remedy. It is now fixed by
+making the two writers' filters **disjoint** instead of removing either one, so no annotation is
+serialized twice and no adjudication state is lost on restart:
+
+- `addAnnotations(root, true)` → `MATCHES_OK` **or** annotator `ADJUDICATION`
+- `addAdjudicatingAnnotations(root)` → everything else, **except** `MATCHES_DLETED`
+
+`MATCHES_DLETED` marks the partner an agreed match absorbed. It is derived from the surviving result
+and hidden in the editor, so persisting it made the file hold twice what the editor showed — the
+symptom originally reported here. It is no longer written, while rejections and open disagreements
+still are.
+
+See [adjudication-duplicate-fix-plan.md](../plans/adjudication-duplicate-fix-plan.md) (§3 for the
+routing table, §7.3 for the `MATCHES_DLETED` decision). Guarded by `AdjudicationRoundTripTest`,
+`OutputToXMLTest`, `TwoAnnotatorProjectAdjudicationTest` and `OverlappingClassAdjudicationTest`;
+111 tests pass, and EHOST-003's resume path is covered by `layoutIsStableAcrossResume`.
 
 ## Fix Details
 

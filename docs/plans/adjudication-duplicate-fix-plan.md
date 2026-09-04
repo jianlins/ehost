@@ -1,10 +1,14 @@
 # Fix Plan: Duplicate Annotations When Resuming Adjudication
 
 **Date**: 2026-09-03
-**Status**: ✅ Implemented — `mvn clean test` → 86 tests, 0 failures
+**Status**: ✅ Implemented and manually verified — `mvn test` → 111 tests, 0 failures
 **Bug**: reopening eHOST → continuing a previous adjudication → saving produces duplicate annotations
 **Analysis**: [adjudication-duplicate-annotations-analysis.md](./adjudication-duplicate-annotations-analysis.md)
 **中文版**: [adjudication-duplicate-fix-plan.zh-CN.md](./adjudication-duplicate-fix-plan.zh-CN.md)
+
+> Manual GUI verification (§7) found two further defects beyond the original double-write, both now
+> fixed: overlapping agreements were reported as disagreements, and absorbed match partners were
+> persisted so the file held twice what the editor showed. See **§7.3**.
 
 ---
 
@@ -29,11 +33,15 @@ implements the fix and turns those tests green.
 | Element | Meaning | Written by | Read by |
 |---|---|---|---|
 | `<annotation>` | **final adjudicated result** (the deliverable) | `addAnnotations(root, true)` | IAA reporting, via `AdjudicationLoader.load()` — which explicitly strips `type == 5` first |
-| `<adjudicating>` | **in-progress working state** (so a session can resume) | `addAdjudicatingAnnotations(root)` | resume, via `AdjudicationLoader.loadWorkingState()` |
+| `<adjudicating>` | **outstanding working state** (so a session can resume): open disagreements and rejections | `addAdjudicatingAnnotations(root)` | resume, via `AdjudicationLoader.loadWorkingState()` |
 
 `docs/bugs/EHOST-001` already tried deleting the `<adjudicating>` writer; that caused
 `docs/bugs/EHOST-003` (total loss of adjudication state on restart) and was reverted. **Do not repeat
 that approach.**
+
+> Refined by §7.3: `<adjudicating>` holds only annotations that still carry a *decision*. The partner
+> that an agreed match absorbed (`MATCHES_DLETED`) is derived from the surviving result and is no
+> longer written.
 
 ---
 
@@ -41,10 +49,11 @@ that approach.**
 
 Only one row of this table is wrong today.
 
-| Status | Annotator | Current | Target |
+| Status | Annotator | Before the fix | Now |
 |---|---|---|---|
 | `MATCHES_OK` | any | `<annotation>` | `<annotation>` |
 | not `MATCHES_OK` | `ADJUDICATION` | 🔴 **`<annotation>` + `<adjudicating>`** | `<annotation>` |
+| `MATCHES_DLETED` | anyone else | `<adjudicating>` | *not written* (§7.3) |
 | not `MATCHES_OK` | anyone else | `<adjudicating>` | `<adjudicating>` |
 
 ```
@@ -366,6 +375,17 @@ Automated tests cover the data round trip, not the UI. After the suite is green:
    against a verbatim capture of the pre-fix writer's output. This step originally revealed that
    B.1–B.5 alone left the duplicate intact — keep it in the manual pass as a sanity check.*
 8. Generate an IAA report and confirm adjudication results still appear.
+9. **Overlap check** (added after §7.3): have both annotators tag one span under two classes, enter
+   adjudication, and confirm *both* render as adjudicated — neither should carry a disagreement
+   underwave. Adjust one span boundary, save, and confirm the file holds exactly the annotations the
+   editor shows.
+
+> **Status: done.** Steps 1–9 were walked through in the GUI. Steps 1–8 passed; step 9 failed twice
+> and produced the two defects fixed in §7.3. A re-run after those fixes was confirmed correct by the
+> reporter.
+>
+> ⚠️ Run the manual pass against a **copy** of a project, never `src/test/resources/` — see the second
+> bullet in §7.2 for what happened when that rule was broken.
 
 ### 7.1 Headless end-to-end coverage over real projects
 
@@ -396,8 +416,10 @@ Two behaviours this exercise pinned down, both pre-existing and both worth knowi
 pass, because either could otherwise be mistaken for a duplicate:
 
 - An **exact agreement is auto-resolved by the comparison engine**, not by the adjudicator: one copy
-  becomes `MATCHES_OK`, its partner `MATCHES_DLETED`. Both are retained in the working set, and both
-  must survive a restart (`autoResolvedMatch_survivesRestart`).
+  becomes `MATCHES_OK`, its partner `MATCHES_DLETED`. Both are retained in the working set. Only the
+  accepted copy is persisted (§7.3), so what must hold across a restart is that the agreement stays
+  settled — exactly one copy returns, still `MATCHES_OK`
+  (`autoResolvedMatch_survivesRestart`).
 - `addAnnotations(root, true)` **relabels every final `<annotation>` in `adjudication/` as
   `ADJUDICATION`**, whoever authored it, and `setAnnotationToMatchedOK_byUID` re-attributes an
   accepted annotation the same way. Original authorship is therefore not recoverable from the
@@ -406,14 +428,18 @@ pass, because either could otherwise be mistaken for a duplicate:
   annotator name.
 
 What step 7's manual pass still adds is the one thing no test covers: how the adjudication view
-*renders* what it loads.
+*renders* what it loads — which is exactly what turned up the two defects in §7.3.
 
-### 7.2 Reported as a defect, resolved as correct: 2 `<annotation>` + 2 `<adjudicating>`
+### 7.2 First report: 2 `<annotation>` + 2 `<adjudicating>`
+
+> ⚠️ **The conclusion below was wrong** — see §7.3. The file was *internally consistent*, but it
+> should never have contained the two `<adjudicating>` entries, and the state that produced it was
+> itself the result of a matching bug. Kept because the two side findings still stand.
 
 The manual pass raised `proj2/adjudication/doc3.txt.knowtator.xml`: after editing one of two
 overlapping annotations and accepting both, the editor showed two annotations but the file held four
-entries. **That file is correct.** Both annotators had tagged the *same span* under *two different
-classes*, so adjudication legitimately carries four annotations:
+entries. Both annotators had tagged the *same span* under *two different classes*, so adjudication
+carried four annotations:
 
 | Entry | Annotator | Class | Status | Shown in editor |
 |---|---|---|---|---|
@@ -422,13 +448,13 @@ classes*, so adjudication legitimately carries four annotations:
 | `<adjudicating>` | `a2` | CONCEPT | `MATCHES_DLETED` | no |
 | `<adjudicating>` | `a2` | CON2 | `MATCHES_DLETED` | no |
 
-The two writers are disjoint by construction (§B.1), so four annotations must produce exactly four
-elements; and `GUI.reloadAnnotationsToScreen` skips `*_DLETED` in adjudication mode, so the editor
-paints two. The tombstones are what lets a resume rebuild the pairing rather than re-running the
-comparison. `OverlappingClassAdjudicationTest` builds this shape in a temp project and holds the
-invariant across three resume/save cycles and a further span edit.
+The two writers are disjoint by construction (§B.1), so four annotations produced four elements, and
+`GUI.reloadAnnotationsToScreen` skips `*_DLETED`, so the editor painted two. That much was accurate.
+What this analysis missed is that an absorbed partner has no reason to be on disk at all: the
+argument that "the tombstones let a resume rebuild the pairing" does not hold, because a settled
+agreement has no pairing left to rebuild. §7.3 removes them.
 
-Two real problems surfaced while confirming it:
+Two real problems surfaced while confirming it, and both stand:
 
 - **The legacy healer could drop a genuine annotation.** `legacyTwinKey` identified an annotation by
   span + text + annotator + `creationDate` — none of which separates two annotations that share a
@@ -494,6 +520,8 @@ save. Re-running the comparison repopulates everything from `saved/` regardless.
 | Adjudicator-authored work silently dropped | B.1 changes the `<adjudicating>` side, never the `<annotation>` side — see the warning in B.1 |
 | `hashCode()` altering behaviour elsewhere | `Annotation` is not currently used as a hash key anywhere; verify with a usage search before committing |
 | Adjudication XML file size growing | Neutral: one element is removed per overlapping annotation, two small child elements added per `<annotation>` |
+| Dropping `MATCHES_DLETED` losing state (§7.3) | `loadWorkingState()` rebuilds `AdjudicationDepot` only from `adjudication/`, so an unwritten partner stays absent rather than resurfacing as a new disagreement. The accepted result it was absorbed into is still written. Pinned by `save_writesOnlyTheAcceptedResults` and `layoutIsStableAcrossResume` |
+| Relaxing the match rule hiding real disagreements (§7.3) | `checkAnnotators()` still requires every selected annotator to be represented. `OverlappingAgreementMatchingTest` asserts both directions — class disagreements, single-annotator findings and one-sided extra classes all remain `NON_MATCHES` |
 
 ---
 
@@ -503,3 +531,16 @@ save. Re-running the comparison repopulates everything from `saved/` regardless.
 - The dead `adjudicationParameters()` / `getAdjudicationSetting()` methods (fork review §4.9) — they
   are related but independent; resolve separately.
 - Any change to the `saved/` (annotation-mode) output path.
+
+---
+
+## 10. Final state
+
+| | |
+|---|---|
+| Test suite | 111 tests, 0 failures (`mvn test`) |
+| Source files changed | `Adjudication.java`, `ImportXML.java`, `AdjudicationLoader.java`, `Annotation.java`, `OutputToXML.java` |
+| Defects fixed | double-written annotation (§1); legacy twin key ignoring class (§7.2); overlapping agreements reported as disagreements (§7.3); absorbed partners persisted (§7.3) |
+| Manual GUI verification | §7 steps 1–9, confirmed by the reporter |
+
+Each fix is guarded by a test that fails when that fix alone is reverted — verified for all four.
