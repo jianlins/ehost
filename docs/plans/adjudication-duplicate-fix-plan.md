@@ -367,6 +367,47 @@ Automated tests cover the data round trip, not the UI. After the suite is green:
    B.1–B.5 alone left the duplicate intact — keep it in the manual pass as a sanity check.*
 8. Generate an IAA report and confirm adjudication results still appear.
 
+### 7.1 Headless end-to-end coverage over real projects
+
+`src/test/java/adjudication/TwoAnnotatorProjectAdjudicationTest.java` (12 tests) now drives steps
+2–8 without a display, over two *real* eHOST project directories rather than a hand-seeded depot:
+
+- `testsupport/EhostProjectFixture` writes a `config/ corpus/ saved/` project with a two-document
+  clinical corpus, then the whole directory is **copied** and re-annotated as a second annotator —
+  the artefacts a real two-annotator study produces. Spans are resolved with `indexOf` against the
+  document text, so every `<span>` provably covers its own `<spannedText>`.
+- The two annotator sets cover every relationship the comparison engine distinguishes: exact
+  agreement, partial span overlap, same span with a different class, and single-annotator spans.
+- The pipeline is eHOST's own: `ImportAnnotation.XMLImporter` → `AdjudicationDepot.copyAnnotations`
+  → `Adjudication.searchDifferenceinArticle` → `OutputToXML.directsave` →
+  `AdjudicationLoader.loadWorkingState`. Adjudicator actions call the production mutators
+  (`Depot.setAnnotationToMatchedOK_byUID`, `deleteAnnotation_byUID_onAdjudicationMode`,
+  `AdjudicationDepot.deleteAnnotation_byUID`) rather than assigning fields, so the simulated
+  session behaves like `data_onlyKeepPrimaryAnnotation` does.
+- The core assertion is that the XML on disk is an exact multiset image of the in-memory working
+  set — the precise anti-duplication invariant, rather than a heuristic duplicate scan.
+
+**Verified against the broken code**: reverting the four fixed source files to `70606f4` makes 4 of
+the 12 fail, including `substernal chest pain` appearing twice in one file and the `MATCHES_OK`
+count drifting 7 → 8 across a restart. The suite therefore detects the original defect rather than
+merely passing alongside it.
+
+Two behaviours this exercise pinned down, both pre-existing and both worth knowing before the GUI
+pass, because either could otherwise be mistaken for a duplicate:
+
+- An **exact agreement is auto-resolved by the comparison engine**, not by the adjudicator: one copy
+  becomes `MATCHES_OK`, its partner `MATCHES_DLETED`. Both are retained in the working set, and both
+  must survive a restart (`autoResolvedMatch_survivesRestart`).
+- `addAnnotations(root, true)` **relabels every final `<annotation>` in `adjudication/` as
+  `ADJUDICATION`**, whoever authored it, and `setAnnotationToMatchedOK_byUID` re-attributes an
+  accepted annotation the same way. Original authorship is therefore not recoverable from the
+  adjudication folder for resolved annotations — only `<adjudicating>` entries keep their author.
+  Unchanged by this fix; noted because it makes two accepted annotations indistinguishable by
+  annotator name.
+
+What step 7's manual pass still adds is the one thing no test covers: how the adjudication view
+*renders* what it loads.
+
 ---
 
 ## 8. Risks
