@@ -321,6 +321,15 @@ public class OutputToXML {
      * {@code <annotation>} is skipped here. Otherwise the same annotation is
      * serialized twice into the same file and read back as two entries when the
      * adjudication session is resumed.
+     *
+     * <p>Only genuinely unfinished work is recorded. {@code MATCHES_DLETED}
+     * marks the partner that an <em>agreed</em> match absorbed: it is derived
+     * entirely from the surviving {@code MATCHES_OK} annotation, is hidden in
+     * the editor, and needs no decision. Writing it produced adjudication files
+     * holding twice as many entries as the editor showed. It is therefore not
+     * persisted — the accepted result alone records the outcome. Rejections
+     * ({@code NONMATCHES_DLETED}) and open disagreements ({@code NON_MATCHES})
+     * are real decisions and are still written.
      */
     private Element addAdjudicatingAnnotations(Element root )
     {
@@ -346,6 +355,11 @@ public class OutputToXML {
             try {
                 if (annotation.adjudicationStatus == resultEditor.annotations.Annotation.AdjudicationStatus.MATCHES_OK
                         || "ADJUDICATION".equals(annotation.getFullAnnotator())) {
+                    continue;
+                }
+
+                if (annotation.adjudicationStatus
+                        == resultEditor.annotations.Annotation.AdjudicationStatus.MATCHES_DLETED) {
                     continue;
                 }
 

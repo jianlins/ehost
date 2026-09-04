@@ -336,8 +336,8 @@ public class OutputToXMLTest {
     }
 
     @Test
-    @DisplayName("Adjudication save: MATCHES_DLETED written as <adjudicating> with preserved status")
-    void adjudicationSave_matchesDeleted_writtenAsAdjudicating() throws Exception {
+    @DisplayName("Adjudication save: MATCHES_DLETED is not persisted, its accepted match is")
+    void adjudicationSave_matchesDeleted_isNotPersisted() throws Exception {
         setupWorkspace();
         GUI.reviewmode = GUI.ReviewMode.adjudicationMode;
 
@@ -364,10 +364,11 @@ public class OutputToXMLTest {
 
         assertEquals(1, annotations.size(),
                 "MATCHES_OK should produce 1 <annotation>");
-        assertEquals(1, adjudicating.size(),
-                "MATCHES_DLETED should produce 1 <adjudicating>");
-        assertEquals("MATCHES_DLETED", adjudicating.get(0).getChildText("AdjudicationStatus"),
-                "AdjudicationStatus should be MATCHES_DLETED");
+        // MATCHES_DLETED is the partner an agreed match absorbed: it is derived
+        // from the surviving result, hidden in the editor, and needs no
+        // decision, so persisting it only inflated the file.
+        assertEquals(0, adjudicating.size(),
+                "MATCHES_DLETED should not be persisted");
     }
 
     @Test
@@ -563,8 +564,8 @@ public class OutputToXMLTest {
         Document docC1 = parseXml(xmlC);
         assertEquals(1, docC1.getRootElement().getChildren("annotation").size(),
                 "noteC session 1: 1 <annotation> (MATCHES_OK)");
-        assertEquals(1, docC1.getRootElement().getChildren("adjudicating").size(),
-                "noteC session 1: 1 <adjudicating> (MATCHES_DLETED)");
+        assertEquals(0, docC1.getRootElement().getChildren("adjudicating").size(),
+                "noteC session 1: MATCHES_DLETED is absorbed by its match, not persisted");
 
         // ========== RESTART: clear all in-memory state ==========
 
@@ -619,19 +620,16 @@ public class OutputToXMLTest {
                 "noteB session 2: NON_MATCHES/UNPROCESSED must survive restart+save. "
                 + "Got " + noteB_adjudicating.size() + " <adjudicating>, expected 3");
 
-        // --- noteC: ALL annotations must survive (1 MATCHES_OK, 1 MATCHES_DLETED) ---
+        // --- noteC: the accepted result survives; its absorbed partner is not persisted ---
         Document docC2 = parseXml(xmlC);
         List<Element> noteC_annotations = docC2.getRootElement().getChildren("annotation");
         List<Element> noteC_adjudicating = docC2.getRootElement().getChildren("adjudicating");
         assertEquals(1, noteC_annotations.size(),
                 "noteC session 2: MATCHES_OK must survive restart+save. "
                 + "Got " + noteC_annotations.size() + " <annotation>, expected 1");
-        assertEquals(1, noteC_adjudicating.size(),
-                "noteC session 2: MATCHES_DLETED must survive restart+save. "
-                + "Got " + noteC_adjudicating.size() + " <adjudicating>, expected 1");
-        assertEquals("MATCHES_DLETED",
-                noteC_adjudicating.get(0).getChildText("AdjudicationStatus"),
-                "noteC: MATCHES_DLETED status must be preserved after restart");
+        assertEquals(0, noteC_adjudicating.size(),
+                "noteC session 2: the MATCHES_DLETED partner stays absent, and must not "
+                + "reappear. Got " + noteC_adjudicating.size() + " <adjudicating>, expected 0");
     }
 
     @Test

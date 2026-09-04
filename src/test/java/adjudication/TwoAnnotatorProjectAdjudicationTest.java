@@ -460,7 +460,14 @@ public class TwoAnnotatorProjectAdjudicationTest {
         return counts;
     }
 
-    /** The same multiset, taken from the in-memory adjudication working set. */
+    /**
+     * The same multiset, taken from the in-memory adjudication working set,
+     * restricted to what the writer is expected to persist.
+     *
+     * <p>{@code MATCHES_DLETED} is excluded: it marks the partner an agreed
+     * match absorbed, which is derived from the surviving result and is
+     * deliberately not written.
+     */
     private Map<String, Integer> memoryMultiset(String doc) {
         Map<String, Integer> counts = new LinkedHashMap<String, Integer>();
         Article article = AdjudicationDepot.getArticleByFilename(doc);
@@ -468,6 +475,9 @@ public class TwoAnnotatorProjectAdjudicationTest {
             return counts;
         }
         for (Annotation ann : article.annotations) {
+            if (ann.adjudicationStatus == Annotation.AdjudicationStatus.MATCHES_DLETED) {
+                continue;
+            }
             StringBuilder spans = new StringBuilder();
             if (ann.spanset != null) {
                 for (int i = 0; i < ann.spanset.size(); i++) {
@@ -483,16 +493,17 @@ public class TwoAnnotatorProjectAdjudicationTest {
     }
 
     /**
-     * Asserts the file on disk is an exact image of the working set: one entry
-     * per in-memory annotation, no more. Any double-write shows up as a count
-     * of 2 on the XML side against 1 in memory.
+     * Asserts the file on disk is an exact image of the persisted working set:
+     * one entry per in-memory annotation that should be written, no more. Any
+     * double-write shows up as a count of 2 on the XML side against 1 in
+     * memory.
      */
     private void assertXmlMirrorsMemory(String doc, String when) throws Exception {
         File xml = aliceProject.adjudicationXml(doc);
         assertTrue(xml.isFile(), "no adjudication XML written for " + doc + " " + when);
         assertEquals(memoryMultiset(doc), xmlMultiset(xml),
                 "the adjudication XML for " + doc + " does not mirror memory " + when);
-        assertEquals(adjudicationDepotCount(doc), totalEntries(xml),
+        assertEquals(persistedCount(doc), totalEntries(xml),
                 "wrong number of entries in " + doc + " " + when);
     }
 
@@ -504,6 +515,21 @@ public class TwoAnnotatorProjectAdjudicationTest {
     private int adjudicationDepotCount(String doc) {
         Article article = AdjudicationDepot.getArticleByFilename(doc);
         return article == null ? 0 : article.annotations.size();
+    }
+
+    /** Working-set annotations the writer is expected to persist. */
+    private int persistedCount(String doc) {
+        Article article = AdjudicationDepot.getArticleByFilename(doc);
+        if (article == null) {
+            return 0;
+        }
+        int count = 0;
+        for (Annotation ann : article.annotations) {
+            if (ann.adjudicationStatus != Annotation.AdjudicationStatus.MATCHES_DLETED) {
+                count++;
+            }
+        }
+        return count;
     }
 
     // ================================================================== //
@@ -628,9 +654,11 @@ public class TwoAnnotatorProjectAdjudicationTest {
         createAdjudicatorAnnotation(NOTE_2, "cough productive of yellow sputum", "SYMPTOM",
                 Annotation.AdjudicationStatus.NON_MATCHES);
 
+        // Absorbed partners of agreed matches are not persisted, so only the
+        // decisions the file carries can be expected back after a restart.
         Map<String, Integer> afterSession1 = new HashMap<String, Integer>();
-        afterSession1.put(NOTE_1, adjudicationDepotCount(NOTE_1));
-        afterSession1.put(NOTE_2, adjudicationDepotCount(NOTE_2));
+        afterSession1.put(NOTE_1, persistedCount(NOTE_1));
+        afterSession1.put(NOTE_2, persistedCount(NOTE_2));
 
         saveAll();
 
@@ -718,12 +746,13 @@ public class TwoAnnotatorProjectAdjudicationTest {
                 "precondition: alice's unique finding should be unresolved");
 
         Map<String, Integer> before = statusHistogram(NOTE_1);
+        before.remove(Annotation.AdjudicationStatus.MATCHES_DLETED.toString());
 
         saveAll();
         restartAndResumeAdjudication();
 
         assertEquals(before, statusHistogram(NOTE_1),
-                "the mix of adjudication statuses changed across the restart");
+                "the mix of adjudication decisions changed across the restart");
 
         // An accepted annotation is re-attributed to ADJUDICATION by
         // Depot.setAnnotationToMatchedOK_byUID, so it is looked up by text.
@@ -744,11 +773,15 @@ public class TwoAnnotatorProjectAdjudicationTest {
     /**
      * An exact agreement needs no adjudicator input: the comparison engine
      * settles it, keeping one copy as {@code MATCHES_OK} and marking the
-     * redundant partner {@code MATCHES_DLETED}. Both must survive a restart
-     * with those statuses, or resuming would re-open a settled difference.
+     * redundant partner {@code MATCHES_DLETED}.
+     *
+     * <p>Only the accepted copy is persisted — the retired partner is derived
+     * from it and is deliberately not written. What must hold across a restart
+     * is that the agreement stays settled: exactly one copy comes back, still
+     * {@code MATCHES_OK}, and the difference is not re-opened.
      */
     @Test
-    @DisplayName("An auto-resolved exact agreement keeps both statuses across a restart")
+    @DisplayName("An auto-resolved exact agreement stays settled across a restart")
     void autoResolvedMatch_survivesRestart() throws Exception {
         openProjectWithBothAnnotators();
         startNewAdjudication();
@@ -763,8 +796,10 @@ public class TwoAnnotatorProjectAdjudicationTest {
         saveAll();
         restartAndResumeAdjudication();
 
-        assertEquals(before, statusesOf(NOTE_1, "acute myocardial infarction"),
-                "an auto-resolved agreement changed after the restart");
+        assertEquals(
+                Arrays.asList(Annotation.AdjudicationStatus.MATCHES_OK),
+                statusesOf(NOTE_1, "acute myocardial infarction"),
+                "a settled agreement should come back as exactly one accepted result");
     }
 
     private List<Annotation.AdjudicationStatus> statusesOf(String doc, String text) {

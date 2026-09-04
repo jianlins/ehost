@@ -444,6 +444,45 @@ Two real problems surfaced while confirming it:
   their own fixture in a temp directory, as `OverlappingClassAdjudicationTest` now does, rather than
   reading a shared one other tests depend on.
 
+### 7.3 The follow-up: agreements shown as disagreements, and the file the editor disagreed with
+
+The conclusion in §7.2 — that four elements were correct — held for the *writer*, but a second manual
+pass showed the layout was a symptom of two deeper problems.
+
+**Agreements were reported as disagreements (pre-existing, `Adjudication.java`).** In
+`searchDifferenceinArticle`, an overlapping annotation that failed the class/attribute comparison set
+`foundDifference = true`, which marked the whole candidate group `NON_MATCHES`. So when both
+annotators tagged one span under two classes — two agreements — the first pair resolved and the
+second was drawn with a disagreement underwave, though the annotators had written the same thing.
+
+An annotation that overlaps but compares differently is simply a *different* annotation, not evidence
+that this one is disputed. Whether the annotators agreed is already decided further down by
+`checkAnnotators()`, which requires every selected annotator to be represented among the matches;
+the short-circuit pre-empted it. The flag is now gone. Genuine disagreements still surface through
+`checkAnnotators()`:
+
+| Fixture | Before | After |
+|---|---|---|
+| a1{CONCEPT}, a2{CONCEPT} | OK + DLETED | unchanged |
+| a1{CONCEPT, CON2}, a2{CONCEPT, CON2} | OK + DLETED + **2 NON_MATCHES** | OK×2 + DLETED×2 |
+| a1{CONCEPT}, a2{CON2} | 2 NON_MATCHES | unchanged |
+| a1{CONCEPT, CON2}, a2{CONCEPT} | — | OK + DLETED + NON_MATCHES (a1's extra CON2) |
+
+Verified against `70606f4`, so this predates the duplicate fix. `OverlappingAgreementMatchingTest`
+covers both directions; reverting only `Adjudication.java` fails 3 of its 7 tests.
+
+**Absorbed partners are no longer persisted (`OutputToXML.addAdjudicatingAnnotations`).**
+`MATCHES_DLETED` marks the partner an *agreed* match absorbed. It is derived entirely from the
+surviving `MATCHES_OK` annotation, is hidden by `GUI.reloadAnnotationsToScreen`, and carries no
+decision — so writing it made the adjudication file hold twice what the editor showed, which is what
+looked like duplication. It is now skipped. Rejections (`NONMATCHES_DLETED`) and open disagreements
+(`NON_MATCHES`) are real decisions and are still written.
+
+This is safe because `loadWorkingState()` rebuilds `AdjudicationDepot` **only** from the adjudication
+folder, so a partner that is not written simply stays absent — it cannot resurface as a fresh
+disagreement. Older files that still contain the partners load fine and are normalised on the next
+save. Re-running the comparison repopulates everything from `saved/` regardless.
+
 ---
 
 ## 8. Risks

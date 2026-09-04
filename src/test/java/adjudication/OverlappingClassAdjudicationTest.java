@@ -33,25 +33,22 @@ import java.util.Vector;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Covers the adjudication file layout that a manual GUI run produced and that
- * looked like a duplicate: two {@code <annotation>} and two
- * {@code <adjudicating>} elements in one document, while the editor showed only
- * two annotations.
+ * Covers the adjudication file that a manual GUI run produced, holding two
+ * {@code <annotation>} and two {@code <adjudicating>} elements while the editor
+ * showed only two annotations.
  *
  * <p>It arises whenever both annotators tag the <em>same span</em> under
- * <em>two different classes</em>. Adjudication then carries four annotations —
- * two accepted results and the two partners they absorbed — and the two writers
- * in {@link OutputToXML} split them on complementary conditions:
+ * <em>two different classes</em>. Adjudication then carries four annotations:
+ * two accepted results and the two partners those results absorbed
+ * ({@code MATCHES_DLETED}). The absorbed partners are hidden by
+ * {@code GUI.reloadAnnotationsToScreen}, so the file held twice what the editor
+ * showed.
  *
- * <pre>
- *   &lt;annotation&gt;    status == MATCHES_OK || annotator == ADJUDICATION
- *   &lt;adjudicating&gt;  everything else
- * </pre>
- *
- * <p>Four annotations therefore must yield exactly four elements. The editor
- * paints only two because {@code GUI.reloadAnnotationsToScreen} skips
- * {@code *_DLETED} in adjudication mode. These tests hold that invariant and
- * prove the layout round-trips without growing.
+ * <p>An absorbed partner is derived entirely from the surviving result and
+ * carries no outstanding decision, so {@link OutputToXML} no longer persists
+ * it. Saving now writes exactly the accepted results, and the file matches the
+ * editor. Older files that still contain the partners load fine and are
+ * normalised on the next save.
  *
  * <p>The fixture is built from scratch in a temporary directory rather than
  * read from {@code src/test/resources}, so no shared fixture that other tests
@@ -311,6 +308,25 @@ public class OverlappingClassAdjudicationTest {
         return counts;
     }
 
+    /**
+     * The working-set multiset restricted to what the writer should persist.
+     * Absorbed partners ({@code MATCHES_DLETED}) are excluded.
+     */
+    private Map<String, Integer> persistedMemoryMultiset() {
+        Map<String, Integer> counts = new LinkedHashMap<String, Integer>();
+        for (Annotation ann : article().annotations) {
+            if (ann.adjudicationStatus == Annotation.AdjudicationStatus.MATCHES_DLETED) {
+                continue;
+            }
+            String key = ann.spanset.getSpanAt(0).start + "-" + ann.spanset.getSpanAt(0).end
+                    + "|" + ann.annotationText + "|" + ann.annotationclass
+                    + "|" + ann.adjudicationStatus;
+            Integer prev = counts.get(key);
+            counts.put(key, prev == null ? 1 : prev + 1);
+        }
+        return counts;
+    }
+
     private int totalEntries() throws Exception {
         Element root = root();
         return root.getChildren("annotation").size() + root.getChildren("adjudicating").size();
@@ -325,8 +341,8 @@ public class OverlappingClassAdjudicationTest {
     // ================================================================== //
 
     @Test
-    @DisplayName("Two <annotation> plus two <adjudicating> is four annotations, not a duplicate")
-    void fourElements_areFourDistinctAnnotations() throws Exception {
+    @DisplayName("An older 2+2 file loads as four distinct annotations, not duplicates")
+    void olderFile_loadsAsFourDistinctAnnotations() throws Exception {
         openAndResume();
 
         assertEquals(4, article().annotations.size(),
@@ -350,25 +366,22 @@ public class OverlappingClassAdjudicationTest {
         assertEquals(Arrays.asList(CONCEPT, CON2), finalClasses,
                 "the two finals should be the two different classes");
 
-        List<String> tombstoneClasses = new ArrayList<String>();
+        List<String> partnerClasses = new ArrayList<String>();
         for (Object o : root.getChildren("adjudicating")) {
             Element e = (Element) o;
             assertEquals("MATCHES_DLETED", e.getChildText("AdjudicationStatus"));
-            assertNotEquals(ADJUDICATION, e.getChildText("annotator"),
-                    "a tombstone keeps its real author");
-            tombstoneClasses.add(classes.get(mentionId(e)));
+            partnerClasses.add(classes.get(mentionId(e)));
         }
-        assertEquals(Arrays.asList(CONCEPT, CON2), tombstoneClasses,
+        assertEquals(Arrays.asList(CONCEPT, CON2), partnerClasses,
                 "one absorbed partner per class");
     }
 
     @Test
-    @DisplayName("The editor shows only the two finals, though the file holds four entries")
-    void editorShowsTwo_whileFileHoldsFour() throws Exception {
+    @DisplayName("The editor shows only the two accepted results")
+    void editorShowsOnlyTheAcceptedResults() throws Exception {
         openAndResume();
 
         assertEquals(4, article().annotations.size());
-        assertEquals(4, totalEntries());
         assertEquals(2, visibleInEditor().size(),
                 "the editor should paint exactly the two accepted annotations");
         assertEquals(EDITED_PHRASE, visibleOfClass(CONCEPT).annotationText,
@@ -376,28 +389,36 @@ public class OverlappingClassAdjudicationTest {
         assertEquals(SHORT_PHRASE, visibleOfClass(CON2).annotationText);
     }
 
+    /** The heart of the report: after saving, the file matches the editor. */
     @Test
-    @DisplayName("The re-saved file mirrors the working set exactly")
-    void savedFileMirrorsMemory() throws Exception {
+    @DisplayName("Saving writes only the accepted results, matching the editor")
+    void save_writesOnlyTheAcceptedResults() throws Exception {
         openAndResume();
         save();
-        assertEquals(memoryMultiset(), xmlMultiset(),
-                "the adjudication XML is not an exact image of the working set");
+
+        assertEquals(2, root().getChildren("annotation").size(),
+                "the two accepted results should be written");
+        assertEquals(0, root().getChildren("adjudicating").size(),
+                "an absorbed partner carries no decision and should not be written");
+        assertEquals(visibleInEditor().size(), totalEntries(),
+                "the file should hold exactly what the editor shows");
+        assertEquals(persistedMemoryMultiset(), xmlMultiset(),
+                "the adjudication XML is not an exact image of the persisted working set");
     }
 
     @Test
-    @DisplayName("Resuming and re-saving this layout changes nothing")
+    @DisplayName("Resuming and re-saving stays stable once normalised")
     void layoutIsStableAcrossResume() throws Exception {
         openAndResume();
         save();
 
         Map<String, Integer> baseline = xmlMultiset();
-        assertEquals(4, totalEntries(), "the first re-save changed the entry count");
+        assertEquals(2, totalEntries(), "the first re-save should normalise the file to 2 entries");
 
         for (int cycle = 1; cycle <= 3; cycle++) {
             openAndResume();
 
-            assertEquals(4, article().annotations.size(),
+            assertEquals(2, article().annotations.size(),
                     "resume on cycle " + cycle + " changed the working set size");
             assertEquals(2, visibleInEditor().size(),
                     "resume on cycle " + cycle + " changed what the editor shows");
@@ -407,14 +428,14 @@ public class OverlappingClassAdjudicationTest {
             assertEquals(baseline, xmlMultiset(),
                     "cycle " + cycle + " changed the adjudication file");
             assertEquals(2, root().getChildren("annotation").size(),
-                    "cycle " + cycle + " changed the number of finals");
-            assertEquals(2, root().getChildren("adjudicating").size(),
-                    "cycle " + cycle + " changed the number of tombstones");
+                    "cycle " + cycle + " changed the number of accepted results");
+            assertEquals(0, root().getChildren("adjudicating").size(),
+                    "cycle " + cycle + " reintroduced absorbed partners");
         }
     }
 
     @Test
-    @DisplayName("Editing an overlapping annotation again still writes four entries")
+    @DisplayName("Editing a span boundary and saving does not grow the file")
     void furtherEdit_doesNotGrowTheFile() throws Exception {
         openAndResume();
 
@@ -425,15 +446,15 @@ public class OverlappingClassAdjudicationTest {
 
         save();
 
-        assertEquals(4, totalEntries(), "editing a span changed the entry count");
+        assertEquals(2, totalEntries(), "editing a span changed the entry count");
         assertEquals(2, root().getChildren("annotation").size());
-        assertEquals(2, root().getChildren("adjudicating").size());
-        assertEquals(memoryMultiset(), xmlMultiset());
+        assertEquals(0, root().getChildren("adjudicating").size());
+        assertEquals(persistedMemoryMultiset(), xmlMultiset());
 
         openAndResume();
         assertEquals(EDITED_PHRASE, visibleOfClass(CON2).annotationText,
                 "the second edit was not persisted");
-        assertEquals(4, article().annotations.size());
+        assertEquals(2, article().annotations.size());
     }
 
     /**
