@@ -54,4 +54,4 @@ A new "Open Report Folder..." button allows users to browse for any report direc
 - **`WebConfig.java`** — added `127.0.0.1` origins to CORS config alongside `localhost`
 
 ## Version
-1.39b2 (Unreleased)
+1.39b2 (released in 1.39)

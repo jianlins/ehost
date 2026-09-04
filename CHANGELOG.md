@@ -1,3 +1,26 @@
+## Version 1.39 (2026-09-04):
+
+First stable release of the 1.39 line, consolidating the 1.39b1–1.39b5 beta work.
+
+### Enhanced
+- **Adjudication Restart Warning**: Confirmation dialog when starting a new adjudication, preventing accidental loss of previous adjudication work ([docs/enhancements/009-adjudication-restart-warning.md](docs/enhancements/009-adjudication-restart-warning.md))
+- **Adjudication XML Optimization**: Slimmer adjudication XML with backward compatibility ([docs/enhancements/008-adjudication-xml-optimization.md](docs/enhancements/008-adjudication-xml-optimization.md))
+- **Adjudication Detection Simplified**: Removed XML metadata and streamlined detection logic ([docs/enhancements/007-simplify-adjudication-detection.md](docs/enhancements/007-simplify-adjudication-detection.md))
+- **Save Prompts on Mode Switch**: Prompts to prevent data loss when switching modes ([docs/enhancements/006-save-prompt-on-mode-switch.md](docs/enhancements/006-save-prompt-on-mode-switch.md))
+- **Adjudication Resume Robustness**: Improved state persistence and resume detection ([docs/enhancements/005-adjudication-resume-robustness.md](docs/enhancements/005-adjudication-resume-robustness.md))
+- **HTTP Report Serving for Multi-User Support**: IAA reports served via HTTP instead of `file://` URIs ([docs/enhancements/004-http-report-serving.md](docs/enhancements/004-http-report-serving.md))
+- **IAA Adjudication Comparison**: Compare annotators against the adjudicated gold standard ([docs/enhancements/003-iaa-adjudication-comparison.md](docs/enhancements/003-iaa-adjudication-comparison.md))
+- **IAA Report HTML Output**: Improved attribute display in unmatched/matched reports ([docs/enhancements/002-iaa-report-attribute-display.md](docs/enhancements/002-iaa-report-attribute-display.md))
+- **System Configuration Dialog**: New dialog for managing application settings from the GUI
+- **User Wiki**: Added user documentation under [docs/wiki](docs/wiki)
+
+### Fixed
+- **Overlapping annotations reported as disagreements**: Overlapping annotations that agree are no longer counted as disagreements in IAA/adjudication reports
+- **Duplicate adjudication elements**: Annotations no longer saved twice in adjudication mode, and folders written by pre-fix builds are healed on load ([docs/bugs/EHOST-001-duplicate-adjudication-elements.md](docs/bugs/EHOST-001-duplicate-adjudication-elements.md))
+- **Adjudication resume failure**: Adjudication state is restored correctly when resuming ([docs/bugs/EHOST-003-adjudication-resume-failure.md](docs/bugs/EHOST-003-adjudication-resume-failure.md))
+- **Missing annotator info on class change**: Annotator name/ID now set when changing annotation class ([docs/bugs/EHOST-002-missing-annotator-info-on-class-change.md](docs/bugs/EHOST-002-missing-annotator-info-on-class-change.md))
+- **Overlapping annotations misaligned in HTML report tables**: Rows no longer duplicate or misalign for overlapping spans
+
 ## Version 1.39b5 (2026-03-23):
 
 ### Enhanced
