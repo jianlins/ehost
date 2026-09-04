@@ -26,6 +26,7 @@ public class SystemConfigDialog extends JDialog {
     private JCheckBox chkFileConverter;
     private JCheckBox chkSystemSettings;
     private JCheckBox chkRestfulServer;
+    private JCheckBox chkSyncAssignments;
 
     // Tab 2: REST Server
     private JTextField txtServerAddress;
@@ -110,6 +111,13 @@ public class SystemConfigDialog extends JDialog {
 
         chkRestfulServer = new JCheckBox("Enable RESTful Server");
         serverPanel.add(chkRestfulServer);
+
+        chkSyncAssignments = new JCheckBox("Show Sync Assignments (legacy VA Annotation Admin, unsupported)");
+        chkSyncAssignments.setToolTipText("<html>Shows the \"Sync Assignments\" toolbar button, which synchronizes"
+                + "<br>annotation assignments with a VA VINCI Annotation Admin server."
+                + "<br>The integration is incomplete and requires such a server; keep it off"
+                + "<br>unless you are testing that integration.</html>");
+        serverPanel.add(chkSyncAssignments);
 
         panel.add(maskPanel);
         panel.add(Box.createVerticalStrut(8));
@@ -246,6 +254,9 @@ public class SystemConfigDialog extends JDialog {
         // RESTful Server
         chkRestfulServer.setSelected(env.Parameters.RESTFulServer);
 
+        // Legacy Annotation Admin sync
+        chkSyncAssignments.setSelected(env.Parameters.SyncAssignments);
+
         // REST Server settings from application.properties
         txtServerAddress.setText(
                 PropertiesUtil.getProperty("server.address", "127.0.0.1"));
@@ -284,6 +295,9 @@ public class SystemConfigDialog extends JDialog {
 
         // 2. Update RESTful Server flag
         env.Parameters.RESTFulServer = chkRestfulServer.isSelected();
+
+        // 2b. Update legacy Annotation Admin sync visibility
+        env.Parameters.SyncAssignments = chkSyncAssignments.isSelected();
 
         // 3. Save eHOST.sys
         SysConf.saveSystemConfigure();
@@ -343,6 +357,9 @@ public class SystemConfigDialog extends JDialog {
 
         // REST server default
         chkRestfulServer.setSelected(true);
+
+        // Legacy Annotation Admin sync stays off by default
+        chkSyncAssignments.setSelected(false);
 
         // REST settings defaults
         txtServerAddress.setText("127.0.0.1");

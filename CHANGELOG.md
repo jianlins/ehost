@@ -12,6 +12,7 @@ First stable release of the 1.39 line, consolidating the 1.39b1–1.39b5 beta wo
 - **IAA Adjudication Comparison**: Compare annotators against the adjudicated gold standard ([docs/enhancements/003-iaa-adjudication-comparison.md](docs/enhancements/003-iaa-adjudication-comparison.md))
 - **IAA Report HTML Output**: Improved attribute display in unmatched/matched reports ([docs/enhancements/002-iaa-report-attribute-display.md](docs/enhancements/002-iaa-report-attribute-display.md))
 - **System Configuration Dialog**: New dialog for managing application settings from the GUI
+- **Sync Assignments hidden by default**: The legacy *Sync Assignments* toolbar button (VA VINCI Annotation Admin client, unfinished and requiring a server that is not distributed with eHOST) is now hidden unless `[SYNC_ASSIGNMENTS]` is set to `true` in `eHOST.sys` or the matching checkbox is ticked in System Config ([docs/enhancements/010-sync-assignments-disabled-by-default.md](docs/enhancements/010-sync-assignments-disabled-by-default.md))
 - **User Wiki**: Added user documentation under [docs/wiki](docs/wiki)
 
 ### Fixed

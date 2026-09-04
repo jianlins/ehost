@@ -178,6 +178,14 @@ public class SaveConf {
             }
             p.println("");
 
+            p.println("[SYNC_ASSIGNMENTS]");
+            if ( env.Parameters.SyncAssignments == true )
+                p.println("true");
+            else{
+                p.println("false");
+            }
+            p.println("");
+
             
             
 

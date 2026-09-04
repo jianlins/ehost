@@ -42,6 +42,16 @@ public class Parameters {
     }
 
     public static boolean RESTFulServer = false;
+
+    /**
+     * toolbar button of "Sync Assignments" :
+     * It talks to the legacy VA VINCI Annotation Admin web service, which is not
+     * generally reachable and whose eHOST-side integration is unfinished. The button
+     * is therefore hidden unless [SYNC_ASSIGNMENTS] is set to true in eHOST.sys.
+     * See docs/enhancements/010-sync-assignments-disabled-by-default.md.
+     */
+    public static boolean SyncAssignments = false;
+
     /**
      * button of "diff" :
      * This should be a public attribute of eHOST, not just for one

@@ -539,6 +539,11 @@ public class AssignmentsScreen extends JPanel implements AnnotationAdminComMgrEv
             syncManager.setUserId(userid);
             syncManager.setFetchPreAnnotations(true);
             
+            // KNOWN GAP: the answer collected above is discarded -- both branches call the
+            // one-argument doSync(), which hard-codes isSubmittingAdjudications=false, so
+            // adjudicated annotations are never submitted. Left as-is because the feature is
+            // hidden by default and cannot be verified without an Annotation Admin server.
+            // See docs/enhancements/010-sync-assignments-disabled-by-default.md
             if( !isSubmittingAdjudications  )
                 syncManager.doSync(true);
             else

@@ -66,6 +66,9 @@ public class ParameterGather {
                     case "RESTFUL_SERVER":
                         getRESTFULServerConfig(block);
                         break;
+                    case "SYNC_ASSIGNMENTS":
+                        getSyncAssignmentsConfig(block);
+                        break;
                 }
 
             }
@@ -237,6 +240,30 @@ public class ParameterGather {
                 Parameters.RESTFulServer = true;
         } catch (Exception ex) {
             log.LoggingToFile.log(Level.WARNING, "error 1101141245:: fail to get latest RESTful server setting."
+                    + ex.getMessage());
+        }
+    }
+
+    /**
+     * Reads the [SYNC_ASSIGNMENTS] flag that controls whether the legacy
+     * "Sync Assignments" toolbar button is shown. It stays hidden unless the
+     * configuration explicitly enables it.
+     */
+    private static void getSyncAssignmentsConfig(Block _block) {
+        try {
+            Parameters.SyncAssignments = false;
+
+            if (_block == null)
+                return;
+
+            if ((_block.values == null) || (_block.values.size() != 1))
+                return;
+
+            String enabled = _block.values.get(0);
+            if (enabled != null && enabled.trim().equalsIgnoreCase("true"))
+                Parameters.SyncAssignments = true;
+        } catch (Exception ex) {
+            log.LoggingToFile.log(Level.WARNING, "error 1101141245:: fail to get Sync Assignments setting."
                     + ex.getMessage());
         }
     }

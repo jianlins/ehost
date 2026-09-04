@@ -10559,6 +10559,11 @@ public class GUI extends JFrame {
         else
             jToggleButton_DictionarySetting.setVisible(false);
 
+        // "Sync Assignments" talks to the legacy VA VINCI Annotation Admin server and
+        // its eHOST-side integration is unfinished, so it stays hidden unless
+        // [SYNC_ASSIGNMENTS] is explicitly enabled in eHOST.sys.
+        jToggle_AssignmentsScreen.setVisible(env.Parameters.SyncAssignments);
+
         // hide the button of pre-pairing functions
         this.jButton_save1.setVisible(false);
     }

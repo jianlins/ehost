@@ -8,7 +8,6 @@ import resultEditor.save.Save;
 import userInterface.GUI.ReviewMode;
 import userInterface.structure.FileObj;
 import userInterface.structure.FileRenderer;
-import webservices.AssignmentsScreen;
 import workSpace.ProjectLock;
 
 import javax.swing.*;
@@ -349,7 +348,11 @@ public class NavigationManager {
             ((navigatorContainer.TabPanel) NavigationPanel1).setTab_All();
 
             String annotator_name = resultEditor.annotator.Manager.getAnnotatorName_OutputOnly();
-            AssignmentsScreen assignmentsScreen = gui.getAssignmentsScreen(annotator_name);
+            // Pre-creating the Annotation Admin screen writes annotationadmin.xml into the
+            // workspace, so only do it when that legacy feature is enabled.
+            if (env.Parameters.SyncAssignments) {
+                gui.getAssignmentsScreen(annotator_name);
+            }
             // String annotator_id =
             // resultEditor.annotator.Manager.getAnnotatorID_outputOnly(); NOT
             // SAME AS AA USER ID

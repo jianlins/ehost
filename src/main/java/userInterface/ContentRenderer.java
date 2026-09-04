@@ -759,7 +759,7 @@ public class ContentRenderer {
         else
             jToggleButton_DictionarySetting.setVisible(false);
 
-        gui.jToggle_AssignmentsScreen.setVisible(isVisible);
+        gui.jToggle_AssignmentsScreen.setVisible(isVisible && env.Parameters.SyncAssignments);
 
         gui.jToggleButton_Converter.setVisible(false);
 
