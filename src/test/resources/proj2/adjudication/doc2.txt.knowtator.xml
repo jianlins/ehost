@@ -1,24 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <annotations textSource="doc2.txt">
     <annotation>
-        <mention id="EHOST_Instance_19" />
+        <mention id="EHOST_Instance_47" />
         <annotator id="eHOST_2010">ADJUDICATION</annotator>
         <span start="628" end="635" />
         <spannedText>incised</spannedText>
         <creationDate>Wed Apr 16 10:18:36 MDT 2025</creationDate>
+        <processed>true</processed>
+        <AdjudicationStatus>MATCHES_OK</AdjudicationStatus>
     </annotation>
-    <classMention id="EHOST_Instance_19">
+    <classMention id="EHOST_Instance_47">
         <mentionClass id="CONCEPT">incised</mentionClass>
-    </classMention>
-    <annotation>
-        <mention id="EHOST_Instance_20" />
-        <annotator id="eHOST_2010">ADJUDICATION</annotator>
-        <span start="611" end="618" />
-        <spannedText>patient</spannedText>
-        <creationDate>Thu Apr 02 18:48:40 MDT 2026</creationDate>
-    </annotation>
-    <classMention id="EHOST_Instance_20">
-        <mentionClass id="CONCEPT">patient</mentionClass>
     </classMention>
 </annotations>
 

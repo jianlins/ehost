@@ -1,33 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <annotations textSource="doc3.txt">
     <annotation>
-        <mention id="EHOST_Instance_27" />
+        <mention id="EHOST_Instance_55" />
         <annotator id="eHOST_2010">ADJUDICATION</annotator>
+        <span start="746" end="760" />
+        <spannedText>Eltroxin which</spannedText>
+        <creationDate>Thu Sep 03 20:17:19 MDT 2026</creationDate>
+        <processed>true</processed>
+        <AdjudicationStatus>MATCHES_OK</AdjudicationStatus>
+    </annotation>
+    <classMention id="EHOST_Instance_55">
+        <mentionClass id="CONCEPT">Eltroxin which</mentionClass>
+    </classMention>
+    <annotation>
+        <mention id="EHOST_Instance_56" />
+        <annotator id="eHOST_2010">ADJUDICATION</annotator>
+        <span start="746" end="754" />
+        <spannedText>Eltroxin</spannedText>
+        <creationDate>Sat Apr 19 00:02:18 MDT 2025</creationDate>
+        <processed>true</processed>
+        <AdjudicationStatus>MATCHES_OK</AdjudicationStatus>
+    </annotation>
+    <classMention id="EHOST_Instance_56">
+        <mentionClass id="CON2">Eltroxin</mentionClass>
+    </classMention>
+    <adjudicating>
+        <mention id="EHOST_Instance_57" />
+        <annotator id="eHOST_2010">a2</annotator>
         <span start="746" end="754" />
         <spannedText>Eltroxin</spannedText>
         <creationDate>Sat Apr 19 00:02:19 MDT 2025</creationDate>
-    </annotation>
-    <classMention id="EHOST_Instance_27">
+        <processed>true</processed>
+        <AdjudicationStatus>MATCHES_DLETED</AdjudicationStatus>
+    </adjudicating>
+    <classMention id="EHOST_Instance_57">
         <mentionClass id="CONCEPT">Eltroxin</mentionClass>
     </classMention>
-    <annotation>
-        <mention id="EHOST_Instance_28" />
-        <annotator id="eHOST_2010">ADJUDICATION</annotator>
+    <adjudicating>
+        <mention id="EHOST_Instance_58" />
+        <annotator id="eHOST_2010">a2</annotator>
         <span start="746" end="754" />
         <spannedText>Eltroxin</spannedText>
-        <creationDate>Thu Apr 02 12:27:57 MDT 2026</creationDate>
-    </annotation>
-    <stringSlotMention id="EHOST_Instance_29">
-        <mentionSlot id="att1" />
-        <stringSlotMentionValue value="1" />
-    </stringSlotMention>
-    <stringSlotMention id="EHOST_Instance_30">
-        <mentionSlot id="att2" />
-        <stringSlotMentionValue value="c" />
-    </stringSlotMention>
-    <classMention id="EHOST_Instance_28">
-        <hasSlotMention id="EHOST_Instance_29" />
-        <hasSlotMention id="EHOST_Instance_30" />
+        <creationDate>Sat Apr 19 00:02:20 MDT 2025</creationDate>
+        <processed>true</processed>
+        <AdjudicationStatus>MATCHES_DLETED</AdjudicationStatus>
+    </adjudicating>
+    <classMention id="EHOST_Instance_58">
         <mentionClass id="CON2">Eltroxin</mentionClass>
     </classMention>
 </annotations>
