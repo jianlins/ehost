@@ -408,6 +408,42 @@ pass, because either could otherwise be mistaken for a duplicate:
 What step 7's manual pass still adds is the one thing no test covers: how the adjudication view
 *renders* what it loads.
 
+### 7.2 Reported as a defect, resolved as correct: 2 `<annotation>` + 2 `<adjudicating>`
+
+The manual pass raised `proj2/adjudication/doc3.txt.knowtator.xml`: after editing one of two
+overlapping annotations and accepting both, the editor showed two annotations but the file held four
+entries. **That file is correct.** Both annotators had tagged the *same span* under *two different
+classes*, so adjudication legitimately carries four annotations:
+
+| Entry | Annotator | Class | Status | Shown in editor |
+|---|---|---|---|---|
+| `<annotation>` | `ADJUDICATION` | CONCEPT | `MATCHES_OK` | yes (edited span) |
+| `<annotation>` | `ADJUDICATION` | CON2 | `MATCHES_OK` | yes |
+| `<adjudicating>` | `a2` | CONCEPT | `MATCHES_DLETED` | no |
+| `<adjudicating>` | `a2` | CON2 | `MATCHES_DLETED` | no |
+
+The two writers are disjoint by construction (§B.1), so four annotations must produce exactly four
+elements; and `GUI.reloadAnnotationsToScreen` skips `*_DLETED` in adjudication mode, so the editor
+paints two. The tombstones are what lets a resume rebuild the pairing rather than re-running the
+comparison. `OverlappingClassAdjudicationTest` builds this shape in a temp project and holds the
+invariant across three resume/save cycles and a further span edit.
+
+Two real problems surfaced while confirming it:
+
+- **The legacy healer could drop a genuine annotation.** `legacyTwinKey` identified an annotation by
+  span + text + annotator + `creationDate` — none of which separates two annotations that share a
+  span and differ only by class. `creationDate` has one-second resolution, so tagging one span twice
+  in quick succession collides, and a status-less legacy final would be silently discarded as a
+  "duplicate". The key now includes the class, resolved through `classMentions`. Reverting just that
+  change fails `legacyHealer_keepsDifferentClassesOnTheSameSpan` (working set 1 instead of 2).
+- **The manual run overwrote committed fixtures.** Running the GUI against `src/test/resources/proj2`
+  rewrote its `saved/`, `adjudication/` and `reports/` files in place (commit `a0d226f`), dropping the
+  `att1`/`att2` attribute data that `IAACalculationTest` pins its expected counts to, and leaving 11
+  tests red at HEAD. The fixture has been restored to its `e7e838f` contents. **Do not point a manual
+  eHOST session at `src/test/resources/`** — copy the project elsewhere first. New tests should build
+  their own fixture in a temp directory, as `OverlappingClassAdjudicationTest` now does, rather than
+  reading a shared one other tests depend on.
+
 ---
 
 ## 8. Risks

@@ -10,8 +10,10 @@ import resultEditor.annotations.ImportAnnotation;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Vector;
 import java.util.logging.Level;
 
@@ -299,9 +301,10 @@ public class AdjudicationLoader {
         }
 
         HashSet<String> adjudicatingKeys = new HashSet<String>();
+        Map<String, String> classByMentionId = classesByMentionId(parsedXml);
         for (imports.importedXML.eAnnotationNode node : parsedXml.annotations) {
             if (node != null && node.type == 5) {
-                adjudicatingKeys.add(legacyTwinKey(node));
+                adjudicatingKeys.add(legacyTwinKey(node, classByMentionId));
             }
         }
 
@@ -315,7 +318,7 @@ public class AdjudicationLoader {
                 continue;
             }
 
-            if (adjudicatingKeys.contains(legacyTwinKey(node))) {
+            if (adjudicatingKeys.contains(legacyTwinKey(node, classByMentionId))) {
                 parsedXml.annotations.remove(i);
                 dropped++;
             } else {
@@ -340,8 +343,15 @@ public class AdjudicationLoader {
      * Identity of an annotation for legacy twin detection: the fields the two
      * writers copied verbatim from the same in-memory object. Mention ids are
      * regenerated on every save and so cannot be used.
+     *
+     * <p>The annotation class is part of the identity because overlapping
+     * annotations of different classes on one span are a normal adjudication
+     * shape, and {@code creationDate} has only one-second resolution — two such
+     * annotations created in the same second are otherwise indistinguishable,
+     * and one would be wrongly dropped as a duplicate.
      */
-    private static String legacyTwinKey(imports.importedXML.eAnnotationNode node) {
+    private static String legacyTwinKey(imports.importedXML.eAnnotationNode node,
+            Map<String, String> classByMentionId) {
         StringBuilder key = new StringBuilder();
         if (node.spanset != null) {
             for (int i = 0; i < node.spanset.size(); i++) {
@@ -353,8 +363,23 @@ public class AdjudicationLoader {
         }
         key.append('|').append(node.annotationText)
            .append('|').append(node.annotator)
-           .append('|').append(node.creationDate);
+           .append('|').append(node.creationDate)
+           .append('|').append(classByMentionId.get(node.mention_id));
         return key.toString();
+    }
+
+    /** Maps each {@code <classMention>} id to the class it declares. */
+    private static Map<String, String> classesByMentionId(eXMLFile parsedXml) {
+        Map<String, String> classes = new HashMap<String, String>();
+        if (parsedXml.classMentions == null) {
+            return classes;
+        }
+        for (imports.importedXML.eClassMention classMention : parsedXml.classMentions) {
+            if (classMention != null && classMention.classMentionID != null) {
+                classes.put(classMention.classMentionID, classMention.mentionClassID);
+            }
+        }
+        return classes;
     }
 
     private static File getAdjudicationDir() {
