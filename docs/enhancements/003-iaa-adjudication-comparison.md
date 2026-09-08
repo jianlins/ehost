@@ -40,4 +40,4 @@ The system now detects adjudication `.knowtator.xml` files in the `projectDir/ad
 - `src/main/java/report/iaaReport/genHtml/GenIndex.java` — Added Adjudication Comparison section to index
 
 ## Version
-1.39 (Unreleased)
+1.39

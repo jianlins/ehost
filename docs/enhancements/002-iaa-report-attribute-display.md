@@ -23,4 +23,4 @@ Each attribute is now displayed as its own row in the comparison table:
 - `src/main/java/report/iaaReport/genHtml/GenHtmlForNonMatches.java` — Unmatched annotations report
 - `src/main/java/report/iaaReport/genHtml/GenHtmlForNonMatches2.java` — Unmatched annotations report (alternate version)
 ## Version
-1.39 (Unreleased)
+1.39

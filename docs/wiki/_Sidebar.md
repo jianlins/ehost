@@ -25,11 +25,12 @@
 * [2.3 Editor](2.3-Editor.md)
 * [2.4 Import Annotations](2.4-Import-Annotations.md)
 * [2.5.1 Add/Delete/Modify Annotations](2.5-Add-Delete-Modify-Annotations,-Class,-Attributes-and-Relationships.md)
-* [2.5.2 Add/Delete/Modify Class]()
+* [2.5.2 Add/Delete/Modify Class](2.5.2-Add-Delete-Modify-Class.md)
 * [2.5.3 Add/Delete/Modify Attributes and Values](2.5.3-Add-Delete-Modify-Attributes-and-Values.md)
 * [2.5.4 Add/Delete/Modify Relationship](2.5.4-Add-Delete-Modify-Relationships.md)
 * [2.6 Assign Annotator](2.6-Assign-Annotator.md)
 * [2.7 Save Annotations](2.7-Save-Annotations.md)
+* [2.8 System Configuration](2.8-System-Configuration.md)
 
 3. Advanced Features
 * [3.1 Annotation Review and Curation](3.1-Annotation-Review-and-Curation.md)
@@ -44,8 +45,10 @@
 * [3.7 Viewing and Sharing Reports](3.7-Viewing-and-Sharing-Reports.md)
 
 4. Beyond Manual Annotation
-* [4.1 Generate Pre-annotations using Custom Dictionary]
-* [4.2 Generate Pre-annotations using Regular Expression]
-* [4.3 ConTEXT algorithm]
+* [4.1 Generate Pre-annotations using Custom Dictionary](4.1-Generate-Pre-annotations-using-Custom-Dictionary.md)
+* [4.2 Generate Pre-annotations using Regular Expression](4.2-Generate-Pre-annotations-using-Regular-Expression.md)
+* [4.3 ConTEXT algorithm](4.3-ConTEXT-algorithm.md)
 
-5. Glossary
+5. Reference
+* [5 Glossary](5-Glossary.md)
+* [RESTful Server Guide](../RESTful-Server-Guide.md)

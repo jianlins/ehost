@@ -74,10 +74,11 @@ and hidden in the editor, so persisting it made the file hold twice what the edi
 symptom originally reported here. It is no longer written, while rejections and open disagreements
 still are.
 
-See [adjudication-duplicate-fix-plan.md](../plans/adjudication-duplicate-fix-plan.md) (§3 for the
-routing table, §7.3 for the `MATCHES_DLETED` decision). Guarded by `AdjudicationRoundTripTest`,
-`OutputToXMLTest`, `TwoAnnotatorProjectAdjudicationTest` and `OverlappingClassAdjudicationTest`;
-111 tests pass, and EHOST-003's resume path is covered by `layoutIsStableAcrossResume`.
+The routing table and the `MATCHES_DLETED` decision are recorded in the internal fix plan
+(`docs/plans/adjudication-duplicate-fix-plan.md`, §3 and §7.3 — not published). Guarded by
+`AdjudicationRoundTripTest`, `OutputToXMLTest`, `TwoAnnotatorProjectAdjudicationTest` and
+`OverlappingClassAdjudicationTest`; 111 tests pass, and EHOST-003's resume path is covered by
+`layoutIsStableAcrossResume`.
 
 ## Fix Details
 
