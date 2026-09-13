@@ -97,7 +97,8 @@ More: [3.7 Viewing and Sharing Reports](wiki/3.7-Viewing-and-Sharing-Reports.md)
 
 Settings that used to require hand-editing `eHOST.sys` and `application.properties` can now be changed
 from the toolbar's **System Config** button — which toolbar features are visible, whether the RESTful
-server runs, and the server address, port and logging levels.
+server runs, the server address, port and logging levels, and how annotation attributes are ordered
+and compared on screen.
 
 ![System Configuration dialog](wiki/res/system-config-features.png)
 

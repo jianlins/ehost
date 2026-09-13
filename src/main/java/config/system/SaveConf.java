@@ -186,6 +186,22 @@ public class SaveConf {
             }
             p.println("");
 
+            // how the attributes are listed on the editor and comparator panels
+            p.println("[ATTRIBUTE_DISPLAY_ORDER]");
+            if ( env.Parameters.AttributeDisplay.order == null )
+                p.println(env.Parameters.AttributeDisplay.Order.SCHEMA.name());
+            else
+                p.println(env.Parameters.AttributeDisplay.order.name());
+            p.println("");
+
+            p.println("[HIGHLIGHT_ATTRIBUTE_DIFFERENCES]");
+            if ( env.Parameters.AttributeDisplay.highlightDifferences == true )
+                p.println("true");
+            else{
+                p.println("false");
+            }
+            p.println("");
+
             
             
 

@@ -1,5 +1,8 @@
 ## Unreleased
 
+### Enhanced
+- **Ordered and highlighted attribute lists**: Attributes of an annotation are listed in schema order (or by name) on both the annotation editor panel and the side by side comparison of the adjudication mode, and the values the two annotators disagree on are highlighted. Configurable in *System Config → Annotation Display* ([docs/enhancements/011-attribute-display-order.md](docs/enhancements/011-attribute-display-order.md))
+
 ### Fixed
 - **Document navigation hotkeys ignored outside the Text Display**: `Ctrl+PageUp` / `Ctrl+PageDown` now switch documents from anywhere in the eHOST window, including right after a project is opened and after selecting an annotation or using the Annotation Editor ([docs/bugs/EHOST-007-hotkey-requires-text-display-focus.md](docs/bugs/EHOST-007-hotkey-requires-text-display-focus.md))
 

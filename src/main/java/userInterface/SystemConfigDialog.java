@@ -37,6 +37,16 @@ public class SystemConfigDialog extends JDialog {
     private JComboBox<String> cmbLogSpringWeb;
     private JComboBox<String> cmbLogHibernate;
 
+    // Tab 3: Annotation Display
+    private JComboBox<String> cmbAttributeOrder;
+    private JCheckBox chkHighlightAttributeDifferences;
+
+    private static final String ORDER_SCHEMA = "Schema order (as in the schema file)";
+    private static final String ORDER_NAME = "Attribute name (A to Z)";
+    private static final String ORDER_UNSORTED = "As stored in the file (no sorting)";
+
+    private static final String[] ATTRIBUTE_ORDERS = {ORDER_SCHEMA, ORDER_NAME, ORDER_UNSORTED};
+
     private static final String[] LOG_LEVELS = {"ERROR", "WARN", "INFO", "DEBUG"};
 
     // Snapshot of original REST values to detect changes
@@ -69,6 +79,7 @@ public class SystemConfigDialog extends JDialog {
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Feature Visibility", buildFeatureTab());
         tabbedPane.addTab("REST Server", buildRestTab());
+        tabbedPane.addTab("Annotation Display", buildAnnotationDisplayTab());
 
         JPanel buttonPanel = buildButtonPanel();
 
@@ -217,6 +228,54 @@ public class SystemConfigDialog extends JDialog {
         return panel;
     }
 
+    /**
+     * Lets the user pick how the attributes of an annotation are listed, and
+     * whether the attributes two annotators disagree on are pointed out.
+     */
+    private JPanel buildAnnotationDisplayTab() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(new EmptyBorder(12, 12, 12, 12));
+
+        JPanel attributePanel = new JPanel(new GridBagLayout());
+        attributePanel.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createEtchedBorder(), "Attribute List",
+                TitledBorder.LEFT, TitledBorder.TOP));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(4, 4, 4, 4);
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0;
+        attributePanel.add(new JLabel("Order attributes by:"), gbc);
+
+        cmbAttributeOrder = new JComboBox<>(ATTRIBUTE_ORDERS);
+        cmbAttributeOrder.setToolTipText("<html>The order used to list the attributes of an"
+                + "<br>annotation, both on the annotation editor panel"
+                + "<br>and on the side by side comparison of the"
+                + "<br>adjudication mode.</html>");
+        gbc.gridx = 1; gbc.weightx = 1.0;
+        attributePanel.add(cmbAttributeOrder, gbc);
+
+        chkHighlightAttributeDifferences = new JCheckBox(
+                "Highlight values that differ between the two annotations");
+        chkHighlightAttributeDifferences.setToolTipText("<html>Shows in red and bold the attributes"
+                + "<br>whose values are not the same on the editor panel"
+                + "<br>and on the comparison panel.</html>");
+        gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 2; gbc.weightx = 1.0;
+        attributePanel.add(chkHighlightAttributeDifferences, gbc);
+
+        // keep the two rows at the top of the group box
+        gbc.gridy = 2; gbc.weighty = 1.0; gbc.fill = GridBagConstraints.BOTH;
+        attributePanel.add(Box.createVerticalGlue(), gbc);
+
+        panel.add(attributePanel);
+        panel.add(Box.createVerticalGlue());
+
+        return panel;
+    }
+
     private JPanel buildButtonPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 4));
 
@@ -273,6 +332,31 @@ public class SystemConfigDialog extends JDialog {
                 PropertiesUtil.getProperty("logging.level.org.springframework.web", "INFO"));
         selectComboItem(cmbLogHibernate,
                 PropertiesUtil.getProperty("logging.level.org.hibernate", "ERROR"));
+
+        // Annotation display
+        selectComboItem(cmbAttributeOrder, labelOf(env.Parameters.AttributeDisplay.order));
+        chkHighlightAttributeDifferences.setSelected(
+                env.Parameters.AttributeDisplay.highlightDifferences);
+    }
+
+    /** The label shown in the combo box for a given attribute order. */
+    private static String labelOf(env.Parameters.AttributeDisplay.Order order) {
+        if (order == env.Parameters.AttributeDisplay.Order.NAME)
+            return ORDER_NAME;
+        if (order == env.Parameters.AttributeDisplay.Order.UNSORTED)
+            return ORDER_UNSORTED;
+
+        return ORDER_SCHEMA;
+    }
+
+    /** The attribute order matching the label selected in the combo box. */
+    private static env.Parameters.AttributeDisplay.Order orderOf(String label) {
+        if (ORDER_NAME.equals(label))
+            return env.Parameters.AttributeDisplay.Order.NAME;
+        if (ORDER_UNSORTED.equals(label))
+            return env.Parameters.AttributeDisplay.Order.UNSORTED;
+
+        return env.Parameters.AttributeDisplay.Order.SCHEMA;
     }
 
     private void snapshotRestValues() {
@@ -299,6 +383,12 @@ public class SystemConfigDialog extends JDialog {
         // 2b. Update legacy Annotation Admin sync visibility
         env.Parameters.SyncAssignments = chkSyncAssignments.isSelected();
 
+        // 2c. Update how the attributes are listed and compared
+        env.Parameters.AttributeDisplay.order =
+                orderOf((String) cmbAttributeOrder.getSelectedItem());
+        env.Parameters.AttributeDisplay.highlightDifferences =
+                chkHighlightAttributeDifferences.isSelected();
+
         // 3. Save eHOST.sys
         SysConf.saveSystemConfigure();
 
@@ -321,6 +411,9 @@ public class SystemConfigDialog extends JDialog {
 
         // 5. Refresh toolbar visibility
         parentGui.enableFunctionsByMask();
+
+        // 5b. Re-list the attributes so the new order shows up right away
+        parentGui.display_diff_updateAttributeDisplay();
 
         // 6. Reload cached eHOST config
         PropertiesUtil.reloadEhostConfig();
@@ -360,6 +453,10 @@ public class SystemConfigDialog extends JDialog {
 
         // Legacy Annotation Admin sync stays off by default
         chkSyncAssignments.setSelected(false);
+
+        // Annotation display defaults
+        selectComboItem(cmbAttributeOrder, ORDER_SCHEMA);
+        chkHighlightAttributeDifferences.setSelected(true);
 
         // REST settings defaults
         txtServerAddress.setText("127.0.0.1");

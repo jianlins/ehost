@@ -1519,6 +1519,40 @@ public class Comparator extends javax.swing.JPanel {
     }
 
 
+    /**The annotation shown on the editor panel, the one every annotation of the
+     * comparator panel is compared against.
+     *
+     * @return  the primary annotation, or null when there is none.
+     */
+    public Annotation getPrimaryAnnotation(){
+        try{
+            int uniqueindex_ofPrimaryAnnotation = Depot.SelectedAnnotationSet.uniqueIndex_of_annotationOnEditor;
+            if (uniqueindex_ofPrimaryAnnotation < 0)
+                return null;
+
+            String filename = WorkSet.getCurrentFile().getName().trim();
+            if( GUI.reviewmode == GUI.ReviewMode.ANNOTATION_MODE )
+                return new Depot().getAnnotationByUnique(filename, uniqueindex_ofPrimaryAnnotation);
+
+            return new adjudication.data.AdjudicationDepot()
+                    .getAnnotationByUnique(filename, uniqueindex_ofPrimaryAnnotation);
+
+        }catch(Exception ex){
+            return null;
+        }
+    }
+
+    /**The annotation whose attribute values are used to spot the differences on
+     * this panel. Returns null when the user turned that highlighting off.
+     */
+    private Annotation getAnnotationToCompareAttributesWith(){
+        if( !env.Parameters.AttributeDisplay.highlightDifferences )
+            return null;
+
+        return getPrimaryAnnotation();
+    }
+
+
     /**Compare primary annotation to a given annotation, try to find 
      * differences. 
      * 
@@ -1534,19 +1568,8 @@ public class Comparator extends javax.swing.JPanel {
             // ##2## validity check
             if(annotation==null)
                 return;
-            int uniqueindex_ofPrimaryAnnotation = Depot.SelectedAnnotationSet.uniqueIndex_of_annotationOnEditor;
-            if (uniqueindex_ofPrimaryAnnotation <0)
-                return;
-            Depot depot = new Depot();
-            String filename = WorkSet.getCurrentFile().getName().trim();
-            Annotation primaryAnnotation = null;
-            if( GUI.reviewmode == GUI.ReviewMode.ANNOTATION_MODE )
-                primaryAnnotation = depot.getAnnotationByUnique(filename, uniqueindex_ofPrimaryAnnotation);
-            else{
-                adjudication.data.AdjudicationDepot depotOfAdj = new adjudication.data.AdjudicationDepot();
-                primaryAnnotation = depotOfAdj.getAnnotationByUnique(filename, uniqueindex_ofPrimaryAnnotation);
-            }
-                
+            Annotation primaryAnnotation = getPrimaryAnnotation();
+
             if (primaryAnnotation==null)
                 return;
 
@@ -1652,21 +1675,29 @@ public class Comparator extends javax.swing.JPanel {
             //jLabel_typeOfRelationship.setText("Type of normalrelationships: ");
         } else {
             //jLabel_typeOfRelationship.setText("Type of normalrelationships: ");
-            Vector<String> list = new Vector<String>();
-            for( AnnotationAttributeDef normalrelationship : annotation.attributes ){
-                if (normalrelationship == null) continue;
-             
-                String str = null;
-                    if( normalrelationship.value != null ) {
-                        str = " \"" + normalrelationship.name + "\" = " + normalrelationship.value;
-                    } else {
-                        str = " \"" + normalrelationship.name + "\"";
-                    }
-                    list.add(str);
-                
+            jList_attributes.setCellRenderer(new userInterface.AttributeListCellRenderer());
+
+            java.util.Set<String> differences = resultEditor.annotations.AttributeDisplayUtil
+                    .getDifferingAttributeNames(annotation,
+                            getAnnotationToCompareAttributesWith());
+
+            Vector<userInterface.AttributeListEntry> list =
+                    new Vector<userInterface.AttributeListEntry>();
+            for( AnnotationAttributeDef attribute :
+                    resultEditor.annotations.AttributeDisplayUtil
+                            .getAttributesInDisplayOrder(annotation) ){
+
+                list.add(new userInterface.AttributeListEntry(attribute,
+                        resultEditor.annotations.AttributeDisplayUtil
+                                .isDifferent(differences, attribute.name)));
             }
             jList_attributes.setListData( list );
         }
+
+        // the editor panel shows the annotation we are compared against, its
+        // own highlighting has to follow this selection.
+        if( gui != null )
+            gui.display_diff_refreshAttributeHighlight();
 
 
         //####-2-   show complex relationships        

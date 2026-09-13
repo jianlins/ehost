@@ -72,6 +72,47 @@ public class Parameters {
      */
     public static boolean enabled_displayAttributeEditor = false;
 
+    /**
+     * How the attributes of an annotation are listed on the annotation editor
+     * panel and on the side by side comparator panel of the adjudication mode.
+     */
+    public static class AttributeDisplay {
+
+        /** The available orders of the attribute lists. */
+        public enum Order {
+            /** Follow the order of the schema configuration file. */
+            SCHEMA,
+            /** Sort alphabetically by attribute name. */
+            NAME,
+            /** Keep the order in which the attributes were read from disk. */
+            UNSORTED
+        }
+
+        /** The order currently used to list attributes. */
+        public static Order order = Order.SCHEMA;
+
+        /**
+         * Highlight the attributes whose values differ between the annotation
+         * on the editor panel and the annotation on the comparator panel.
+         */
+        public static boolean highlightDifferences = true;
+
+        /**
+         * Translate a configuration string into an {@link Order}. Unknown or
+         * missing values fall back to {@link Order#SCHEMA}.
+         */
+        public static Order parseOrder(String value) {
+            if ((value == null) || (value.trim().length() < 1))
+                return Order.SCHEMA;
+
+            try {
+                return Order.valueOf(value.trim().toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                return Order.SCHEMA;
+            }
+        }
+    }
+
 
     // UMLS related --------------------------------------------------- //
     public static String umls_decryptedPassword = null;
