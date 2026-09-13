@@ -261,7 +261,7 @@ public class Popmenu extends JPanel{
         int newuniqueindex = assignMeAUniqueIndex();
         
         
-        if( GUI.reviewmode == GUI.ReviewMode.ANNOTATION_MODE )
+        if( GUI.reviewmode == GUI.ReviewMode.ANNOTATION_MODE ){
             depot.addANewAnnotation( testsourceFilename,
                 this.selectedText,
                 spanset,
@@ -275,7 +275,9 @@ public class Popmenu extends JPanel{
                 null,
                 newuniqueindex
                 );
-        else if( GUI.reviewmode == GUI.ReviewMode.adjudicationMode )
+            depot.setAttributeDefault( testsourceFilename, newuniqueindex );
+        }
+        else if( GUI.reviewmode == GUI.ReviewMode.adjudicationMode ){
             depotOfAdj.addANewAnnotation( testsourceFilename,
                 this.selectedText,
                 spanset,
@@ -289,9 +291,10 @@ public class Popmenu extends JPanel{
                 null,
                 newuniqueindex
                 );
-        
-        depot.setAttributeDefault( testsourceFilename, newuniqueindex );
-
+            // the new annotation lives in the adjudication depot, so its
+            // default attribute values have to be set through that depot.
+            depotOfAdj.setAttributeDefault( testsourceFilename, newuniqueindex );
+        }
 
 
         if(gui.reviewmode == GUI.reviewmode.adjudicationMode ){

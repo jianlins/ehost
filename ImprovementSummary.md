@@ -14,6 +14,7 @@
 - **One-Key Deletion**: Simple annotation deletion using a single press of the "Delete" key
 - **Synchronized Selection**: File navigation panel now highlights the current selection when choosing files from any source
 - **Responsive UI**: Eliminated redundant refreshing operations for a more responsive annotation experience
+- **Consistent Adjudication Editing**: Annotations created in adjudication mode now receive the schema's default attribute values, exactly as they do in annotation mode
 - **Project Locking**: Prevents accidental concurrent editing of the same project by multiple users or instances
 
 ## Multi-User Experience
