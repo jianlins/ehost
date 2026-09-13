@@ -978,7 +978,10 @@ public class OracleFunction extends javax.swing.JFrame {
                     null,
                     newuniqueindex
                     );
-            }else
+                // the new annotation lives in the adjudication depot, so its
+                // default attribute values have to be set through that depot.
+                depotOfAdj.setAttributeDefault( testsourceFilename, newuniqueindex );
+            }else{
                 depotOfAnn.addANewAnnotation( testsourceFilename, //file.getName().trim(),
                     term.termtext,
                     term.start,
@@ -994,7 +997,8 @@ public class OracleFunction extends javax.swing.JFrame {
                     newuniqueindex
                     );
             
-            depotOfAnn.setAttributeDefault( testsourceFilename, newuniqueindex );
+                depotOfAnn.setAttributeDefault( testsourceFilename, newuniqueindex );
+            }
             
         }catch(Exception ex){
             log.LoggingToFile.log(Level.INFO, "error1205071701: " + ex.getStackTrace().toString() );

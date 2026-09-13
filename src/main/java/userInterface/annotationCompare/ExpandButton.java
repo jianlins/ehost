@@ -84,6 +84,20 @@ public class ExpandButton extends JPanel{
         else 
             return null;
     }
+
+    /**get the annotation currently displayed on the comparator panel, so the
+     * editor panel can point out the attributes the two annotations disagree
+     * on.
+     *
+     * @return  the annotation shown on the comparator panel, or null when the
+     *          panel is not on screen.
+     */
+    public Annotation getAnnotationOnComparatorPanel(){
+        if((compartor!=null)&&(compartor.isVisible()))
+            return compartor.getSelectedAnnotation();
+
+        return null;
+    }
     
     /**update information about current selected annotation, update their spans.
      * attributes, and relationship on the comparator panel. The annotation is

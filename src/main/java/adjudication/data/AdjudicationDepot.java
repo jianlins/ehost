@@ -456,6 +456,26 @@ public class AdjudicationDepot {
     
     
     /**
+     * Check and set the default attribute values, which are defined in the 
+     * annotation schema, to a newly created annotation of the adjudication 
+     * depot. This makes adding a new annotation in adjudication mode behave 
+     * the same way as it does in annotation mode.
+     *
+     * @param filename the text source that holds this annotation.
+     *
+     * @param unique the unique index of the new annotation.
+     */
+    public void setAttributeDefault(String filename, int unique) {
+        Annotation annotation = getAnnotationByUnique(filename, unique);
+        if (annotation == null) {
+            return;
+        }
+
+        new resultEditor.annotations.Depot().setAttributeDefault(annotation);
+    }
+    
+    
+    /**
      * Delete an annotation from depot by its UID (Unique Index ID, a integer).
      *
      * @param _UID The unique ID for annotation. An annotation have and only

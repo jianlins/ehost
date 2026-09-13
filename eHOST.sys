@@ -40,3 +40,6 @@ true
 [RESTFUL_SERVER]
 true
 
+[SYNC_ASSIGNMENTS]
+false
+

@@ -69,6 +69,7 @@ public class GUI extends JFrame {
     protected InfoBarManager infoBarManager;
     private NavigationManager navigationManager;
     private ContentRenderer contentRenderer;
+    private DocumentNavigationHotkeys documentNavigationHotkeyDispatcher;
 
     // <editor-fold defaultstate="collapsed" desc="Member Variables">
     protected enum fileInputType {
@@ -248,6 +249,9 @@ public class GUI extends JFrame {
         componentPostProcessing();
 
         updateScreen_for_variables();
+
+        // #### make ctrl+PageUp / ctrl+PageDown work anywhere in eHOST
+        installDocumentNavigationHotkeys();
 
         // #### check and force to ask user to set workspace setting while
         // necessary
@@ -4181,6 +4185,72 @@ public class GUI extends JFrame {
     }// GEN-LAST:event_verifierOnAllActionPerformed
 
     /**
+     * Register an application wide listener so that ctrl+PageUp and
+     * ctrl+PageDown navigate between documents no matter which component of the
+     * eHOST window currently owns the keyboard focus (text display, annotation
+     * editor, annotation lists, the class tree, or nothing at all right after a
+     * project has been opened).
+     */
+    private void installDocumentNavigationHotkeys() {
+        if (documentNavigationHotkeyDispatcher != null)
+            return;
+        documentNavigationHotkeyDispatcher = new DocumentNavigationHotkeys(
+                new DocumentNavigationHotkeys.Target() {
+                    public boolean acceptsHotkey(Component eventSource) {
+                        return isFromMainWindow(eventSource) && isDocumentNavigationAvailable();
+                    }
+
+                    public void previousDocument() {
+                        jButton13.doClick();
+                    }
+
+                    public void nextDocument() {
+                        jButton14.doClick();
+                    }
+                });
+        KeyboardFocusManager.getCurrentKeyboardFocusManager()
+                .addKeyEventDispatcher(documentNavigationHotkeyDispatcher);
+    }
+
+    /**
+     * Remove the application wide ctrl+PageUp/ctrl+PageDown listener.
+     */
+    private void uninstallDocumentNavigationHotkeys() {
+        if (documentNavigationHotkeyDispatcher == null)
+            return;
+        KeyboardFocusManager.getCurrentKeyboardFocusManager()
+                .removeKeyEventDispatcher(documentNavigationHotkeyDispatcher);
+        documentNavigationHotkeyDispatcher = null;
+    }
+
+    /**
+     * @param eventSource the component a key event was targeted at
+     * @return true when it lives in the main eHOST window; keystrokes of
+     * dialogs such as the schema editors are left alone
+     */
+    private boolean isFromMainWindow(Component eventSource) {
+        Window window = (eventSource instanceof Window) ? (Window) eventSource
+                : SwingUtilities.getWindowAncestor(eventSource);
+        return window == this;
+    }
+
+    /**
+     * @return true when a project with documents is loaded and the document
+     * navigation buttons are on screen
+     */
+    private boolean isDocumentNavigationAvailable() {
+        return jButton13 != null && jButton14 != null && jButton13.isShowing()
+                && jButton14.isShowing() && jComboBox_InputFileList != null
+                && jComboBox_InputFileList.getItemCount() > 0;
+    }
+
+    @Override
+    public void dispose() {
+        uninstallDocumentNavigationHotkeys();
+        super.dispose();
+    }
+
+    /**
      * hot keys for textpanel
      *
      * @param evt
@@ -4259,16 +4329,6 @@ public class GUI extends JFrame {
                 case KeyEvent.VK_RIGHT:
                 case KeyEvent.VK_DOWN:
                     moveToNextAnnotation(true);
-                    break;
-                case KeyEvent.VK_PAGE_DOWN:
-                    if (!evt.isAltDown() && evt.isControlDown()) {
-                        jButton14.doClick();
-                    }
-                    break;
-                case KeyEvent.VK_PAGE_UP:
-                    if (!evt.isAltDown() && evt.isControlDown()) {
-                        jButton13.doClick();
-                    }
                     break;
             }
         }
@@ -5638,20 +5698,68 @@ public class GUI extends JFrame {
         if ((a == null) || (a.attributes == null) || (a.attributes.size() < 1))
             return;
 
-        Vector<String> list = new Vector<String>();
-        for (AnnotationAttributeDef attribute : a.attributes) {
-            if ((attribute == null) || (attribute.value == null) || (attribute.name == null)) {
+        jList_normalrelationship.setListData(buildAttributeList(a));
+    }
+
+    /**
+     * Build the rows of an attribute list: the attributes of the given
+     * annotation, in the order chosen by the user, each of them flagged when
+     * the annotation shown on the comparator panel holds another value.
+     */
+    protected Vector<AttributeListEntry> buildAttributeList(Annotation a) {
+        jList_normalrelationship.setCellRenderer(new AttributeListCellRenderer());
+
+        Set<String> differences = AttributeDisplayUtil.getDifferingAttributeNames(a,
+                getAnnotationToCompareAttributesWith());
+
+        Vector<AttributeListEntry> list = new Vector<AttributeListEntry>();
+        for (AnnotationAttributeDef attribute : AttributeDisplayUtil
+                .getAttributesInDisplayOrder(a)) {
+            if (attribute.value == null)
                 continue;
-            }
 
-            String str;
-            str = " \"" + attribute.name + "\" = " + attribute.value;
-
-            list.add(str);
-
+            list.add(new AttributeListEntry(attribute,
+                    AttributeDisplayUtil.isDifferent(differences, attribute.name)));
         }
 
-        jList_normalrelationship.setListData(list);
+        return list;
+    }
+
+    /**
+     * The annotation currently selected on the comparator panel, whose
+     * attributes are shown next to the ones of the editor panel. Returns null
+     * when there is nothing to compare with, or when the user turned the
+     * highlighting of the differences off.
+     */
+    private Annotation getAnnotationToCompareAttributesWith() {
+        try {
+            if (!env.Parameters.AttributeDisplay.highlightDifferences)
+                return null;
+
+            if (jPanel60 instanceof userInterface.annotationCompare.ExpandButton)
+                return ((userInterface.annotationCompare.ExpandButton) jPanel60)
+                        .getAnnotationOnComparatorPanel();
+
+        } catch (Exception ex) {
+            return null;
+        }
+
+        return null;
+    }
+
+    /**
+     * Re-list the attributes of the annotation on the editor panel, so the
+     * highlighting of the differences follows the annotation that was just
+     * selected on the comparator panel.
+     */
+    public void display_diff_refreshAttributeHighlight() {
+        try {
+            if (WorkSet.currentAnnotation != null)
+                updateAttributes(WorkSet.currentAnnotation);
+        } catch (Exception ex) {
+            log.LoggingToFile.log(Level.WARNING, "error 2506090002:: fail to refresh the "
+                    + "highlighting of the attribute differences:: " + ex.toString());
+        }
     }
 
     public void display_diff_checkDifference() {
@@ -5662,6 +5770,25 @@ public class GUI extends JFrame {
         ((userInterface.annotationCompare.ExpandButton) jPanel60)
                 .cr_updateAnnotation_onComparatorPanel();
         ((userInterface.annotationCompare.ExpandButton) jPanel60).cr_recheckDifference();
+    }
+
+    /**
+     * Re-list the attributes on the editor panel and on the comparator panel,
+     * after the user changed the way they have to be ordered or highlighted.
+     */
+    public void display_diff_updateAttributeDisplay() {
+        try {
+            if (WorkSet.currentAnnotation != null)
+                updateAttributes(WorkSet.currentAnnotation);
+
+            if (jPanel60 instanceof userInterface.annotationCompare.ExpandButton)
+                ((userInterface.annotationCompare.ExpandButton) jPanel60)
+                        .cr_updateAnnotation_onComparatorPanel();
+
+        } catch (Exception ex) {
+            log.LoggingToFile.log(Level.WARNING, "error 2506090003:: fail to refresh the "
+                    + "attribute lists:: " + ex.toString());
+        }
     }
 
     public boolean isShowAnnotations_toAllDoc() {
@@ -8969,17 +9096,7 @@ public class GUI extends JFrame {
             // jLabel_typeOfRelationship.setText("Type of normalrelationships: ");
         } else {
             // jLabel_typeOfRelationship.setText("Type of normalrelationships: ");
-            Vector<String> list = new Vector<String>();
-            for (AnnotationAttributeDef att : annotation.attributes) {
-                if ((att == null) || (att.name == null) || (att.value == null))
-                    continue;
-
-                String str = " \"" + att.name + "\" = " + att.value;
-
-                list.add(str);
-
-            }
-            jList_normalrelationship.setListData(list);
+            jList_normalrelationship.setListData(buildAttributeList(annotation));
         }
 
         // ####-2- show complex relationships
@@ -10558,6 +10675,11 @@ public class GUI extends JFrame {
             jToggleButton_DictionarySetting.setVisible(true);
         else
             jToggleButton_DictionarySetting.setVisible(false);
+
+        // "Sync Assignments" talks to the legacy VA VINCI Annotation Admin server and
+        // its eHOST-side integration is unfinished, so it stays hidden unless
+        // [SYNC_ASSIGNMENTS] is explicitly enabled in eHOST.sys.
+        jToggle_AssignmentsScreen.setVisible(env.Parameters.SyncAssignments);
 
         // hide the button of pre-pairing functions
         this.jButton_save1.setVisible(false);

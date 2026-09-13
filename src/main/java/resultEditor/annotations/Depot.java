@@ -2064,54 +2064,25 @@ public class Depot {
     public void setAttributeDefault(String testsourceFilename, int newuniqueindex) {
         
         // get the annotation
-        Annotation annotation = getAnnotationByUnique(testsourceFilename, newuniqueindex);
+        setAttributeDefault( getAnnotationByUnique(testsourceFilename, newuniqueindex) );
+    }
+    
+    /**check and set the default attributes to a new annotation.
+     * 
+     * <p>This one takes the annotation instance directly, so it can be used no 
+     * matter which depot (annotation mode or adjudication mode) is holding this 
+     * annotation.
+     * 
+     * @param   annotation
+     *          The newly created annotation that needs its default attribute 
+     *          values.
+     */
+    public void setAttributeDefault(Annotation annotation) {
+        
         if( annotation == null )
             return;
         
-        // get the classname
-        String classname =annotation.annotationclass;
-        if( classname == null )
-            return;
-    
-        // get the class
-        resultEditor.annotationClasses.Depot classDepot = new resultEditor.annotationClasses.Depot();
-        AnnotationClass classDef = classDepot.getAnnotatedClass(classname);
-        
-        // Dealing with Private attributes of this class
-        Vector<AttributeSchemaDef> atts = classDef.privateAttributes;
-        if( atts !=null ){
-            for(AttributeSchemaDef attdef : atts ){
-                if( attdef.hasDefaultValue() ){
-                    if(annotation.attributes == null)
-                        annotation.attributes = new Vector<AnnotationAttributeDef>();
-                    //annotation.attributes.add( new AnnotationAttributeDef( attdef.getName(), attdef.getDefault()));
-                    annotation = setAttribute(annotation, attdef.getName(), attdef.getDefault() );                    
-                }
-            }
-        }
-        
-        // if have, dealing with public attributes of this class
-        if (classDef.inheritsPublicAttributes) {
-            if (env.Parameters.AttributeSchemas != null) {
-                Vector<AttributeSchemaDef> public_atts = env.Parameters.AttributeSchemas.getAttributes();
-                if (atts != null) {
-                    for (AttributeSchemaDef attdef : public_atts) {
-                        if(attdef==null)
-                            continue;
-                        if (attdef.hasDefaultValue()) {
-                            if((attdef.getName()!=null)&&(attdef.getDefault()!=null)){
-                                //AnnotationAttributeDef attitem = new AnnotationAttributeDef(attdef.getName(), attdef.getDefault());
-                                if(annotation.attributes == null)
-                                    annotation.attributes = new Vector<AnnotationAttributeDef>();
-                                //annotation.attributes.add( attitem );
-                                annotation = setAttribute(annotation, attdef.getName(), attdef.getDefault() );                    
-                            }
-                        }
-                    }
-                }
-
-            }
-        }
+        setDefaultAttValue( annotation, annotation.annotationclass );
     }
     
     

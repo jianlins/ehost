@@ -66,6 +66,15 @@ public class ParameterGather {
                     case "RESTFUL_SERVER":
                         getRESTFULServerConfig(block);
                         break;
+                    case "SYNC_ASSIGNMENTS":
+                        getSyncAssignmentsConfig(block);
+                        break;
+                    case "ATTRIBUTE_DISPLAY_ORDER":
+                        getAttributeDisplayOrder(block);
+                        break;
+                    case "HIGHLIGHT_ATTRIBUTE_DIFFERENCES":
+                        getHighlightAttributeDifferences(block);
+                        break;
                 }
 
             }
@@ -238,6 +247,77 @@ public class ParameterGather {
         } catch (Exception ex) {
             log.LoggingToFile.log(Level.WARNING, "error 1101141245:: fail to get latest RESTful server setting."
                     + ex.getMessage());
+        }
+    }
+
+    /**
+     * Reads the [SYNC_ASSIGNMENTS] flag that controls whether the legacy
+     * "Sync Assignments" toolbar button is shown. It stays hidden unless the
+     * configuration explicitly enables it.
+     */
+    private static void getSyncAssignmentsConfig(Block _block) {
+        try {
+            Parameters.SyncAssignments = false;
+
+            if (_block == null)
+                return;
+
+            if ((_block.values == null) || (_block.values.size() != 1))
+                return;
+
+            String enabled = _block.values.get(0);
+            if (enabled != null && enabled.trim().equalsIgnoreCase("true"))
+                Parameters.SyncAssignments = true;
+        } catch (Exception ex) {
+            log.LoggingToFile.log(Level.WARNING, "error 1101141245:: fail to get Sync Assignments setting."
+                    + ex.getMessage());
+        }
+    }
+
+    /**
+     * Reads the [ATTRIBUTE_DISPLAY_ORDER] flag that tells how the attributes of
+     * an annotation are listed on the editor and the comparator panels.
+     */
+    private static void getAttributeDisplayOrder(Block _block) {
+        try {
+            Parameters.AttributeDisplay.order = Parameters.AttributeDisplay.Order.SCHEMA;
+
+            if (_block == null)
+                return;
+
+            if ((_block.values == null) || (_block.values.size() != 1))
+                return;
+
+            Parameters.AttributeDisplay.order =
+                    Parameters.AttributeDisplay.parseOrder(_block.values.get(0));
+
+        } catch (Exception ex) {
+            log.LoggingToFile.log(Level.WARNING, "error 1101141245:: fail to get the display "
+                    + "order of the attributes." + ex.getMessage());
+        }
+    }
+
+    /**
+     * Reads the [HIGHLIGHT_ATTRIBUTE_DIFFERENCES] flag that tells whether the
+     * attributes two annotators disagree on are pointed out on screen.
+     */
+    private static void getHighlightAttributeDifferences(Block _block) {
+        try {
+            Parameters.AttributeDisplay.highlightDifferences = true;
+
+            if (_block == null)
+                return;
+
+            if ((_block.values == null) || (_block.values.size() != 1))
+                return;
+
+            String enabled = _block.values.get(0);
+            if (enabled != null && enabled.trim().equalsIgnoreCase("false"))
+                Parameters.AttributeDisplay.highlightDifferences = false;
+
+        } catch (Exception ex) {
+            log.LoggingToFile.log(Level.WARNING, "error 1101141245:: fail to get the "
+                    + "highlighting setting of the attribute differences." + ex.getMessage());
         }
     }
 

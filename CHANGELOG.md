@@ -1,3 +1,11 @@
+## Unreleased
+
+### Enhanced
+- **Ordered and highlighted attribute lists**: Attributes of an annotation are listed in schema order (or by name) on both the annotation editor panel and the side by side comparison of the adjudication mode, and the values the two annotators disagree on are highlighted. Configurable in *System Config → Annotation Display* ([docs/enhancements/011-attribute-display-order.md](docs/enhancements/011-attribute-display-order.md))
+
+### Fixed
+- **Document navigation hotkeys ignored outside the Text Display**: `Ctrl+PageUp` / `Ctrl+PageDown` now switch documents from anywhere in the eHOST window, including right after a project is opened and after selecting an annotation or using the Annotation Editor ([docs/bugs/EHOST-007-hotkey-requires-text-display-focus.md](docs/bugs/EHOST-007-hotkey-requires-text-display-focus.md))
+
 ## Version 1.39 (2026-09-04):
 
 First stable release of the 1.39 line, consolidating the 1.39b1–1.39b5 beta work.
@@ -12,6 +20,7 @@ First stable release of the 1.39 line, consolidating the 1.39b1–1.39b5 beta wo
 - **IAA Adjudication Comparison**: Compare annotators against the adjudicated gold standard ([docs/enhancements/003-iaa-adjudication-comparison.md](docs/enhancements/003-iaa-adjudication-comparison.md))
 - **IAA Report HTML Output**: Improved attribute display in unmatched/matched reports ([docs/enhancements/002-iaa-report-attribute-display.md](docs/enhancements/002-iaa-report-attribute-display.md))
 - **System Configuration Dialog**: New dialog for managing application settings from the GUI
+- **Sync Assignments hidden by default**: The legacy *Sync Assignments* toolbar button (VA VINCI Annotation Admin client, unfinished and requiring a server that is not distributed with eHOST) is now hidden unless `[SYNC_ASSIGNMENTS]` is set to `true` in `eHOST.sys` or the matching checkbox is ticked in System Config ([docs/enhancements/010-sync-assignments-disabled-by-default.md](docs/enhancements/010-sync-assignments-disabled-by-default.md))
 - **User Wiki**: Added user documentation under [docs/wiki](docs/wiki)
 
 ### Fixed

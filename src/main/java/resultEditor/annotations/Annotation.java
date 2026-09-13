@@ -1487,7 +1487,7 @@ public class Annotation implements Comparable {
         if (attributes != null) {
         }
 
-
+        AttributeDisplayUtil.sortEditorRowsByNameIfRequested(finalList);
 
         return finalList;
     }
