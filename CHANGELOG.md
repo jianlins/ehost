@@ -1,3 +1,8 @@
+## Unreleased
+
+### Fixed
+- **Document navigation hotkeys ignored outside the Text Display**: `Ctrl+PageUp` / `Ctrl+PageDown` now switch documents from anywhere in the eHOST window, including right after a project is opened and after selecting an annotation or using the Annotation Editor ([docs/bugs/EHOST-007-hotkey-requires-text-display-focus.md](docs/bugs/EHOST-007-hotkey-requires-text-display-focus.md))
+
 ## Version 1.39 (2026-09-04):
 
 First stable release of the 1.39 line, consolidating the 1.39b1–1.39b5 beta work.
