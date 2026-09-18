@@ -1,5 +1,7 @@
 package userInterface;
 
+import adjudication.data.AdjudicationDepot;
+import adjudication.parameters.Paras;
 import env.Parameters;
 import main.eHOST;
 import org.apache.commons.io.comparator.NameFileComparator;
@@ -254,6 +256,13 @@ public class NavigationManager {
             autoSaveIfModified();
             gui.modified = false;
 
+            // Drop the previous project's adjudication state before anything
+            // reads it. Reload.load() below resets the annotation Depot, but
+            // nothing resets the adjudication side, and both are keyed only by
+            // document filename -- so with two copies of a project the stale
+            // data would silently be taken for this project's own.
+            discardAdjudicationState();
+
             // #### load configure settings of this project
             config.project.ProjectConf projectconf = new config.project.ProjectConf(projectFolder);
             gui.infoBarTarget=projectFolder.getAbsolutePath();
@@ -436,12 +445,44 @@ public class NavigationManager {
         }
     }
 
+    /**
+     * Discards every piece of in-memory adjudication state belonging to a
+     * project, so none of it can be mistaken for the next project's own.
+     *
+     * <p>{@link AdjudicationDepot} and {@link Paras} are process-wide statics
+     * keyed by nothing but the document filename. Copies of one project share
+     * those filenames, so leftovers match perfectly and are picked up in place
+     * of the open project's real work: {@code
+     * GUI.mode_continuePreviousAdjudicationWork()} skips
+     * {@code AdjudicationLoader.loadWorkingState()} whenever
+     * {@link AdjudicationDepot#isReady()} is true, and skips
+     * {@code rebuildParasFromAnnotations()} whenever
+     * {@link Paras#isReadyForAdjudication()} is true.
+     *
+     * <p>Both are repopulated from the open project's own files afterwards:
+     * {@code Paras} by {@code ImportXML.getAdjudicationSetting()} during import,
+     * the depot by {@code AdjudicationLoader.loadWorkingState()} on resume.
+     * Call this only once any pending save has been dealt with.
+     *
+     * <p>Static and GUI-free so that every project-switching path -- including
+     * any added later -- can enforce the invariant, and so it can be tested
+     * without a display.
+     */
+    public static void discardAdjudicationState() {
+        AdjudicationDepot.clear();
+        Paras.removeAll();
+        Paras.removeParas();
+    }
+
     protected void goBackToProjectList() {
         gui.setFlag_allowToAddSpan(false); // cancel possible operation of adding
         // new span
         // if user modified something of this current, ask user whether they
-        // want to save changes or not.
-        if (gui.modified) {
+        // want to save changes or not. Adjudication edits count too: the
+        // adjudication working set is discarded below, and saving has to happen
+        // while reviewmode is still adjudicationMode for directsave() to write
+        // the adjudication/ folder.
+        if (gui.modified || gui.adjudicationModified) {
             // get user's decision
             boolean yes_no = gui.popDialog_Asking_ChangeSaving();
 
@@ -449,6 +490,8 @@ public class NavigationManager {
             if (yes_no) {
                 gui.saveto_originalxml();
             }
+            gui.modified = false;
+            gui.adjudicationModified = false;
         }
 
         // release project lock
@@ -459,6 +502,9 @@ public class NavigationManager {
 
         // close protential consensus mode
         gui.getContentRenderer().setReviewMode(reviewmode.OTHERS);
+
+        // no project is open from here on, so no adjudication state may survive
+        discardAdjudicationState();
 
         ((navigatorContainer.TabPanel) gui.NavigationPanel1).setTab_onlyProject();
 
